@@ -1,9 +1,9 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.get('/', (req: Request, res: Response) => {
+app.get('/', (req, res) => {
   res.json({ message: "Weather API is active" });
 });
 
