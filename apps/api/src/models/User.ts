@@ -10,6 +10,10 @@ export interface IUser extends Document {
   name: string;
   passwordHash: string;
   createdAt: Date;
+  googleAccessToken?: string;
+  googleRefreshToken?: string;
+  googleTokenExpiry?: Date;
+  calendarConnected: boolean;
   comparePassword(password: string): Promise<boolean>;
 }
 
@@ -32,6 +36,10 @@ const UserSchema = new Schema<IUser>({
     type: String,
     required: true,
   },
+  googleAccessToken: { type: String, default: null },
+  googleRefreshToken: { type: String, default: null },
+  googleTokenExpiry: { type: Date, default: null },
+  calendarConnected: { type: Boolean, default: false },
 }, { timestamps: true });
 
 // delete passwordHash in JSON responses

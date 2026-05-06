@@ -7,7 +7,9 @@ import authRoutes from './routes/auth.routes';
 import cityRoutes from './routes/city.routes';
 import weatherRoutes from './routes/weather.routes';
 import aiRoutes from './routes/ai.routes';
+import calendarRoutes from './routes/calendar.routes';
 import { startSnapshotJob } from './utils/snapshotJob';
+import { startCalendarAlertJob } from './utils/calendarAlertJob';
 
 dotenv.config();
 
@@ -27,6 +29,7 @@ app.use('/auth', authRoutes);
 app.use('/api/cities', cityRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/', calendarRoutes);
 
 // ─── Health check ─────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
@@ -40,5 +43,6 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 // ─── Start ────────────────────────────────────────────────────────────────────
 connectDB().then(() => {
   startSnapshotJob();
+  startCalendarAlertJob();
   app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
 });
