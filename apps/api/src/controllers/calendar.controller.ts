@@ -60,9 +60,17 @@ export const calendarCallback = async (req: Request, res: Response): Promise<voi
 
     const tokens = await exchangeCodeForTokens(code);
 
+    // Decode Google ID token to capture the connected Google account email
+    let googleEmail: string | undefined;
+    if (tokens.id_token) {
+      const idPayload = jwt.decode(tokens.id_token) as any;
+      googleEmail = idPayload?.email;
+    }
+
     user.googleAccessToken = tokens.access_token || undefined;
     user.googleRefreshToken = tokens.refresh_token || undefined;
     user.googleTokenExpiry = tokens.expiry_date ? new Date(tokens.expiry_date) : undefined;
+    user.googleEmail = googleEmail;
     user.calendarConnected = true;
     await user.save();
 
@@ -87,8 +95,8 @@ export const getCalendarStatus = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    const user = await User.findById(req.user.id).select('calendarConnected');
-    res.json({ connected: user?.calendarConnected ?? false });
+    const user = await User.findById(req.user.id).select('calendarConnected googleEmail');
+    res.json({ connected: user?.calendarConnected ?? false, googleEmail: user?.googleEmail || null });
   } catch {
     res.status(500).json({ error: 'Failed to check calendar status' });
   }
@@ -122,6 +130,7 @@ export const disconnectCalendar = async (req: Request, res: Response): Promise<v
     user.googleAccessToken = undefined;
     user.googleRefreshToken = undefined;
     user.googleTokenExpiry = undefined;
+    user.googleEmail = undefined;
     user.calendarConnected = false;
     await user.save();
 

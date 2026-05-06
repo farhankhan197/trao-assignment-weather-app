@@ -32,7 +32,9 @@ export default function AlertsPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>('all');
   const [calendarConnected, setCalendarConnected] = useState<boolean | null>(null);
+  const [googleEmail, setGoogleEmail] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
 
   const fetchAlerts = useCallback(async () => {
     try {
@@ -42,6 +44,7 @@ export default function AlertsPage() {
       ]);
       setAlerts(alertsRes.data.alerts);
       setCalendarConnected(statusRes.data.connected);
+      setGoogleEmail(statusRes.data.googleEmail || null);
     } catch {
       // Handled by interceptor
     } finally {
@@ -94,6 +97,22 @@ export default function AlertsPage() {
     }
   };
 
+  const handleDisconnectCalendar = async () => {
+    if (!confirm('Are you sure you want to disconnect your Google Calendar?')) return;
+    setDisconnecting(true);
+    try {
+      await api.post('/auth/calendar/disconnect');
+      setCalendarConnected(false);
+      setGoogleEmail(null);
+      setAlerts([]);
+      await refreshAlertCount();
+    } catch {
+      alert('Failed to disconnect calendar.');
+    } finally {
+      setDisconnecting(false);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -108,16 +127,28 @@ export default function AlertsPage() {
         <div>
           <h1 className="font-display text-4xl mb-1">Weather Alerts</h1>
           <p className="text-slate-400">Calendar events with unusual weather forecasts</p>
+          {calendarConnected && googleEmail && (
+            <p className="text-slate-500 text-sm mt-1">Connected as {googleEmail}</p>
+          )}
         </div>
         <div className="flex items-center gap-3">
           {calendarConnected && (
-            <button
-              onClick={handleManualCheck}
-              disabled={checking}
-              className="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-            >
-              {checking ? 'Checking...' : 'Refresh'}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleManualCheck}
+                disabled={checking}
+                className="text-sm bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {checking ? 'Checking...' : 'Refresh'}
+              </button>
+              <button
+                onClick={handleDisconnectCalendar}
+                disabled={disconnecting}
+                className="text-sm bg-red-500/10 hover:bg-red-500/20 text-red-400 px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {disconnecting ? 'Disconnecting...' : 'Disconnect'}
+              </button>
+            </div>
           )}
         </div>
       </div>

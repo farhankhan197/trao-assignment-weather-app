@@ -98,6 +98,20 @@ export async function runCalendarAlertScanForUser(userId: string) {
       eventStart: { $lt: new Date() },
     });
   } catch (err: any) {
+    const errorMessage = err.message || '';
+    const isScopeError =
+      errorMessage.includes('insufficient authentication scopes') ||
+      errorMessage.includes('insufficient permissions');
+
+    if (isScopeError && user) {
+      console.error(`[CalendarAlertJob] Insufficient scopes for user ${userId}. Disconnecting calendar.`);
+      user.calendarConnected = false;
+      user.googleAccessToken = undefined;
+      user.googleRefreshToken = undefined;
+      user.googleTokenExpiry = undefined;
+      await user.save();
+    }
+
     console.error(`[CalendarAlertJob] Failed for user ${userId}:`, err.message);
   }
 }

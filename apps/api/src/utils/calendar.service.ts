@@ -53,8 +53,16 @@ export async function refreshAccessToken(user: IUser): Promise<string | null> {
     }
     return null;
   } catch (err: any) {
-    // Refresh token revoked or invalid
-    if (err.response?.data?.error === 'invalid_grant') {
+    const errorData = err.response?.data;
+    const errorMessage = err.message || '';
+    const isScopeError =
+      errorData?.error === 'insufficient_permissions' ||
+      errorData?.error === 'insufficient_authentication_scopes' ||
+      errorMessage.includes('insufficient authentication scopes') ||
+      errorMessage.includes('insufficient permissions');
+
+    // Refresh token revoked, invalid, or scopes were removed
+    if (errorData?.error === 'invalid_grant' || isScopeError) {
       user.calendarConnected = false;
       user.googleAccessToken = undefined;
       user.googleRefreshToken = undefined;

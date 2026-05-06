@@ -13,6 +13,7 @@ export interface IUser extends Document {
   googleAccessToken?: string;
   googleRefreshToken?: string;
   googleTokenExpiry?: Date;
+  googleEmail?: string;
   calendarConnected: boolean;
   comparePassword(password: string): Promise<boolean>;
 }
@@ -39,13 +40,18 @@ const UserSchema = new Schema<IUser>({
   googleAccessToken: { type: String, default: null },
   googleRefreshToken: { type: String, default: null },
   googleTokenExpiry: { type: Date, default: null },
+  googleEmail: { type: String, default: null },
   calendarConnected: { type: Boolean, default: false },
 }, { timestamps: true });
 
-// delete passwordHash in JSON responses
+// delete sensitive fields in JSON responses
 UserSchema.set('toJSON', {
   transform: (_doc: any, ret: any) => {
     delete ret.passwordHash;
+    delete ret.googleAccessToken;
+    delete ret.googleRefreshToken;
+    delete ret.googleTokenExpiry;
+    delete ret.__v;
     return ret;
   },
 });
