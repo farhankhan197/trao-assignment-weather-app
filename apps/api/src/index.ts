@@ -7,6 +7,7 @@ import authRoutes from './routes/auth.routes';
 import cityRoutes from './routes/city.routes';
 import weatherRoutes from './routes/weather.routes';
 import aiRoutes from './routes/ai.routes';
+import { startSnapshotJob } from './utils/snapshotJob';
 
 dotenv.config();
 
@@ -38,5 +39,6 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 connectDB().then(() => {
+  startSnapshotJob();
   app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
 });
