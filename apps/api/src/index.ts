@@ -1,12 +1,42 @@
 import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+import { connectDB } from './config/db';
+import authRoutes from './routes/auth.routes';
+import cityRoutes from './routes/city.routes';
+import weatherRoutes from './routes/weather.routes';
+import aiRoutes from './routes/ai.routes';
+
+dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 4000;
+const PORT = process.env.PORT || 4000;
 
-app.get('/', (req, res) => {
-  res.json({ message: "Weather API is active" });
+// ─── Middleware ────────────────────────────────────────────────────────────────
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  credentials: true,
+}));
+app.use(express.json());
+app.use(cookieParser());
+
+// ─── Routes ───────────────────────────────────────────────────────────────────
+app.use('/auth', authRoutes);
+app.use('/api/cities', cityRoutes);
+app.use('/api/weather', weatherRoutes);
+app.use('/api/ai', aiRoutes);
+
+// ─── Health check ─────────────────────────────────────────────────────────────
+app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
+// ─── Global error handler ─────────────────────────────────────────────────────
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('[Error]', err.message);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
-app.listen(port, () => {
-  console.log(`API running on http://localhost:${port}`);
+// ─── Start ────────────────────────────────────────────────────────────────────
+connectDB().then(() => {
+  app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
 });
