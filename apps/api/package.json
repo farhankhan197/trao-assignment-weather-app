@@ -9,6 +9,11 @@
     "@types/node": "^25.6.0",
     "ts-node": "^10.9.2"
   },
+  "scripts": {
+    "dev": "bun --hot src/index.ts",
+    "build": "tsc --noEmit",
+    "check-types": "tsc --noEmit"
+  },
   "peerDependencies": {
     "typescript": "^6.0.3"
   }
