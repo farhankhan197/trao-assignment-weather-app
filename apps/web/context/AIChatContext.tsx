@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 import api from '@/lib/api';
 
 export interface ChatMessage {
@@ -56,8 +56,13 @@ export function AIChatProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const value = useMemo(
+    () => ({ isOpen, messages, isLoading, toggle, close, open, sendMessage }),
+    [isOpen, messages, isLoading, toggle, close, open, sendMessage]
+  );
+
   return (
-    <AIChatContext.Provider value={{ isOpen, messages, isLoading, toggle, close, open, sendMessage }}>
+    <AIChatContext.Provider value={value}>
       {children}
     </AIChatContext.Provider>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, ReactNode } from 'react';
 import api from '@/lib/api';
 
 export interface User {
@@ -26,14 +26,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [unreadAlertCount, setUnreadAlertCount] = useState(0);
 
-  const refreshAlertCount = async () => {
+  const refreshAlertCount = useCallback(async () => {
     try {
       const res = await api.get('/api/calendar/alerts', { skipAuthRedirect: true } as any);
       setUnreadAlertCount(res.data.unreadCount || 0);
     } catch {
       setUnreadAlertCount(0);
     }
-  };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -47,26 +47,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .catch(() => { if (!cancelled) setUser(null); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, []);
+  }, [refreshAlertCount]);
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     const res = await api.post('/auth/login', { email, password });
     setUser(res.data.user);
-  };
+  }, []);
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = useCallback(async (name: string, email: string, password: string) => {
     const res = await api.post('/auth/register', { name, email, password });
     setUser(res.data.user);
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await api.post('/auth/logout');
     setUser(null);
     setUnreadAlertCount(0);
-  };
+  }, []);
+
+  const value = useMemo(
+    () => ({ user, loading, unreadAlertCount, refreshAlertCount, login, register, logout }),
+    [user, loading, unreadAlertCount, refreshAlertCount, login, register, logout]
+  );
 
   return (
-    <AuthContext.Provider value={{ user, loading, unreadAlertCount, refreshAlertCount, login, register, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
