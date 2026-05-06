@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { useAIChat } from '@/context/AIChatContext';
 
 function BellIcon() {
   return (
@@ -14,6 +15,7 @@ function BellIcon() {
 
 export function Navbar() {
   const { user, logout, unreadAlertCount } = useAuth();
+  const { toggle: toggleChat } = useAIChat();
 
   return (
     <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-50">
@@ -31,11 +33,18 @@ export function Navbar() {
               <Link href="/favorites" className="text-slate-400 hover:text-slate-200 transition-colors">
                 Favorites
               </Link>
-              <Link href="/ai-briefing" className="text-slate-400 hover:text-slate-200 transition-colors">
-                AI Briefing
+              <button
+                onClick={toggleChat}
+                className="text-slate-400 hover:text-slate-200 transition-colors"
+              >
+                AI Assistant
+              </button>
+              <Link href="/settings" className="text-slate-400 hover:text-slate-200 transition-colors">
+                Settings
               </Link>
-              <Link href="/alerts" className="relative text-slate-400 hover:text-slate-200 transition-colors">
+              <Link href="/alerts" className="relative flex items-center gap-1.5 text-slate-400 hover:text-slate-200 transition-colors">
                 <BellIcon />
+                <span>Alerts</span>
                 {unreadAlertCount > 0 && (
                   <span className="absolute -top-1.5 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                     {unreadAlertCount > 9 ? '9+' : unreadAlertCount}

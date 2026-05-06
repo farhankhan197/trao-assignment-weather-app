@@ -1,0 +1,70 @@
+'use client';
+
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import api from '@/lib/api';
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+interface AIChatContextType {
+  isOpen: boolean;
+  messages: ChatMessage[];
+  isLoading: boolean;
+  toggle: () => void;
+  close: () => void;
+  open: () => void;
+  sendMessage: (text: string) => Promise<void>;
+}
+
+const AIChatContext = createContext<AIChatContextType | null>(null);
+
+export function AIChatProvider({ children }: { children: ReactNode }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { role: 'assistant', content: 'How can I help?' },
+  ]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
+  const close = useCallback(() => setIsOpen(false), []);
+  const open = useCallback(() => setIsOpen(true), []);
+
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim()) return;
+
+    const userMessage: ChatMessage = { role: 'user', content: text.trim() };
+    setMessages((prev) => [...prev, userMessage]);
+    setIsLoading(true);
+
+    try {
+      const res = await api.post('/api/ai/chat', { message: text.trim() });
+      const assistantMessage: ChatMessage = {
+        role: 'assistant',
+        content: res.data.response || 'I\'m not sure how to respond to that.',
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch {
+      const errorMessage: ChatMessage = {
+        role: 'assistant',
+        content: 'Sorry, something went wrong. Please try again.',
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  return (
+    <AIChatContext.Provider value={{ isOpen, messages, isLoading, toggle, close, open, sendMessage }}>
+      {children}
+    </AIChatContext.Provider>
+  );
+}
+
+export function useAIChat() {
+  const ctx = useContext(AIChatContext);
+  if (!ctx) throw new Error('useAIChat must be used inside AIChatProvider');
+  return ctx;
+}
