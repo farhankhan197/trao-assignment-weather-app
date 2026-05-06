@@ -1,32 +1,64 @@
-import { ChatAnthropic } from '@langchain/anthropic';
-import { AgentExecutor, createReactAgent } from 'langchain/agents';
-import { pull } from 'langchain/hub';
+import { ChatGroq } from '@langchain/groq';
+import { HumanMessage, AIMessage, ToolMessage, BaseMessage } from '@langchain/core/messages';
 import { createWeatherTools } from './tools';
 
+const MAX_ITERATIONS = 5;
+
 export const runWeatherAgent = async (userId: string, userMessage: string): Promise<string> => {
-  const llm = new ChatAnthropic({
-    model: 'claude-haiku-4-5-20251001',
-    anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+  const llm = new ChatGroq({
+    model: 'llama-3.1-8b-instant',
+    apiKey: process.env.GROQ_API_KEY,
     temperature: 0.3,
   });
 
   const tools = createWeatherTools(userId);
+  const toolMap = new Map(tools.map((t) => [t.name, t]));
+  const modelWithTools = llm.bindTools(tools);
 
-  // Pull the standard ReAct prompt from LangChain Hub
-  const prompt = await pull<any>('hwchase17/react');
+  const messages: BaseMessage[] = [
+    new HumanMessage(userMessage),
+  ];
 
-  const agent = await createReactAgent({ llm, tools, prompt });
+  for (let i = 0; i < MAX_ITERATIONS; i++) {
+    const response = await modelWithTools.invoke(messages);
 
-  const executor = new AgentExecutor({
-    agent,
-    tools,
-    maxIterations: 5,
-    verbose: false,
-  });
+    // If the model returns tool calls, execute them and continue the loop
+    if (response.tool_calls && response.tool_calls.length > 0) {
+      messages.push(response);
 
-  const result = await executor.invoke({
-    input: userMessage,
-  });
+      for (const toolCall of response.tool_calls) {
+        const tool = toolMap.get(toolCall.name);
+        let toolResult: string;
 
-  return result.output as string;
+        if (tool) {
+          try {
+            toolResult = await tool.invoke(toolCall.args);
+          } catch (err: any) {
+            toolResult = `Error: ${err.message || 'Tool execution failed'}`;
+          }
+        } else {
+          toolResult = `Error: Tool "${toolCall.name}" not found.`;
+        }
+
+        messages.push(
+          new ToolMessage({
+            content: String(toolResult),
+            tool_call_id: toolCall.id!,
+            name: toolCall.name,
+          })
+        );
+      }
+    } else {
+      // No tool calls — return the final response
+      return String(response.content);
+    }
+  }
+
+  // Max iterations reached — return last message
+  const lastMessage = messages[messages.length - 1];
+  if (lastMessage && 'content' in lastMessage) {
+    return String((lastMessage as any).content);
+  }
+
+  return 'I was unable to complete your request after multiple attempts. Please try rephrasing your question.';
 };
