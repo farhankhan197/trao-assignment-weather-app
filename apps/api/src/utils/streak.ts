@@ -1,4 +1,7 @@
-import { WeatherSnapshot } from '../models/WeatherSnapshot';
+export interface WeatherDay {
+  date: string;
+  condition: string;
+}
 
 export interface StreakResult {
   condition: string;
@@ -6,20 +9,16 @@ export interface StreakResult {
   label: string;
 }
 
-export const calculateStreak = async (cityId: string): Promise<StreakResult | null> => {
-  // Get last 30 snapshots sorted newest first
-  const snapshots = await WeatherSnapshot
-    .find({ cityId })
-    .sort({ date: -1 })
-    .limit(30);
+export const calculateStreak = (days: WeatherDay[]): StreakResult | null => {
+  if (days.length < 2) return null;
 
-  if (snapshots.length < 2) return null;
-
-  const latestCondition = snapshots[0].condition;
+  // Sort newest first to count consecutive matching days from today backward
+  const sorted = [...days].sort((a, b) => b.date.localeCompare(a.date));
+  const latestCondition = sorted[0].condition;
   let streakDays = 1;
 
-  for (let i = 1; i < snapshots.length; i++) {
-    if (snapshots[i].condition === latestCondition) {
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i].condition === latestCondition) {
       streakDays++;
     } else {
       break;

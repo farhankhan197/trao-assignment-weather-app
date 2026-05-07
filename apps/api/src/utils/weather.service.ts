@@ -46,6 +46,27 @@ export const fetchCurrentWeather = async (lat: number, lon: number) => {
   return data;
 };
 
+// Fetch historical weather from Open-Meteo using past_days
+export const fetchHistoricalWeather = async (lat: number, lon: number, pastDays: number = 14) => {
+  const url = `https://api.open-meteo.com/v1/forecast`;
+  const { data } = await axios.get(url, {
+    params: {
+      latitude: lat,
+      longitude: lon,
+      daily: [
+        'temperature_2m_max',
+        'temperature_2m_min',
+        'precipitation_sum',
+        'weather_code',
+      ].join(','),
+      past_days: pastDays,
+      forecast_days: 1,
+      timezone: 'auto',
+    },
+  });
+  return data;
+};
+
 // Map WMO weather code to human-readable condition
 export const getConditionFromCode = (code: number): string => {
   if (code === 0) return 'sunny';

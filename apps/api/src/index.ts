@@ -8,7 +8,6 @@ import cityRoutes from './routes/city.routes';
 import weatherRoutes from './routes/weather.routes';
 import aiRoutes from './routes/ai.routes';
 import calendarRoutes from './routes/calendar.routes';
-import { startSnapshotJob } from './utils/snapshotJob';
 import { startCalendarAlertJob } from './utils/calendarAlertJob';
 
 dotenv.config();
@@ -42,7 +41,6 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 connectDB().then(() => {
-  startSnapshotJob();
   startCalendarAlertJob();
   app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
 });

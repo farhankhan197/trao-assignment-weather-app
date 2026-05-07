@@ -245,7 +245,7 @@ export default function FavoritesPage() {
 
               {/* Past week chart */}
               <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 lg:p-8">
-                <h3 className="font-display text-lg mb-6">Past Week</h3>
+                <h3 className="font-display text-lg mb-6">Past 15 Days</h3>
                 {history.length > 0 ? (
                   <div className="h-64 w-full">
                     <ResponsiveContainer width="100%" height="100%">
@@ -279,7 +279,7 @@ export default function FavoritesPage() {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <p className="text-slate-500 text-sm">No history data yet. Snapshots are taken daily at midnight.</p>
+                    <p className="text-slate-500 text-sm">No history data available.</p>
                   </div>
                 )}
 
