@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@langchain/core": "^1.1.44",
-    "@langchain/groq": "^0.2.0",
+    "@langchain/groq": "^1.2.0",
     "axios": "^1.16.0",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
@@ -29,6 +29,7 @@
     "jsonwebtoken": "^9.0.3",
     "langchain": "^1.4.0",
     "mongoose": "^9.6.1",
-    "node-cron": "^4.2.1"
+    "node-cron": "^4.2.1",
+    "zod": "^3.25.76"
   }
 }

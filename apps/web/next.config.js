@@ -9,14 +9,16 @@ const nextConfig = {
     root: path.resolve(__dirname, '..', '..'),
   },
   async rewrites() {
+    const isDev = process.env.NODE_ENV === 'development';
+    const apiBase = isDev ? 'http://localhost:4000' : 'https://api-mausam.farhankhan.site';
     return [
       {
         source: '/api/:path*',
-        destination: 'https://api-mausam.farhankhan.site/api/:path*',
+        destination: `${apiBase}/api/:path*`,
       },
       {
         source: '/auth/:path*',
-        destination: 'https://api-mausam.farhankhan.site/auth/:path*',
+        destination: `${apiBase}/auth/:path*`,
       },
     ];
   },

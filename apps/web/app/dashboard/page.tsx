@@ -94,9 +94,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 relative">
-      <div className="absolute inset-x-0 top-0 h-[50%] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.08) 0%, transparent 100%)' }} />
-      <div className="relative mb-6 text-center">
+    <div className="relative min-h-screen">
+      {/* Full-width gradient background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.08) 0%, transparent 60%)' }}
+      />
+      <div className="relative max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-6 text-center">
         <h1 className="font-display text-3xl text-[var(--text-primary)] mb-1" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>Dashboard</h1>
         <p className="text-sm text-[var(--text-muted)]">Search and manage your cities</p>
       </div>
@@ -140,6 +145,7 @@ export default function DashboardPage() {
           ))}
         </motion.div>
       )}
+      </div>
     </div>
   );
 }

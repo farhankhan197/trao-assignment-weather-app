@@ -103,3 +103,95 @@ html {
   background: rgba(255, 255, 255, 0.8);
   animation: snowFall linear infinite;
 }
+
+/* ── README Page Markdown Styling ── */
+.readme-content h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+.readme-content h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.35rem;
+}
+.readme-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+.readme-content p {
+  margin-bottom: 0.75rem;
+  color: var(--text-secondary);
+}
+.readme-content ul, .readme-content ol {
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+  color: var(--text-secondary);
+}
+.readme-content li {
+  margin-bottom: 0.25rem;
+}
+.readme-content a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.readme-content a:hover {
+  color: var(--accent-hover);
+}
+.readme-content code {
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  background: var(--bg-surface-hover);
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  color: var(--accent);
+}
+.readme-content pre {
+  background: var(--bg-surface-hover);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 1rem;
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+.readme-content pre code {
+  background: transparent;
+  padding: 0;
+  color: var(--text-primary);
+}
+.readme-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+.readme-content th, .readme-content td {
+  border: 1px solid var(--border-subtle);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.readme-content th {
+  background: var(--bg-surface-hover);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.readme-content hr {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: 1.5rem 0;
+}
+.readme-content blockquote {
+  border-left: 3px solid var(--accent-muted);
+  padding-left: 1rem;
+  margin-left: 0;
+  color: var(--text-muted);
+}

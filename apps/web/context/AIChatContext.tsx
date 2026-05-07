@@ -45,10 +45,11 @@ export function AIChatProvider({ children }: { children: ReactNode }) {
         content: res.data.response || 'I\'m not sure how to respond to that.',
       };
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch {
+    } catch (err: any) {
+      const errorText = err?.response?.data?.error || err?.message || 'Something went wrong. Please try again.';
       const errorMessage: ChatMessage = {
         role: 'assistant',
-        content: 'Sorry, something went wrong. Please try again.',
+        content: `Error: ${errorText}`,
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
