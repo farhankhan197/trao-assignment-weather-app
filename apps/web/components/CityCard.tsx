@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import api from '@/lib/api';
 import { WeatherIcon } from './WeatherIcon';
+import WeatherAtmosphere from './weather/WeatherAtmosphere';
 
 interface City {
   _id: string;
@@ -60,66 +62,91 @@ export function CityCard({ city, onToggleFavorite, onDelete }: Props) {
 
   if (loading) {
     return (
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 animate-pulse">
-        <div className="h-4 bg-slate-800 rounded w-24 mb-3" />
-        <div className="h-8 bg-slate-800 rounded w-16 mb-2" />
-        <div className="h-3 bg-slate-800 rounded w-32" />
+      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 animate-pulse h-full flex flex-col justify-between">
+        <div>
+          <div className="h-4 bg-[var(--bg-surface-hover)] rounded w-24 mb-3" />
+          <div className="h-8 bg-[var(--bg-surface-hover)] rounded w-16 mb-2" />
+        </div>
+        <div className="h-3 bg-[var(--bg-surface-hover)] rounded w-32" />
       </div>
     );
   }
 
-  return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative group">
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <h3 className="font-display text-lg text-slate-100">{city.name}</h3>
-          <p className="text-xs text-slate-500">{city.country}</p>
-        </div>
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => onToggleFavorite(city._id)}
-            className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-amber-400"
-            aria-label={city.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill={city.isFavorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
-            </svg>
-          </button>
-          <button
-            onClick={() => onDelete(city._id)}
-            className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-red-400"
-            aria-label="Delete city"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-            </svg>
-          </button>
-        </div>
-      </div>
+  const glowColor = weather
+    ? {
+        sunny: '0 8px 24px rgba(251,191,36,0.12)',
+        cloudy: '0 8px 24px rgba(148,163,184,0.1)',
+        rainy: '0 8px 24px rgba(59,130,246,0.12)',
+        snowy: '0 8px 24px rgba(186,230,253,0.12)',
+        stormy: '0 8px 24px rgba(71,85,105,0.12)',
+      }[weather.condition] || '0 8px 24px rgba(37,99,235,0.08)'
+    : '0 8px 24px rgba(37,99,235,0.08)';
 
+  return (
+    <motion.div
+      whileHover={{ scale: 1.02, y: -2, boxShadow: glowColor }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl relative group shadow-[var(--shadow-sm)] cursor-default h-full flex flex-col justify-between overflow-hidden"
+    >
       {weather && (
-        <div className="flex items-center gap-3 mb-3">
-          <WeatherIcon condition={weather.condition} />
+        <WeatherAtmosphere condition={weather.condition} intensity="subtle" />
+      )}
+      <div className="relative z-10 p-4 flex flex-col justify-between h-full">
+        <div className="flex items-start justify-between mb-2">
           <div>
-            <span className="text-3xl font-light text-slate-100">{Math.round(weather.temperature)}°</span>
-            <span className="text-sm text-slate-400 ml-2 capitalize">{weather.condition}</span>
+            <h3 className="font-display text-base text-[var(--text-primary)]">{city.name}</h3>
+            <p className="text-xs text-[var(--text-muted)]">{city.country}</p>
+          </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => onToggleFavorite(city._id)}
+              className="p-1.5 rounded-lg hover:bg-[var(--bg-surface-hover)] transition-colors text-[var(--text-muted)] hover:text-[var(--warning)]"
+              aria-label={city.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill={city.isFavorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1-1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+              </svg>
+            </button>
+            <button
+              onClick={() => onDelete(city._id)}
+              className="p-1.5 rounded-lg hover:bg-[var(--bg-surface-hover)] transition-colors text-[var(--text-muted)] hover:text-[var(--danger)]"
+              aria-label="Delete city"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+              </svg>
+            </button>
           </div>
         </div>
-      )}
 
-      {weather && (
-        <div className="flex items-center gap-3 text-xs text-slate-500">
-          <span>H {Math.round(weather.tempMax)}°</span>
-          <span>L {Math.round(weather.tempMin)}°</span>
-        </div>
-      )}
+        {weather && (
+          <div className="flex items-center gap-2.5 mb-2">
+            <WeatherIcon condition={weather.condition} className="text-xl" />
+            <div>
+              <span className="text-2xl font-light text-[var(--text-primary)]">{Math.round(weather.temperature)}°</span>
+              <span className="text-xs text-[var(--text-muted)] ml-1.5 capitalize">{weather.condition}</span>
+            </div>
+          </div>
+        )}
 
-      {streak && (
-        <div className="mt-3 text-xs text-amber-400/80 bg-amber-400/10 rounded-lg px-2.5 py-1.5 inline-block">
-          {streak}
+        {weather && (
+          <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
+            <span>H {Math.round(weather.tempMax)}°</span>
+            <span>L {Math.round(weather.tempMin)}°</span>
+          </div>
+        )}
+
+        <div className="mt-2 h-6">
+          {streak ? (
+            <span className="text-xs text-[var(--warning)]/80 bg-[var(--warning-light)] rounded-lg px-2 py-1 inline-block">
+              {streak}
+            </span>
+          ) : (
+            <span className="inline-block" />
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    </motion.div>
   );
 }
 

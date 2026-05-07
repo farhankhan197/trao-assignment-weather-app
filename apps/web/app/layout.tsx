@@ -10,14 +10,14 @@ const display = DM_Serif_Display({ subsets: ['latin'], weight: '400', variable: 
 const body = DM_Sans({ subsets: ['latin'], variable: '--font-body' });
 
 export const metadata: Metadata = {
-  title: 'Mausam — Your Personal Weather Dashboard',
-  description: 'Track weather across multiple cities with AI-powered insights',
+  title: 'Mausam',
+  description: 'Track weather across multiple cities',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
-      <body className="min-h-screen bg-slate-950 text-slate-100 font-body antialiased">
+      <body className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] font-body antialiased">
         <AuthProvider>
           <AIChatProvider>
             <Navbar />

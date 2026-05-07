@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useAuth } from '@/context/AuthContext';
 import { AlertCard } from '@/components/AlertCard';
@@ -71,30 +72,31 @@ export default function AlertsPage() {
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-slate-400">Loading alerts...</p>
+        <p className="text-[var(--text-muted)]">Loading alerts...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-10">
-      <div className="flex items-center justify-between mb-8">
+    <div className="max-w-4xl mx-auto px-4 py-8 relative">
+      <div className="absolute inset-x-0 top-0 h-[20%] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.03) 0%, transparent 100%)' }} />
+      <div className="relative flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-display text-4xl mb-1">Weather Alerts</h1>
-          <p className="text-slate-400">Calendar events with unusual weather forecasts</p>
+          <h1 className="font-display text-3xl text-[var(--text-primary)] mb-1" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>Weather Alerts</h1>
+          <p className="text-sm text-[var(--text-muted)]">Calendar events with unusual weather forecasts</p>
         </div>
       </div>
 
       {!calendarConnected && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center mb-8">
+        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-8 text-center mb-8 shadow-[var(--shadow-sm)]">
           <p className="text-4xl mb-4">📅</p>
           <h2 className="font-display text-xl mb-2">No Calendar Connected</h2>
-          <p className="text-slate-400 text-sm mb-6 max-w-md mx-auto">
+          <p className="text-[var(--text-muted)] text-sm mb-6 max-w-md mx-auto">
             Link your Google Calendar in Settings to get weather alerts for upcoming events.
           </p>
           <Link
             href="/settings"
-            className="inline-block bg-sky-500 hover:bg-sky-400 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            className="inline-block bg-gradient-to-r from-[var(--accent)] to-sky-400 hover:from-[var(--accent-hover)] hover:to-sky-300 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
           >
             Go to Settings
           </Link>
@@ -110,8 +112,8 @@ export default function AlertsPage() {
                 onClick={() => setFilter(f)}
                 className={`text-sm px-4 py-2 rounded-lg transition-colors ${
                   filter === f
-                    ? 'bg-sky-500 text-white'
-                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                    ? 'bg-gradient-to-r from-[var(--accent)] to-sky-400 text-white shadow-sm'
+                    : 'bg-[var(--bg-surface-hover)] text-[var(--text-muted)] hover:bg-[var(--bg-input-hover)]'
                 }`}
               >
                 {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -127,23 +129,39 @@ export default function AlertsPage() {
           {filteredAlerts.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-5xl mb-4">☀️</p>
-              <p className="text-slate-400">
+              <p className="text-[var(--text-muted)]">
                 {filter === 'all'
                   ? 'No weather alerts for upcoming events. Looking good!'
                   : filter === 'unread'
                   ? 'No unread alerts.'
                   : 'No high-severity alerts.'}
               </p>
-              <p className="text-slate-500 text-sm mt-2">
+              <p className="text-[var(--text-muted)] text-sm mt-2">
                 Alerts are generated daily at 6 AM UTC for events in the next 7 days.
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.06 } },
+              }}
+              className="space-y-4"
+            >
               {filteredAlerts.map((alert) => (
-                <AlertCard key={alert._id} alert={alert} onMarkRead={handleMarkRead} />
+                <motion.div
+                  key={alert._id}
+                  variants={{
+                    hidden: { opacity: 0, y: 16 },
+                    visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
+                  }}
+                >
+                  <AlertCard alert={alert} onMarkRead={handleMarkRead} />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </>
       )}

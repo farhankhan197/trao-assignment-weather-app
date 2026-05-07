@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { CitySearch } from '@/components/CitySearch';
 import { CityCard } from '@/components/CityCard';
@@ -87,41 +88,57 @@ export default function DashboardPage() {
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-slate-400">Loading cities...</p>
+        <p className="text-[var(--text-muted)]">Loading cities...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
-      <div className="mb-8 text-center">
-        <h1 className="font-display text-4xl mb-2">Dashboard</h1>
-        <p className="text-slate-400">Search and manage your cities</p>
+    <div className="max-w-7xl mx-auto px-4 py-8 relative">
+      <div className="absolute inset-x-0 top-0 h-[50%] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.08) 0%, transparent 100%)' }} />
+      <div className="relative mb-6 text-center">
+        <h1 className="font-display text-3xl text-[var(--text-primary)] mb-1" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>Dashboard</h1>
+        <p className="text-sm text-[var(--text-muted)]">Search and manage your cities</p>
       </div>
 
-      <div className="mb-10">
+      <div className="relative mb-8">
         <CitySearch onAdd={handleAdd} />
       </div>
 
       {cities.length === 0 ? (
-        <div className="text-center py-20">
+        <div className="relative text-center py-20">
           <p className="text-5xl mb-4">🌍</p>
-          <h2 className="font-display text-xl mb-2">No cities yet</h2>
-          <p className="text-slate-400 text-sm max-w-md mx-auto">
+          <h2 className="font-display text-xl mb-2 text-[var(--text-primary)]">No cities yet</h2>
+          <p className="text-[var(--text-muted)] text-sm max-w-md mx-auto">
             Search for a city above to add it to your dashboard. You'll see live weather and streaks for each city.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.05 } },
+          }}
+          className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+        >
           {cities.map((city) => (
-            <CityCard
+            <motion.div
               key={city._id}
-              city={city}
-              onToggleFavorite={handleToggleFavorite}
-              onDelete={handleDelete}
-            />
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
+              }}
+            >
+              <CityCard
+                city={city}
+                onToggleFavorite={handleToggleFavorite}
+                onDelete={handleDelete}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );

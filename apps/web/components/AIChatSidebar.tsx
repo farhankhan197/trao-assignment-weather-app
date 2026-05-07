@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { useAIChat } from '@/context/AIChatContext';
 
@@ -37,9 +38,9 @@ function SendIcon() {
 function LoadingDots() {
   return (
     <div className="flex items-center gap-1 py-2">
-      <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-      <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-      <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+      <span className="w-2 h-2 bg-[var(--text-muted)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+      <span className="w-2 h-2 bg-[var(--text-muted)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+      <span className="w-2 h-2 bg-[var(--text-muted)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
     </div>
   );
 }
@@ -73,30 +74,37 @@ export function AIChatSidebar() {
 
   return (
     <>
-      {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-[60] transition-opacity"
-          onClick={close}
-          aria-hidden="true"
-        />
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/50 z-[60]"
+            onClick={close}
+            aria-hidden="true"
+          />
+        )}
+      </AnimatePresence>
 
       {/* Sidebar */}
-      <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-[420px] max-w-full bg-slate-950 border-l border-slate-800 shadow-2xl z-[70] flex flex-col transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+      <motion.div
+        initial={{ x: '100%' }}
+        animate={{ x: isOpen ? '0%' : '100%' }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="fixed top-0 right-0 h-full w-full sm:w-[420px] max-w-full bg-[var(--bg-primary)] border-l border-[var(--border)] shadow-[var(--shadow-md)] z-[70] flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 h-14 border-b border-slate-800 shrink-0">
-          <div className="flex items-center gap-2 text-slate-100">
+        <div className="flex items-center justify-between px-4 h-14 border-b border-[var(--border)] shrink-0">
+          <div className="flex items-center gap-2 text-[var(--text-primary)]">
             <SparklesIcon />
             <span className="font-medium">AI Assistant</span>
           </div>
           <button
             onClick={close}
-            className="text-slate-400 hover:text-slate-200 transition-colors p-1"
+            className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors p-1"
             aria-label="Close chat"
           >
             <CloseIcon />
@@ -105,40 +113,51 @@ export function AIChatSidebar() {
 
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                  msg.role === 'user'
-                    ? 'bg-sky-500 text-white rounded-br-md'
-                    : 'bg-slate-800 text-slate-200 rounded-bl-md'
-                }`}
+          <AnimatePresence initial={false}>
+            {messages.map((msg, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                {msg.role === 'assistant' ? (
-                  <div className="prose prose-sm prose-invert max-w-none">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  </div>
-                ) : (
-                  msg.content
-                )}
-              </div>
-            </div>
-          ))}
+                <div
+                  className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+                    msg.role === 'user'
+                      ? 'bg-[var(--accent)] text-white rounded-br-md'
+                      : 'bg-[var(--bg-surface-hover)] text-[var(--text-primary)] rounded-bl-md'
+                  }`}
+                >
+                  {msg.role === 'assistant' ? (
+                    <div className="prose prose-sm max-w-none">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    msg.content
+                  )}
+                </div>
+              </motion.div>
+            ))}
 
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-slate-800 rounded-2xl rounded-bl-md px-4">
-                <LoadingDots />
-              </div>
-            </div>
-          )}
+            {isLoading && (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex justify-start"
+              >
+                <div className="bg-[var(--bg-surface-hover)] rounded-2xl rounded-bl-md px-4">
+                  <LoadingDots />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Input */}
-        <div className="border-t border-slate-800 px-4 py-3 shrink-0">
+        <div className="border-t border-[var(--border)] px-4 py-3 shrink-0">
           <form onSubmit={handleSubmit} className="flex items-end gap-2">
             <textarea
               value={input}
@@ -146,20 +165,20 @@ export function AIChatSidebar() {
               onKeyDown={handleKeyDown}
               placeholder="Ask about weather..."
               rows={1}
-              className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-sky-500 resize-none min-h-[42px] max-h-32"
+              className="flex-1 bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] resize-none min-h-[42px] max-h-32"
               disabled={isLoading}
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="bg-sky-500 hover:bg-sky-400 disabled:opacity-40 disabled:hover:bg-sky-500 text-white p-2.5 rounded-xl transition-colors shrink-0"
+              className="bg-gradient-to-r from-[var(--accent)] to-sky-400 hover:from-[var(--accent-hover)] hover:to-sky-300 disabled:opacity-40 text-white p-2.5 rounded-xl transition-all shadow-sm hover:shadow-md shrink-0"
               aria-label="Send message"
             >
               <SendIcon />
             </button>
           </form>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }
