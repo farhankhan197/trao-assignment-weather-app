@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import api from '@/lib/api';
 import { WeatherIcon } from './WeatherIcon';
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export function CityCard({ city, onToggleFavorite, onDelete }: Props) {
+  const router = useRouter();
   const [weather, setWeather] = useState<{
     temperature: number;
     condition: string;
@@ -86,7 +88,8 @@ export function CityCard({ city, onToggleFavorite, onDelete }: Props) {
     <motion.div
       whileHover={{ scale: 1.02, y: -2, boxShadow: glowColor }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-      className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl relative group shadow-[var(--shadow-sm)] cursor-default h-full flex flex-col justify-between overflow-hidden"
+      onClick={() => router.push(`/city/${city._id}`)}
+      className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl relative group shadow-[var(--shadow-sm)] cursor-pointer h-full flex flex-col justify-between overflow-hidden"
     >
       {weather && (
         <WeatherAtmosphere condition={weather.condition} intensity="subtle" />
@@ -99,7 +102,7 @@ export function CityCard({ city, onToggleFavorite, onDelete }: Props) {
           </div>
           <div className="flex items-center gap-1">
             <button
-              onClick={() => onToggleFavorite(city._id)}
+              onClick={(e) => { e.stopPropagation(); onToggleFavorite(city._id); }}
               className="p-1.5 rounded-lg hover:bg-[var(--bg-surface-hover)] transition-colors text-[var(--text-muted)] hover:text-[var(--warning)]"
               aria-label={city.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             >
@@ -108,7 +111,7 @@ export function CityCard({ city, onToggleFavorite, onDelete }: Props) {
               </svg>
             </button>
             <button
-              onClick={() => onDelete(city._id)}
+              onClick={(e) => { e.stopPropagation(); onDelete(city._id); }}
               className="p-1.5 rounded-lg hover:bg-[var(--bg-surface-hover)] transition-colors text-[var(--text-muted)] hover:text-[var(--danger)]"
               aria-label="Delete city"
             >

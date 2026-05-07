@@ -11,6 +11,11 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/', getCities);
+router.get('/:id', async (req: Request, res: Response) => {
+  const city = await City.findOne({ _id: req.params.id, userId: req.user!.id });
+  if (!city) { res.status(404).json({ error: 'City not found' }); return; }
+  res.json({ city });
+});
 router.post('/', addCity);
 router.patch('/:id', toggleFavorite);
 router.delete('/:id', deleteCity);
