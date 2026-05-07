@@ -88,12 +88,12 @@ const getWeatherCurrent = (userId: string) =>
       const condition = getConditionFromCode(current.weather_code);
 
       return [
-        `📍 ${city.name}, ${city.country}`,
-        `🌡️ ${Math.round(current.temperature_2m)}°C (feels like ${Math.round(current.apparent_temperature)}°C)`,
-        `☁️ ${condition}`,
-        `💧 Humidity: ${current.relative_humidity_2m}%`,
-        `💨 Wind: ${Math.round(current.wind_speed_10m)} km/h`,
-        `🌧️ Precipitation: ${current.precipitation} mm`,
+        `${city.name}, ${city.country}`,
+        `Temperature: ${Math.round(current.temperature_2m)}°C (feels like ${Math.round(current.apparent_temperature)}°C)`,
+        `Condition: ${condition}`,
+        `Humidity: ${current.relative_humidity_2m}%`,
+        `Wind: ${Math.round(current.wind_speed_10m)} km/h`,
+        `Precipitation: ${current.precipitation} mm`,
       ].join('\n');
     },
   });
@@ -121,7 +121,7 @@ const getWeatherForecast = (userId: string) =>
         const date = new Date(daily.time[i]);
         const dayName = date.toLocaleDateString('en', { weekday: 'short' });
         days.push(
-          `${dayName}: ${getConditionFromCode(daily.weather_code[i])} — H ${Math.round(daily.temperature_2m_max[i])}° / L ${Math.round(daily.temperature_2m_min[i])}° 💧 ${daily.precipitation_sum?.[i] ?? 0}mm`
+          `${dayName}: ${getConditionFromCode(daily.weather_code[i])} — H ${Math.round(daily.temperature_2m_max[i])}° / L ${Math.round(daily.temperature_2m_min[i])}° | Rain: ${daily.precipitation_sum?.[i] ?? 0}mm`
         );
       }
 
@@ -177,11 +177,11 @@ const searchCityWeather = new DynamicTool({
     const condition = getConditionFromCode(current.weather_code);
 
     return [
-      `📍 ${top.name}${top.state ? ', ' + top.state : ''}, ${top.country}`,
-      `🌡️ ${Math.round(current.temperature_2m)}°C (feels like ${Math.round(current.apparent_temperature)}°C)`,
-      `☁️ ${condition}`,
-      `💧 Humidity: ${current.relative_humidity_2m}%`,
-      `💨 Wind: ${Math.round(current.wind_speed_10m)} km/h`,
+      `${top.name}${top.state ? ', ' + top.state : ''}, ${top.country}`,
+      `Temperature: ${Math.round(current.temperature_2m)}°C (feels like ${Math.round(current.apparent_temperature)}°C)`,
+      `Condition: ${condition}`,
+      `Humidity: ${current.relative_humidity_2m}%`,
+      `Wind: ${Math.round(current.wind_speed_10m)} km/h`,
     ].join('\n');
   },
 });
@@ -200,7 +200,7 @@ const getCalendarWeatherAlerts = (userId: string) =>
       return alerts.map((a) => {
         const date = new Date(a.eventStart);
         const dateStr = date.toLocaleDateString('en', { weekday: 'short', month: 'short', day: 'numeric' });
-        return `📅 ${a.eventTitle} — ${dateStr} in ${a.eventLocation}\n   ${a.severity.toUpperCase()}: ${a.message}`;
+        return `${a.eventTitle} — ${dateStr} in ${a.eventLocation}\n   ${a.severity.toUpperCase()}: ${a.message}`;
       }).join('\n\n');
     },
   });
@@ -228,9 +228,9 @@ const compareCities = (userId: string) =>
           const data = await fetchCurrentWeather(city.lat, city.lon);
           const current = data.current;
           return [
-            `📍 ${city.name}, ${city.country}`,
-            `   🌡️ ${Math.round(current.temperature_2m)}°C — ${getConditionFromCode(current.weather_code)}`,
-            `   💧 ${current.relative_humidity_2m}% humidity | 💨 ${Math.round(current.wind_speed_10m)} km/h`,
+            `${city.name}, ${city.country}`,
+            `   Temperature: ${Math.round(current.temperature_2m)}°C — ${getConditionFromCode(current.weather_code)}`,
+            `   Humidity: ${current.relative_humidity_2m}% | Wind: ${Math.round(current.wind_speed_10m)} km/h`,
           ].join('\n');
         })
       );

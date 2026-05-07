@@ -254,7 +254,7 @@ export default function CityDetailPage() {
                   <span className="text-[var(--text-muted)]">{Math.round(day.tempMin)}°</span>
                 </div>
                 {day.precipitation > 0 && (
-                  <p className="text-[10px] text-blue-500 mt-1">💧 {day.precipitation}mm</p>
+                  <p className="text-[10px] text-blue-500 mt-1">Rain: {day.precipitation}mm</p>
                 )}
               </motion.div>
             ))}

@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
 import api from '@/lib/api';
 
 interface Alert {
@@ -22,15 +23,15 @@ interface Props {
 }
 
 const SEVERITY_STYLES = {
-  high: 'border-[var(--danger)] bg-[var(--danger-light)] shadow-[var(--shadow-sm)]',
-  medium: 'border-[var(--warning)] bg-[var(--warning-light)] shadow-[var(--shadow-sm)]',
-  low: 'border-[var(--border)] bg-[var(--bg-surface)] shadow-[var(--shadow-sm)]',
+  high: 'border-[var(--danger)]/40 bg-[var(--danger-light)]/50',
+  medium: 'border-[var(--warning)]/40 bg-[var(--warning-light)]/50',
+  low: 'border-[var(--border)] bg-[var(--bg-surface)]',
 };
 
 const SEVERITY_BADGE = {
-  high: 'bg-[var(--danger-muted)] text-[var(--danger)]',
-  medium: 'bg-[var(--warning-muted)] text-[var(--warning)]',
-  low: 'bg-[var(--bg-surface-hover)] text-[var(--text-muted)]',
+  high: 'bg-[var(--danger)]/10 text-[var(--danger)] border-[var(--danger)]/20',
+  medium: 'bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20',
+  low: 'bg-[var(--bg-surface-hover)] text-[var(--text-muted)] border-[var(--border)]',
 };
 
 const CONDITION_ICONS: Record<string, string> = {
@@ -47,44 +48,80 @@ export function AlertCard({ alert, onMarkRead }: Props) {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
+  });
+  const timeStr = date.toLocaleTimeString('en', {
     hour: '2-digit',
     minute: '2-digit',
   });
 
   return (
     <motion.div
-      whileHover={{ scale: 1.01, y: -1 }}
+      whileHover={{ scale: 1.005, y: -1 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-      className={`border rounded-xl p-5 cursor-default ${SEVERITY_STYLES[alert.severity]} ${!alert.read ? 'ring-1 ring-[var(--accent)]/30' : 'opacity-75'}`}
+      className={`border rounded-xl overflow-hidden shadow-[var(--shadow-sm)] ${SEVERITY_STYLES[alert.severity]} ${!alert.read ? 'ring-1 ring-[var(--accent)]/20' : 'opacity-90'}`}
     >
-      <div className="flex items-start justify-between gap-4">
+      {/* Top Section: Event info (left) + Weather (right) */}
+      <div className="flex items-start gap-4 p-5">
+        {/* Left: Date & Event */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl">{CONDITION_ICONS[alert.condition] || '🌡️'}</span>
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full uppercase tracking-wider ${SEVERITY_BADGE[alert.severity]}`}>
-              {alert.severity}
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
+              {dateStr}
             </span>
+            <span className="text-[var(--border)]">·</span>
+            <span className="text-xs text-[var(--text-muted)]">{timeStr}</span>
             {!alert.read && (
-              <span className="w-2 h-2 bg-[var(--accent)] rounded-full" />
+              <span className="w-2 h-2 bg-[var(--accent)] rounded-full ml-1" />
             )}
           </div>
 
-          <h3 className="font-display text-lg mb-1 truncate">{alert.eventTitle}</h3>
-          <p className="text-[var(--text-muted)] text-sm mb-2">{dateStr} · {alert.eventLocation}</p>
-          <p className="text-[var(--text-secondary)] text-sm leading-relaxed">{alert.message}</p>
+          <h3 className="font-display text-lg text-[var(--text-primary)] mb-1 truncate">
+            {alert.eventTitle}
+          </h3>
 
-          <div className="flex items-center gap-4 mt-3 text-xs text-[var(--text-muted)]">
-            <span>{Math.round(alert.tempMax)}° / {Math.round(alert.tempMin)}°C</span>
+          <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+            </svg>
+            {alert.eventLocation}
           </div>
         </div>
 
+        {/* Right: Weather Info */}
+        <div className="shrink-0 text-right">
+          <div className="text-3xl mb-1.5">{CONDITION_ICONS[alert.condition] || '☁️'}</div>
+
+          <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider border ${SEVERITY_BADGE[alert.severity]}`}>
+            {alert.severity}
+          </span>
+
+          <div className="text-sm font-medium text-[var(--text-primary)] mt-1.5">
+            {Math.round(alert.tempMax)}° / {Math.round(alert.tempMin)}°
+          </div>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="h-px bg-[var(--border-subtle)]/60 mx-5" />
+
+      {/* Bottom: Message with Markdown */}
+      <div className="px-5 py-4">
+        <div className="text-sm text-[var(--text-secondary)] leading-relaxed prose prose-sm max-w-none alert-message">
+          <ReactMarkdown>
+            {alert.message}
+          </ReactMarkdown>
+        </div>
+
+        {/* Mark Read */}
         {!alert.read && (
-          <button
-            onClick={() => onMarkRead(alert._id)}
-            className="shrink-0 text-xs bg-[var(--bg-surface-hover)] hover:bg-[var(--bg-input-hover)] text-[var(--text-secondary)] px-3 py-1.5 rounded-lg transition-colors"
-          >
-            Mark read
-          </button>
+          <div className="flex justify-end mt-3">
+            <button
+              onClick={() => onMarkRead(alert._id)}
+              className="text-xs bg-[var(--bg-surface-hover)] hover:bg-[var(--bg-input-hover)] text-[var(--text-secondary)] px-3 py-1.5 rounded-lg transition-colors"
+            >
+              Mark as read
+            </button>
+          </div>
         )}
       </div>
     </motion.div>

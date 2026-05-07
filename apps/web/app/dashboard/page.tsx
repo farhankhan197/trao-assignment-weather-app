@@ -112,7 +112,6 @@ export default function DashboardPage() {
 
       {cities.length === 0 ? (
         <div className="relative text-center py-20">
-          <p className="text-5xl mb-4">🌍</p>
           <h2 className="font-display text-xl mb-2 text-[var(--text-primary)]">No cities yet</h2>
           <p className="text-[var(--text-muted)] text-sm max-w-md mx-auto">
             Search for a city above to add it to your dashboard. You'll see live weather and streaks for each city.

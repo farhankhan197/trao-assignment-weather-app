@@ -28,11 +28,11 @@ export const calculateStreak = (days: WeatherDay[]): StreakResult | null => {
   if (streakDays < 2) return null;
 
   const labels: Record<string, string> = {
-    sunny: `☀️ ${streakDays}-day sunshine streak`,
-    rainy: `🌧️ Rainy for ${streakDays} days`,
-    cloudy: `☁️ Overcast ${streakDays} days running`,
-    snowy: `❄️ Snow for ${streakDays} days`,
-    stormy: `⛈️ Stormy ${streakDays}-day stretch`,
+    sunny: `${streakDays}-day sunshine streak`,
+    rainy: `Rainy for ${streakDays} days`,
+    cloudy: `Overcast ${streakDays} days running`,
+    snowy: `Snow for ${streakDays} days`,
+    stormy: `Stormy ${streakDays}-day stretch`,
   };
 
   return {

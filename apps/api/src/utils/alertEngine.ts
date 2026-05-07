@@ -33,24 +33,24 @@ export function checkWeatherForAlert(
   // High severity rules
   if (condition === 'stormy') {
     severity = 'high';
-    message = `⚠️ **Stormy weather** expected in ${eventLocation} during "${eventTitle}" on ${formatDate(eventDate)}. Consider rescheduling or moving indoors.`;
+    message = `**Stormy weather** expected in ${eventLocation} during "${eventTitle}" on ${formatDate(eventDate)}. Consider rescheduling or moving indoors.`;
   } else if (tempMax > 35) {
     severity = 'high';
-    message = `🥵 **Extreme heat** (${Math.round(tempMax)}°C) expected in ${eventLocation} during "${eventTitle}" on ${formatDate(eventDate)}. Stay hydrated and avoid prolonged sun exposure.`;
+    message = `**Extreme heat** (${Math.round(tempMax)}°C) expected in ${eventLocation} during "${eventTitle}" on ${formatDate(eventDate)}. Stay hydrated and avoid prolonged sun exposure.`;
   } else if (tempMin < 0) {
     severity = 'high';
-    message = `❄️ **Freezing conditions** (${Math.round(tempMin)}°C) forecast for ${eventLocation} during "${eventTitle}" on ${formatDate(eventDate)}. Dress warmly and watch for ice.`;
+    message = `**Freezing conditions** (${Math.round(tempMin)}°C) forecast for ${eventLocation} during "${eventTitle}" on ${formatDate(eventDate)}. Dress warmly and watch for ice.`;
   }
   // Medium severity rules
   else if (condition === 'rainy' && precipitation > 10) {
     severity = 'medium';
-    message = `🌧️ **Heavy rain** (${Math.round(precipitation)}mm) forecast for ${eventLocation} during "${eventTitle}" on ${formatDate(eventDate)}. Bring an umbrella or consider indoor alternatives.`;
+    message = `**Heavy rain** (${Math.round(precipitation)}mm) forecast for ${eventLocation} during "${eventTitle}" on ${formatDate(eventDate)}. Bring an umbrella or consider indoor alternatives.`;
   } else if (tempMax > 30) {
     severity = 'medium';
-    message = `🌡️ **Very hot** (${Math.round(tempMax)}°C) expected in ${eventLocation} during "${eventTitle}" on ${formatDate(eventDate)}. Stay cool and hydrated.`;
+    message = `**Very hot** (${Math.round(tempMax)}°C) expected in ${eventLocation} during "${eventTitle}" on ${formatDate(eventDate)}. Stay cool and hydrated.`;
   } else if (tempMin < 5) {
     severity = 'medium';
-    message = `🧥 **Chilly conditions** (${Math.round(tempMin)}°C) forecast for ${eventLocation} during "${eventTitle}" on ${formatDate(eventDate)}. Dress in layers.`;
+    message = `**Chilly conditions** (${Math.round(tempMin)}°C) forecast for ${eventLocation} during "${eventTitle}" on ${formatDate(eventDate)}. Dress in layers.`;
   } else {
     // Low severity / no alert
     severity = 'low';

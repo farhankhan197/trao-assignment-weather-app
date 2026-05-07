@@ -90,7 +90,6 @@ export default function AlertsPage() {
 
       {!calendarConnected && (
         <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-8 text-center mb-8 shadow-[var(--shadow-sm)]">
-          <p className="text-4xl mb-4">📅</p>
           <h2 className="font-display text-xl mb-2">No Calendar Connected</h2>
           <p className="text-[var(--text-muted)] text-sm mb-6 max-w-md mx-auto">
             Link your Google Calendar in Settings to get weather alerts for upcoming events.
@@ -129,7 +128,6 @@ export default function AlertsPage() {
 
           {filteredAlerts.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-5xl mb-4">☀️</p>
               <p className="text-[var(--text-muted)]">
                 {filter === 'all'
                   ? 'No weather alerts for upcoming events. Looking good!'
