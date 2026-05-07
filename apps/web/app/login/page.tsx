@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
@@ -28,7 +29,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+      className="min-h-screen flex items-center justify-center px-4"
+    >
       <div className="w-full max-w-md">
         <h1 className="font-display text-3xl text-center text-[var(--text-primary)] mb-1">Welcome back</h1>
         <p className="text-sm text-[var(--text-muted)] text-center mb-6">Sign in to your Mausam account</p>
@@ -96,6 +102,6 @@ export default function LoginPage() {
           </button>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

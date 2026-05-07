@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import api from '@/lib/api';
 
 interface Alert {
@@ -51,7 +52,11 @@ export function AlertCard({ alert, onMarkRead }: Props) {
   });
 
   return (
-    <div className={`border rounded-xl p-5 transition-all ${SEVERITY_STYLES[alert.severity]} ${!alert.read ? 'ring-1 ring-[var(--accent)]/30' : 'opacity-75'}`}>
+    <motion.div
+      whileHover={{ scale: 1.01, y: -1 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      className={`border rounded-xl p-5 cursor-default ${SEVERITY_STYLES[alert.severity]} ${!alert.read ? 'ring-1 ring-[var(--accent)]/30' : 'opacity-75'}`}
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
@@ -82,6 +87,6 @@ export function AlertCard({ alert, onMarkRead }: Props) {
           </button>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

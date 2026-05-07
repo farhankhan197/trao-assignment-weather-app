@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import api from '@/lib/api';
 
 interface SearchResult {
@@ -71,29 +72,45 @@ export function CitySearch({ onAdd }: Props) {
         )}
       </div>
 
-      {open && results.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl shadow-[var(--shadow-md)] overflow-hidden z-50">
-          {results.map((city, i) => (
-            <button
-              key={i}
-              onClick={() => handleSelect(city)}
-              className="w-full text-left px-4 py-3 hover:bg-[var(--bg-surface-hover)] transition-colors flex items-center justify-between"
-            >
-              <div>
-                <span className="text-[var(--text-primary)] text-sm font-medium">{city.name}</span>
-                <span className="text-[var(--text-muted)] text-xs ml-2">{city.state ? `${city.state}, ` : ''}{city.country}</span>
-              </div>
-              <span className="text-xs text-[var(--accent)]">Add</span>
-            </button>
-          ))}
-        </div>
-      )}
+      <AnimatePresence>
+        {open && results.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+            className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl shadow-[var(--shadow-md)] overflow-hidden z-50"
+          >
+            {results.map((city, i) => (
+              <motion.button
+                key={i}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.03, type: 'spring', stiffness: 400, damping: 25 }}
+                onClick={() => handleSelect(city)}
+                className="w-full text-left px-4 py-3 hover:bg-[var(--bg-surface-hover)] transition-colors flex items-center justify-between"
+              >
+                <div>
+                  <span className="text-[var(--text-primary)] text-sm font-medium">{city.name}</span>
+                  <span className="text-[var(--text-muted)] text-xs ml-2">{city.state ? `${city.state}, ` : ''}{city.country}</span>
+                </div>
+                <span className="text-xs text-[var(--accent)]">Add</span>
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
 
-      {open && query.trim() && !loading && results.length === 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-muted)] z-50">
-          No cities found
-        </div>
-      )}
+        {open && query.trim() && !loading && results.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="absolute top-full left-0 right-0 mt-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-[var(--text-muted)] z-50"
+          >
+            No cities found
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

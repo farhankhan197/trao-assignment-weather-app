@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useAuth } from '@/context/AuthContext';
 import { AlertCard } from '@/components/AlertCard';
@@ -139,11 +140,27 @@ export default function AlertsPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.06 } },
+              }}
+              className="space-y-4"
+            >
               {filteredAlerts.map((alert) => (
-                <AlertCard key={alert._id} alert={alert} onMarkRead={handleMarkRead} />
+                <motion.div
+                  key={alert._id}
+                  variants={{
+                    hidden: { opacity: 0, y: 16 },
+                    visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
+                  }}
+                >
+                  <AlertCard alert={alert} onMarkRead={handleMarkRead} />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </>
       )}

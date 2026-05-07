@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { CitySearch } from '@/components/CitySearch';
 import { CityCard } from '@/components/CityCard';
@@ -112,16 +113,31 @@ export default function DashboardPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.05 } },
+          }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+        >
           {cities.map((city) => (
-            <CityCard
+            <motion.div
               key={city._id}
-              city={city}
-              onToggleFavorite={handleToggleFavorite}
-              onDelete={handleDelete}
-            />
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
+              }}
+            >
+              <CityCard
+                city={city}
+                onToggleFavorite={handleToggleFavorite}
+                onDelete={handleDelete}
+              />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
     </div>
   );

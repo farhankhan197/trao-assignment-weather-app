@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import { useAIChat } from '@/context/AIChatContext';
 
@@ -73,20 +74,27 @@ export function AIChatSidebar() {
 
   return (
     <>
-      {/* Backdrop */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-[60] transition-opacity"
-          onClick={close}
-          aria-hidden="true"
-        />
-      )}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/50 z-[60]"
+            onClick={close}
+            aria-hidden="true"
+          />
+        )}
+      </AnimatePresence>
 
       {/* Sidebar */}
-      <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-[420px] max-w-full bg-[var(--bg-primary)] border-l border-[var(--border)] shadow-[var(--shadow-md)] z-[70] flex flex-col transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+      <motion.div
+        initial={{ x: '100%' }}
+        animate={{ x: isOpen ? '0%' : '100%' }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className="fixed top-0 right-0 h-full w-full sm:w-[420px] max-w-full bg-[var(--bg-primary)] border-l border-[var(--border)] shadow-[var(--shadow-md)] z-[70] flex flex-col"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 h-14 border-b border-[var(--border)] shrink-0">
@@ -105,36 +113,47 @@ export function AIChatSidebar() {
 
         {/* Messages */}
         <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                  msg.role === 'user'
-                    ? 'bg-[var(--accent)] text-white rounded-br-md'
-                    : 'bg-[var(--bg-surface-hover)] text-[var(--text-primary)] rounded-bl-md'
-                }`}
+          <AnimatePresence initial={false}>
+            {messages.map((msg, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                {msg.role === 'assistant' ? (
-                  <div className="prose prose-sm max-w-none">
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  </div>
-                ) : (
-                  msg.content
-                )}
-              </div>
-            </div>
-          ))}
+                <div
+                  className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
+                    msg.role === 'user'
+                      ? 'bg-[var(--accent)] text-white rounded-br-md'
+                      : 'bg-[var(--bg-surface-hover)] text-[var(--text-primary)] rounded-bl-md'
+                  }`}
+                >
+                  {msg.role === 'assistant' ? (
+                    <div className="prose prose-sm max-w-none">
+                      <ReactMarkdown>{msg.content}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    msg.content
+                  )}
+                </div>
+              </motion.div>
+            ))}
 
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-[var(--bg-surface-hover)] rounded-2xl rounded-bl-md px-4">
-                <LoadingDots />
-              </div>
-            </div>
-          )}
+            {isLoading && (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="flex justify-start"
+              >
+                <div className="bg-[var(--bg-surface-hover)] rounded-2xl rounded-bl-md px-4">
+                  <LoadingDots />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Input */}
@@ -159,7 +178,7 @@ export function AIChatSidebar() {
             </button>
           </form>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }

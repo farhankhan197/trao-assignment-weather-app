@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { WeatherIcon } from '@/components/WeatherIcon';
 import api from '@/lib/api';
@@ -162,31 +163,61 @@ export default function FavoritesPage() {
             <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3 hidden lg:block">
               Your Cities
             </h3>
-            <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-hide">
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: { transition: { staggerChildren: 0.04 } },
+              }}
+              className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-hide"
+            >
               {favorites.map((city) => (
-                <SidebarItem
+                <motion.div
                   key={city._id}
-                  city={city}
-                  isSelected={city._id === selectedId}
-                  onClick={() => setSelectedId(city._id)}
-                />
+                  variants={{
+                    hidden: { opacity: 0, x: -12 },
+                    visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 350, damping: 25 } },
+                  }}
+                >
+                  <SidebarItem
+                    city={city}
+                    isSelected={city._id === selectedId}
+                    onClick={() => setSelectedId(city._id)}
+                  />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </div>
 
         {/* Main detail area */}
         <div className="flex-1 min-w-0">
-          {detailLoading ? (
-            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-8 animate-pulse shadow-[var(--shadow-sm)]">
-              <div className="h-8 bg-[var(--bg-surface-hover)] rounded w-40 mb-4" />
-              <div className="h-16 bg-[var(--bg-surface-hover)] rounded w-32 mb-6" />
-              <div className="h-48 bg-[var(--bg-surface-hover)] rounded w-full" />
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {/* Current weather header */}
-              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 lg:p-6 shadow-[var(--shadow-sm)]">
+          <AnimatePresence mode="wait">
+            {detailLoading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-8 animate-pulse shadow-[var(--shadow-sm)]"
+              >
+                <div className="h-8 bg-[var(--bg-surface-hover)] rounded w-40 mb-4" />
+                <div className="h-16 bg-[var(--bg-surface-hover)] rounded w-32 mb-6" />
+                <div className="h-48 bg-[var(--bg-surface-hover)] rounded w-full" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key={selectedId}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.25, ease: 'easeOut' }}
+                className="space-y-6"
+              >
+                {/* Current weather header */}
+                <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 lg:p-6 shadow-[var(--shadow-sm)]">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h2 className="font-display text-2xl lg:text-3xl text-[var(--text-primary)]">{selected.name}</h2>
@@ -279,8 +310,9 @@ export default function FavoritesPage() {
                   </div>
                 )}
               </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

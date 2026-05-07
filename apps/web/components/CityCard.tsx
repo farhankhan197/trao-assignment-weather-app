@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import api from '@/lib/api';
 import { WeatherIcon } from './WeatherIcon';
 
@@ -60,16 +61,22 @@ export function CityCard({ city, onToggleFavorite, onDelete }: Props) {
 
   if (loading) {
     return (
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 animate-pulse">
-        <div className="h-4 bg-[var(--bg-surface-hover)] rounded w-24 mb-3" />
-        <div className="h-8 bg-[var(--bg-surface-hover)] rounded w-16 mb-2" />
+      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 animate-pulse h-full flex flex-col justify-between">
+        <div>
+          <div className="h-4 bg-[var(--bg-surface-hover)] rounded w-24 mb-3" />
+          <div className="h-8 bg-[var(--bg-surface-hover)] rounded w-16 mb-2" />
+        </div>
         <div className="h-3 bg-[var(--bg-surface-hover)] rounded w-32" />
       </div>
     );
   }
 
   return (
-    <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 relative group shadow-[var(--shadow-sm)]">
+    <motion.div
+      whileHover={{ scale: 1.02, y: -2 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 relative group shadow-[var(--shadow-sm)] cursor-default h-full flex flex-col justify-between"
+    >
       <div className="flex items-start justify-between mb-2">
         <div>
           <h3 className="font-display text-base text-[var(--text-primary)]">{city.name}</h3>
@@ -114,12 +121,16 @@ export function CityCard({ city, onToggleFavorite, onDelete }: Props) {
         </div>
       )}
 
-      {streak && (
-        <div className="mt-2 text-xs text-[var(--warning)]/80 bg-[var(--warning-light)] rounded-lg px-2 py-1 inline-block">
-          {streak}
-        </div>
-      )}
-    </div>
+      <div className="mt-2 h-6">
+        {streak ? (
+          <span className="text-xs text-[var(--warning)]/80 bg-[var(--warning-light)] rounded-lg px-2 py-1 inline-block">
+            {streak}
+          </span>
+        ) : (
+          <span className="inline-block" />
+        )}
+      </div>
+    </motion.div>
   );
 }
 
