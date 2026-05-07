@@ -11,7 +11,8 @@ export const searchCity = async (req: Request, res: Response): Promise<void> => 
     }
     const results = await geocodeCity(q);
     res.json({ results });
-  } catch {
+  } catch (err) {
+    console.error('[Weather Search Error]', err);
     res.status(500).json({ error: 'City search failed' });
   }
 };
@@ -20,13 +21,14 @@ export const searchCity = async (req: Request, res: Response): Promise<void> => 
 export const getCurrentWeather = async (req: Request, res: Response): Promise<void> => {
   try {
     const { lat, lon } = req.query;
-    if (!lat || !lon) {
-      res.status(400).json({ error: 'lat and lon are required' });
+    if (!lat || !lon || isNaN(Number(lat)) || isNaN(Number(lon))) {
+      res.status(400).json({ error: 'Valid lat and lon are required' });
       return;
     }
     const data = await fetchCurrentWeather(Number(lat), Number(lon));
     res.json(data);
-  } catch {
+  } catch (err) {
+    console.error('[Weather Current Error]', err);
     res.status(500).json({ error: 'Failed to fetch weather' });
   }
 };

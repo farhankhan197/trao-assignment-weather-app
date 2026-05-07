@@ -7,6 +7,7 @@ import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { WeatherIcon } from '@/components/WeatherIcon';
 import WeatherAtmosphere from '@/components/weather/WeatherAtmosphere';
 import api from '@/lib/api';
+import { getCondition } from '@/lib/weather';
 
 interface City {
   _id: string;
@@ -309,12 +310,4 @@ export default function CityDetailPage() {
       </div>
     </div>
   );
-}
-
-function getCondition(code: number): string {
-  if (code === 0) return 'sunny';
-  if (code <= 3) return 'cloudy';
-  if (code <= 67) return 'rainy';
-  if (code <= 77) return 'snowy';
-  return 'stormy';
 }

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import api from '@/lib/api';
+import { getCondition } from '@/lib/weather';
 import { WeatherIcon } from './WeatherIcon';
 import WeatherAtmosphere from './weather/WeatherAtmosphere';
 
@@ -22,7 +23,7 @@ interface Props {
   onDelete: (id: string) => void;
 }
 
-export function CityCard({ city, onToggleFavorite, onDelete }: Props) {
+function CityCardComponent({ city, onToggleFavorite, onDelete }: Props) {
   const router = useRouter();
   const [weather, setWeather] = useState<{
     temperature: number;
@@ -153,10 +154,5 @@ export function CityCard({ city, onToggleFavorite, onDelete }: Props) {
   );
 }
 
-function getCondition(code: number): string {
-  if (code === 0) return 'sunny';
-  if (code <= 3) return 'cloudy';
-  if (code <= 67) return 'rainy';
-  if (code <= 77) return 'snowy';
-  return 'stormy';
-}
+export const CityCard = React.memo(CityCardComponent);
+CityCard.displayName = 'CityCard';

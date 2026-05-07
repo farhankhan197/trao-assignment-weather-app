@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshAlertCount = useCallback(async () => {
     try {
-      const res = await api.get('/api/calendar/alerts', { skipAuthRedirect: true } as any);
+      const res = await api.get('/api/calendar/alerts', { skipAuthRedirect: true });
       setUnreadAlertCount(res.data.unreadCount || 0);
     } catch {
       setUnreadAlertCount(0);
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let cancelled = false;
-    api.get('/auth/me', { skipAuthRedirect: true } as any)
+    api.get('/auth/me', { skipAuthRedirect: true })
       .then((res) => {
         if (!cancelled) {
           setUser(res.data.user);

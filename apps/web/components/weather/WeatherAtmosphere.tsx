@@ -22,7 +22,7 @@ export default function WeatherAtmosphere({
   intensity = 'subtle',
   className = '',
 }: WeatherAtmosphereProps) {
-  const styleFn = weatherStyles[condition] || weatherStyles.sunny;
+  const styleFn = weatherStyles[condition] || weatherStyles.cloudy;
   const style = styleFn(intensity);
 
   return (

@@ -22,7 +22,7 @@ export function CitySearch({ onAdd }: Props) {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const search = useCallback(async (q: string) => {
     if (!q.trim()) { setResults([]); setOpen(false); return; }
@@ -83,7 +83,7 @@ export function CitySearch({ onAdd }: Props) {
           >
             {results.map((city, i) => (
               <motion.button
-                key={i}
+                key={`${city.name}-${city.lat}-${city.lon}`}
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.03, type: 'spring', stiffness: 400, damping: 25 }}

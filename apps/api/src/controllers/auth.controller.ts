@@ -39,6 +39,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     res.status(201).json({ user });
   } catch (err) {
+    console.error('[Auth Register Error]', err);
     res.status(500).json({ error: 'Registration failed' });
   }
 };
@@ -63,7 +64,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.cookie('token', token, COOKIE_OPTIONS);
 
     res.json({ user });
-  } catch {
+  } catch (err) {
+    console.error('[Auth Login Error]', err);
     res.status(500).json({ error: 'Login failed' });
   }
 };
@@ -83,7 +85,8 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
       return;
     }
     res.json({ user });
-  } catch {
+  } catch (err) {
+    console.error('[Auth GetMe Error]', err);
     res.status(500).json({ error: 'Failed to fetch user' });
   }
 };
