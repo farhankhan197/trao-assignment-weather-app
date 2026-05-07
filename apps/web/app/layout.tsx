@@ -10,8 +10,8 @@ const display = DM_Serif_Display({ subsets: ['latin'], weight: '400', variable: 
 const body = DM_Sans({ subsets: ['latin'], variable: '--font-body' });
 
 export const metadata: Metadata = {
-  title: 'Mausam — Your Personal Weather Dashboard',
-  description: 'Track weather across multiple cities with AI-powered insights',
+  title: 'Mausam',
+  description: 'Track weather across multiple cities',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

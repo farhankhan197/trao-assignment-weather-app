@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useAIChat } from '@/context/AIChatContext';
 
@@ -14,8 +15,12 @@ function BellIcon() {
 }
 
 export function Navbar() {
+  const pathname = usePathname();
   const { user, logout, unreadAlertCount } = useAuth();
   const { toggle: toggleChat } = useAIChat();
+
+  // Don't show navbar on landing page
+  if (pathname === '/') return null;
 
   return (
     <nav className="border-b border-[var(--border)] bg-[var(--bg-primary)]/80 backdrop-blur-sm sticky top-0 z-50">

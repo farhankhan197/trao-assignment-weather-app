@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { WeatherIcon } from '@/components/WeatherIcon';
+import WeatherAtmosphere from '@/components/weather/WeatherAtmosphere';
 import api from '@/lib/api';
 import {
   AreaChart,
@@ -217,41 +218,46 @@ export default function FavoritesPage() {
                 className="space-y-6"
               >
                 {/* Current weather header */}
-                <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 lg:p-6 shadow-[var(--shadow-sm)]">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h2 className="font-display text-2xl lg:text-3xl text-[var(--text-primary)]">{selected.name}</h2>
-                    <p className="text-[var(--text-muted)] text-sm">{selected.country}</p>
-                  </div>
+                <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl shadow-[var(--shadow-sm)] relative overflow-hidden">
                   {current && (
-                    <div className="text-right">
-                      <WeatherIcon condition={current.condition} className="text-4xl lg:text-5xl" />
-                    </div>
+                    <WeatherAtmosphere condition={current.condition} intensity="dramatic" />
                   )}
+                  <div className="relative z-10 p-4 lg:p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h2 className="font-display text-2xl lg:text-3xl text-[var(--text-primary)]">{selected.name}</h2>
+                        <p className="text-[var(--text-muted)] text-sm">{selected.country}</p>
+                      </div>
+                      {current && (
+                        <div className="text-right">
+                          <WeatherIcon condition={current.condition} className="text-4xl lg:text-5xl" />
+                        </div>
+                      )}
+                    </div>
+
+                    {current && (
+                      <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6">
+                        <div>
+                          <span className="text-4xl lg:text-5xl font-light text-[var(--text-primary)]">{Math.round(current.temperature)}°</span>
+                          <span className="text-[var(--text-muted)] text-base ml-2 capitalize">{current.condition}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-[var(--text-muted)]">
+                          <span>H {Math.round(current.tempMax)}°</span>
+                          <span>L {Math.round(current.tempMin)}°</span>
+                          <span>Humidity {current.humidity}%</span>
+                          <span>Wind {Math.round(current.windSpeed)} km/h</span>
+                          <span>Precip {current.precipitation} mm</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {streak && (
+                      <div className="mt-4 text-sm text-[var(--warning)]/80 bg-[var(--warning-light)] rounded-lg px-3 py-2 inline-block">
+                        {streak}
+                      </div>
+                    )}
+                  </div>
                 </div>
-
-                {current && (
-                  <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6">
-                    <div>
-                      <span className="text-4xl lg:text-5xl font-light text-[var(--text-primary)]">{Math.round(current.temperature)}°</span>
-                      <span className="text-[var(--text-muted)] text-base ml-2 capitalize">{current.condition}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-[var(--text-muted)]">
-                      <span>H {Math.round(current.tempMax)}°</span>
-                      <span>L {Math.round(current.tempMin)}°</span>
-                      <span>Humidity {current.humidity}%</span>
-                      <span>Wind {Math.round(current.windSpeed)} km/h</span>
-                      <span>Precip {current.precipitation} mm</span>
-                    </div>
-                  </div>
-                )}
-
-                {streak && (
-                  <div className="mt-4 text-sm text-[var(--warning)]/80 bg-[var(--warning-light)] rounded-lg px-3 py-2 inline-block">
-                    {streak}
-                  </div>
-                )}
-              </div>
 
               {/* Past week chart */}
               <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 lg:p-6 shadow-[var(--shadow-sm)]">
