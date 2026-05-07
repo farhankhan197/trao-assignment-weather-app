@@ -9,7 +9,7 @@ export function Logo({ size = 32, className = '', variant = 'dark' }: LogoProps)
   const cloudColor = variant === 'dark' ? '#ffffff' : '#e2e8f0';
   const cloudStroke = variant === 'dark' ? '#ffffff' : '#cbd5e1';
   const cloudShadow = variant === 'dark' ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.08)';
-  const textColor = variant === 'dark' ? '#ffffff' : '#0f172a';
+  const textColor = variant === 'light' ? '#ffffff' : '#0f172a';
 
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>

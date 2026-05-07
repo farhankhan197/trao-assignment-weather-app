@@ -5,8 +5,8 @@ import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
 import LandingHeader from './LandingHeader';
 import HeroSection from './HeroSection';
-import FeaturesSection from './FeaturesSection';
 import Footer from './Footer';
+import MausamLoader from '../weather/mausamLoader';
 
 interface City {
   _id: string;
@@ -112,7 +112,7 @@ export default function LandingPage() {
   if (loading && authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#0a1628]">
-        <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        <MausamLoader variant="inline" hint="Mausam kaisa hai?"/>
       </div>
     );
   }
@@ -133,7 +133,6 @@ export default function LandingPage() {
         ctaPrimary={ctaPrimary}
         ctaSecondary={ctaSecondary}
       />
-      <FeaturesSection />
       <Footer />
     </div>
   );

@@ -9,7 +9,9 @@ export default function Rain() {
     const container = containerRef.current;
     if (!container) return;
 
-    for (let i = 0; i < 70; i++) {
+    const count = window.innerWidth < 640 ? 20 : 70;
+
+    for (let i = 0; i < count; i++) {
       const drop = document.createElement("div");
       drop.className = "rain-drop";
       const h = Math.random() * 60 + 15;
