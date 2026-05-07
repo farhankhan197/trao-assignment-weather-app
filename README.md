@@ -1,7 +1,8 @@
-# Mausam — Multi-User Weather Dashboard
+# Mausam 
+An assignment made for TRAO hiring process.
 
-**Live App**: [https://mausam-xyz.vercel.app](https://mausam-xyz.vercel.app) *(update after deployment)*
-**API**: [https://mausam-api.up.railway.app](https://mausam-api.up.railway.app) *(update after deployment)*
+**Web App**: [https://mausam-xyz.vercel.app](https://mausam.farhankhan.site) 
+**API**: [https://mausam-api.up.railway.app](https://api-mausam.farhankhan.site) 
 
 A full-stack weather dashboard where users can track multiple cities, view live weather data, get AI-powered insights, and discover weather memory streaks.
 
