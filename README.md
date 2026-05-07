@@ -1,8 +1,8 @@
 # Mausam 
 An assignment made for TRAO hiring process.
 
-**Web App**: [https://mausam-xyz.vercel.app](https://mausam.farhankhan.site) 
-**API**: [https://mausam-api.up.railway.app](https://api-mausam.farhankhan.site) 
+**Web App**: [https://mausam.farhankhan.site](https://mausam.farhankhan.site) 
+**API**: [https://api-mausam.farhankhan.site](https://api-mausam.farhankhan.site) 
 
 A full-stack weather dashboard where users can track multiple cities, view live weather data, get AI-powered insights, and discover weather memory streaks.
 
