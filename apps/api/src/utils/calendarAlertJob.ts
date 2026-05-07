@@ -16,23 +16,16 @@ export async function runCalendarAlertScanForUser(userId: string) {
   if (!user || !user.calendarConnected) return;
 
   const accessToken = await getValidAccessToken(user);
-  if (!accessToken) {
-    console.log(`[CalendarAlertJob] No valid token for user ${userId}`);
-    return;
-  }
+  if (!accessToken) return;
 
   try {
     const events = await fetchUpcomingEvents(accessToken);
-    console.log(`[CalendarAlertJob] Found ${events.length} events with location for user ${userId}`);
 
     for (const event of events) {
       try {
         // Geocode event location
         const geo = await geocodeLocation(event.location);
-        if (!geo) {
-          console.log(`[CalendarAlertJob] Could not geocode: ${event.location}`);
-          continue;
-        }
+        if (!geo) continue;
 
         // Get weather forecast
         const weather = await fetchCurrentWeather(geo.lat, geo.lon);
@@ -43,10 +36,7 @@ export async function runCalendarAlertScanForUser(userId: string) {
         if (!daily || !daily.time) continue;
 
         const dayIndex = daily.time.indexOf(eventDate);
-        if (dayIndex === -1) {
-          console.log(`[CalendarAlertJob] No forecast for ${eventDate} (outside 7-day window)`);
-          continue;
-        }
+        if (dayIndex === -1) continue;
 
         const forecastDay = {
           temperature_2m_max: daily.temperature_2m_max[dayIndex],
@@ -78,7 +68,6 @@ export async function runCalendarAlertScanForUser(userId: string) {
             },
             { upsert: true, new: true }
           );
-          console.log(`[CalendarAlertJob] Alert created/updated for event: ${event.title}`);
         } else {
           // Remove any old alert if weather is now fine
           await CalendarAlert.findOneAndDelete({
@@ -88,7 +77,7 @@ export async function runCalendarAlertScanForUser(userId: string) {
           });
         }
       } catch (err: any) {
-        console.error(`[CalendarAlertJob] Failed for event ${event.title}:`, err.message);
+        console.error(`[CalendarAlertJob] Event scan failed:`, err.message);
       }
     }
 
@@ -112,27 +101,21 @@ export async function runCalendarAlertScanForUser(userId: string) {
       await user.save();
     }
 
-    console.error(`[CalendarAlertJob] Failed for user ${userId}:`, err.message);
+    console.error(`[CalendarAlertJob] Scan failed for user ${userId}:`, err.message);
   }
 }
 
 export async function runCalendarAlertScanForAllUsers() {
   const users = await User.find({ calendarConnected: true });
-  console.log(`[CalendarAlertJob] Scanning ${users.length} users with calendar connected`);
 
   for (const user of users) {
     await runCalendarAlertScanForUser(user._id.toString());
   }
-
-  console.log('[CalendarAlertJob] Done');
 }
 
 export function startCalendarAlertJob() {
   // Run daily at 6:00 AM UTC
   cron.schedule('0 6 * * *', async () => {
-    console.log('[CalendarAlertJob] Running daily calendar weather scan...');
     await runCalendarAlertScanForAllUsers();
   });
-
-  console.log('[CalendarAlertJob] Scheduled daily at 06:00 UTC');
 }

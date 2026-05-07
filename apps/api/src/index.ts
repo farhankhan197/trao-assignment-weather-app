@@ -39,8 +39,7 @@ app.use(async (_req, _res, next) => {
   try {
     await connectDB();
     next();
-  } catch (err: any) {
-    console.error('[DB Connect Error]', err.message);
+  } catch (err) {
     next(err);
   }
 });

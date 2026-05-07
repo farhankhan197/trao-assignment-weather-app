@@ -26,8 +26,7 @@ export const connectCalendar = async (req: Request, res: Response): Promise<void
 
     const url = generateAuthUrl(state);
     res.json({ url });
-  } catch (err) {
-    console.error('[Calendar Connect Error]', err);
+  } catch {
     res.status(500).json({ error: 'Failed to generate OAuth URL' });
   }
 };
@@ -75,13 +74,10 @@ export const calendarCallback = async (req: Request, res: Response): Promise<voi
     await user.save();
 
     // Run initial scan immediately
-    runCalendarAlertScanForUser(user._id.toString()).catch((err) => {
-      console.error('[Calendar Callback] Initial scan failed:', err);
-    });
+    runCalendarAlertScanForUser(user._id.toString()).catch(() => { /* ignore */ });
 
     res.redirect(`${CLIENT_URL}/dashboard?calendar=connected`);
-  } catch (err: any) {
-    console.error('[Calendar Callback Error]', err);
+  } catch {
     res.redirect(`${CLIENT_URL}/dashboard?calendar=error&message=OAuth failed`);
   }
 };

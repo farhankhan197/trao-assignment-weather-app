@@ -12,6 +12,7 @@ html {
   --bg-surface-hover: #f1f5f9;
   --bg-input: #ffffff;
   --bg-input-hover: #f8fafc;
+  --bg-glass: rgba(255, 255, 255, 0.75);
 
   --text-primary: #0f172a;
   --text-secondary: #334155;

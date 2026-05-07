@@ -14,10 +14,9 @@ export const connectDB = async (): Promise<typeof mongoose> => {
   try {
     const conn = await mongoose.connect(uri);
     cachedConnection = conn;
-    console.log('MongoDB connected');
     return conn;
   } catch (err) {
     console.error('MongoDB connection failed:', err);
-    throw err; // Don't process.exit in serverless
+    throw err;
   }
 };

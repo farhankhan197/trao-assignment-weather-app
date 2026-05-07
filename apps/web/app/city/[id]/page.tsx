@@ -59,16 +59,15 @@ export default function CityDetailPage() {
   const fetchData = useCallback(async () => {
     if (!id) return;
     try {
-      const [cityRes, weatherRes, historyRes] = await Promise.all([
+      const [cityRes, historyRes] = await Promise.all([
         api.get(`/api/cities/${id}`),
-        api.get('/api/weather/current', { params: { lat: 0, lon: 0 } }), // placeholder - we'll use city's coords
         api.get(`/api/cities/${id}/history`),
       ]);
 
       const cityData = cityRes.data.city;
       setCity(cityData);
 
-      // Fetch weather with correct coords
+      // Fetch weather with correct city coords
       const wRes = await api.get('/api/weather/current', {
         params: { lat: cityData.lat, lon: cityData.lon },
       });
