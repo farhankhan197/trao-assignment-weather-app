@@ -18,7 +18,7 @@ export function Navbar() {
   const { toggle: toggleChat } = useAIChat();
 
   return (
-    <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-sm sticky top-0 z-50">
+    <nav className="border-b border-[var(--border)] bg-[var(--bg-primary)]/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="font-display text-xl tracking-tight">
           Mausam
@@ -27,47 +27,47 @@ export function Navbar() {
         <div className="flex items-center gap-6 text-sm">
           {user ? (
             <>
-              <Link href="/dashboard" className="text-slate-400 hover:text-slate-200 transition-colors">
+              <Link href="/dashboard" className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
                 Dashboard
               </Link>
-              <Link href="/favorites" className="text-slate-400 hover:text-slate-200 transition-colors">
+              <Link href="/favorites" className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
                 Favorites
               </Link>
               <button
                 onClick={toggleChat}
-                className="text-slate-400 hover:text-slate-200 transition-colors"
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
               >
                 AI Assistant
               </button>
-              <Link href="/settings" className="text-slate-400 hover:text-slate-200 transition-colors">
+              <Link href="/settings" className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
                 Settings
               </Link>
-              <Link href="/alerts" className="relative flex items-center gap-1.5 text-slate-400 hover:text-slate-200 transition-colors">
+              <Link href="/alerts" className="relative flex items-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
                 <BellIcon />
                 <span>Alerts</span>
                 {unreadAlertCount > 0 && (
-                  <span className="absolute -top-1.5 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                  <span className="absolute -top-1.5 -right-2 bg-[var(--danger)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                     {unreadAlertCount > 9 ? '9+' : unreadAlertCount}
                   </span>
                 )}
               </Link>
-              <span className="text-slate-500">|</span>
-              <span className="text-slate-400">{user.name}</span>
+              <span className="text-[var(--text-muted)]">|</span>
+              <span className="text-[var(--text-muted)]">{user.name}</span>
               <button
                 onClick={logout}
-                className="text-slate-400 hover:text-red-400 transition-colors"
+                className="text-[var(--text-muted)] hover:text-[var(--danger)] transition-colors"
               >
                 Logout
               </button>
             </>
           ) : (
             <>
-              <Link href="/login" className="text-slate-400 hover:text-slate-200 transition-colors">
+              <Link href="/login" className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
                 Sign In
               </Link>
               <Link
                 href="/register"
-                className="bg-sky-500 hover:bg-sky-400 text-white px-4 py-2 rounded-lg transition-colors"
+                className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-4 py-2 rounded-lg transition-colors"
               >
                 Get Started
               </Link>

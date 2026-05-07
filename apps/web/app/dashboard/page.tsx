@@ -87,19 +87,19 @@ export default function DashboardPage() {
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-slate-400">Loading cities...</p>
+        <p className="text-[var(--text-muted)]">Loading cities...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-10">
-      <div className="mb-8 text-center">
-        <h1 className="font-display text-4xl mb-2">Dashboard</h1>
-        <p className="text-slate-400">Search and manage your cities</p>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="mb-6 text-center">
+        <h1 className="font-display text-3xl text-[var(--text-primary)] mb-1">Dashboard</h1>
+        <p className="text-sm text-[var(--text-muted)]">Search and manage your cities</p>
       </div>
 
-      <div className="mb-10">
+      <div className="mb-8">
         <CitySearch onAdd={handleAdd} />
       </div>
 
@@ -107,7 +107,7 @@ export default function DashboardPage() {
         <div className="text-center py-20">
           <p className="text-5xl mb-4">🌍</p>
           <h2 className="font-display text-xl mb-2">No cities yet</h2>
-          <p className="text-slate-400 text-sm max-w-md mx-auto">
+          <p className="text-[var(--text-muted)] text-sm max-w-md mx-auto">
             Search for a city above to add it to your dashboard. You'll see live weather and streaks for each city.
           </p>
         </div>

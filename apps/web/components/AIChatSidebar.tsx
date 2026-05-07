@@ -37,9 +37,9 @@ function SendIcon() {
 function LoadingDots() {
   return (
     <div className="flex items-center gap-1 py-2">
-      <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-      <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-      <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+      <span className="w-2 h-2 bg-[var(--text-muted)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+      <span className="w-2 h-2 bg-[var(--text-muted)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+      <span className="w-2 h-2 bg-[var(--text-muted)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
     </div>
   );
 }
@@ -84,19 +84,19 @@ export function AIChatSidebar() {
 
       {/* Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-[420px] max-w-full bg-slate-950 border-l border-slate-800 shadow-2xl z-[70] flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-full sm:w-[420px] max-w-full bg-[var(--bg-primary)] border-l border-[var(--border)] shadow-[var(--shadow-md)] z-[70] flex flex-col transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 h-14 border-b border-slate-800 shrink-0">
-          <div className="flex items-center gap-2 text-slate-100">
+        <div className="flex items-center justify-between px-4 h-14 border-b border-[var(--border)] shrink-0">
+          <div className="flex items-center gap-2 text-[var(--text-primary)]">
             <SparklesIcon />
             <span className="font-medium">AI Assistant</span>
           </div>
           <button
             onClick={close}
-            className="text-slate-400 hover:text-slate-200 transition-colors p-1"
+            className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors p-1"
             aria-label="Close chat"
           >
             <CloseIcon />
@@ -113,12 +113,12 @@ export function AIChatSidebar() {
               <div
                 className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                   msg.role === 'user'
-                    ? 'bg-sky-500 text-white rounded-br-md'
-                    : 'bg-slate-800 text-slate-200 rounded-bl-md'
+                    ? 'bg-[var(--accent)] text-white rounded-br-md'
+                    : 'bg-[var(--bg-surface-hover)] text-[var(--text-primary)] rounded-bl-md'
                 }`}
               >
                 {msg.role === 'assistant' ? (
-                  <div className="prose prose-sm prose-invert max-w-none">
+                  <div className="prose prose-sm max-w-none">
                     <ReactMarkdown>{msg.content}</ReactMarkdown>
                   </div>
                 ) : (
@@ -130,7 +130,7 @@ export function AIChatSidebar() {
 
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-slate-800 rounded-2xl rounded-bl-md px-4">
+              <div className="bg-[var(--bg-surface-hover)] rounded-2xl rounded-bl-md px-4">
                 <LoadingDots />
               </div>
             </div>
@@ -138,7 +138,7 @@ export function AIChatSidebar() {
         </div>
 
         {/* Input */}
-        <div className="border-t border-slate-800 px-4 py-3 shrink-0">
+        <div className="border-t border-[var(--border)] px-4 py-3 shrink-0">
           <form onSubmit={handleSubmit} className="flex items-end gap-2">
             <textarea
               value={input}
@@ -146,13 +146,13 @@ export function AIChatSidebar() {
               onKeyDown={handleKeyDown}
               placeholder="Ask about weather..."
               rows={1}
-              className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-sky-500 resize-none min-h-[42px] max-h-32"
+              className="flex-1 bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] resize-none min-h-[42px] max-h-32"
               disabled={isLoading}
             />
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="bg-sky-500 hover:bg-sky-400 disabled:opacity-40 disabled:hover:bg-sky-500 text-white p-2.5 rounded-xl transition-colors shrink-0"
+              className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-40 disabled:hover:bg-[var(--accent)] text-white p-2.5 rounded-xl transition-colors shrink-0"
               aria-label="Send message"
             >
               <SendIcon />

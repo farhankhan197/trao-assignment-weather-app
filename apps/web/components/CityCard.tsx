@@ -60,25 +60,25 @@ export function CityCard({ city, onToggleFavorite, onDelete }: Props) {
 
   if (loading) {
     return (
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 animate-pulse">
-        <div className="h-4 bg-slate-800 rounded w-24 mb-3" />
-        <div className="h-8 bg-slate-800 rounded w-16 mb-2" />
-        <div className="h-3 bg-slate-800 rounded w-32" />
+      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 animate-pulse">
+        <div className="h-4 bg-[var(--bg-surface-hover)] rounded w-24 mb-3" />
+        <div className="h-8 bg-[var(--bg-surface-hover)] rounded w-16 mb-2" />
+        <div className="h-3 bg-[var(--bg-surface-hover)] rounded w-32" />
       </div>
     );
   }
 
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative group">
-      <div className="flex items-start justify-between mb-3">
+    <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 relative group shadow-[var(--shadow-sm)]">
+      <div className="flex items-start justify-between mb-2">
         <div>
-          <h3 className="font-display text-lg text-slate-100">{city.name}</h3>
-          <p className="text-xs text-slate-500">{city.country}</p>
+          <h3 className="font-display text-base text-[var(--text-primary)]">{city.name}</h3>
+          <p className="text-xs text-[var(--text-muted)]">{city.country}</p>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={() => onToggleFavorite(city._id)}
-            className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-amber-400"
+            className="p-1.5 rounded-lg hover:bg-[var(--bg-surface-hover)] transition-colors text-[var(--text-muted)] hover:text-[var(--warning)]"
             aria-label={city.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill={city.isFavorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -87,7 +87,7 @@ export function CityCard({ city, onToggleFavorite, onDelete }: Props) {
           </button>
           <button
             onClick={() => onDelete(city._id)}
-            className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors text-slate-400 hover:text-red-400"
+            className="p-1.5 rounded-lg hover:bg-[var(--bg-surface-hover)] transition-colors text-[var(--text-muted)] hover:text-[var(--danger)]"
             aria-label="Delete city"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -98,24 +98,24 @@ export function CityCard({ city, onToggleFavorite, onDelete }: Props) {
       </div>
 
       {weather && (
-        <div className="flex items-center gap-3 mb-3">
-          <WeatherIcon condition={weather.condition} />
+        <div className="flex items-center gap-2.5 mb-2">
+          <WeatherIcon condition={weather.condition} className="text-xl" />
           <div>
-            <span className="text-3xl font-light text-slate-100">{Math.round(weather.temperature)}°</span>
-            <span className="text-sm text-slate-400 ml-2 capitalize">{weather.condition}</span>
+            <span className="text-2xl font-light text-[var(--text-primary)]">{Math.round(weather.temperature)}°</span>
+            <span className="text-xs text-[var(--text-muted)] ml-1.5 capitalize">{weather.condition}</span>
           </div>
         </div>
       )}
 
       {weather && (
-        <div className="flex items-center gap-3 text-xs text-slate-500">
+        <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
           <span>H {Math.round(weather.tempMax)}°</span>
           <span>L {Math.round(weather.tempMin)}°</span>
         </div>
       )}
 
       {streak && (
-        <div className="mt-3 text-xs text-amber-400/80 bg-amber-400/10 rounded-lg px-2.5 py-1.5 inline-block">
+        <div className="mt-2 text-xs text-[var(--warning)]/80 bg-[var(--warning-light)] rounded-lg px-2 py-1 inline-block">
           {streak}
         </div>
       )}
