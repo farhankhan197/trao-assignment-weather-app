@@ -6,7 +6,7 @@ const MAX_ITERATIONS = 5;
 
 export const runWeatherAgent = async (userId: string, userMessage: string): Promise<string> => {
   const llm = new ChatGroq({
-    model: 'llama-3.1-8b-instant',
+    model: 'openai/gpt-oss-120b',
     apiKey: process.env.GROQ_API_KEY,
     temperature: 0.3,
   });
