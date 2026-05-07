@@ -16,8 +16,18 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 
 // ─── Middleware ────────────────────────────────────────────────────────────────
+const ALLOWED_ORIGINS = [
+  process.env.CLIENT_URL || 'http://localhost:3000',
+  'https://mausam.farhankhan.site',
+];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS blocked: ${origin}`));
+  },
   credentials: true,
 }));
 app.use(express.json());
