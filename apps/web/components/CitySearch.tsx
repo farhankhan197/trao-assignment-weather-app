@@ -60,7 +60,7 @@ export function CitySearch({ onAdd }: Props) {
           onChange={(e) => handleChange(e.target.value)}
           onFocus={() => { if (results.length) setOpen(true); }}
           placeholder="Search for a city..."
-          className="w-full bg-[var(--bg-input)] border border-[var(--border)] rounded-xl px-4 py-3 pl-11 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors"
+          className="w-full bg-white/80 backdrop-blur-sm border border-white/60 rounded-xl px-4 py-3 pl-11 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] focus:bg-white transition-all shadow-sm"
         />
         <svg className="absolute left-3.5 top-3.5 text-[var(--text-muted)]" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>

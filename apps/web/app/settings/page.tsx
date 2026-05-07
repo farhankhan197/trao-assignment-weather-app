@@ -79,9 +79,10 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="mb-6">
-        <h1 className="font-display text-3xl text-[var(--text-primary)] mb-1">Settings</h1>
+    <div className="max-w-4xl mx-auto px-4 py-8 relative">
+      <div className="absolute inset-x-0 top-0 h-[20%] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.03) 0%, transparent 100%)' }} />
+      <div className="relative mb-6">
+        <h1 className="font-display text-3xl text-[var(--text-primary)] mb-1" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>Settings</h1>
         <p className="text-sm text-[var(--text-muted)]">Manage your account and integrations</p>
       </div>
 
@@ -103,7 +104,7 @@ export default function SettingsPage() {
             {!calendarConnected ? (
               <button
                 onClick={handleConnectCalendar}
-                className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                className="bg-gradient-to-r from-[var(--accent)] to-sky-400 hover:from-[var(--accent-hover)] hover:to-sky-300 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
               >
                 Connect Google Calendar
               </button>

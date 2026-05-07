@@ -151,13 +151,14 @@ export default function FavoritesPage() {
   const selected = favorites.find((c) => c._id === selectedId) || favorites[0];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 lg:py-8">
-      <div className="mb-4">
-        <h1 className="font-display text-2xl lg:text-3xl text-[var(--text-primary)] mb-1">Favorites</h1>
+    <div className="max-w-7xl mx-auto px-4 py-6 lg:py-8 relative">
+      <div className="absolute inset-x-0 top-0 h-[20%] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.03) 0%, transparent 100%)' }} />
+      <div className="relative mb-4">
+        <h1 className="font-display text-2xl lg:text-3xl text-[var(--text-primary)] mb-1" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>Favorites</h1>
         <p className="text-sm text-[var(--text-muted)]">Detailed weather for your favorite cities</p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="relative flex flex-col lg:flex-row gap-6">
         {/* Sidebar - all favorites */}
         <div className="lg:w-64 shrink-0">
           <div className="lg:bg-[var(--bg-surface)] lg:border lg:border-[var(--border)] lg:rounded-2xl lg:p-4 lg:shadow-[var(--shadow-sm)]">
@@ -172,20 +173,20 @@ export default function FavoritesPage() {
                 visible: { transition: { staggerChildren: 0.04 } },
               }}
               className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-hide"
-            >
+              >
               {favorites.map((city) => (
                 <motion.div
-                  key={city._id}
-                  variants={{
-                    hidden: { opacity: 0, x: -12 },
-                    visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 350, damping: 25 } },
+                key={city._id}
+                variants={{
+                  hidden: { opacity: 0, x: -12 },
+                  visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 350, damping: 25 } },
                   }}
-                >
+                  >
                   <SidebarItem
                     city={city}
                     isSelected={city._id === selectedId}
                     onClick={() => setSelectedId(city._id)}
-                  />
+                    />
                 </motion.div>
               ))}
             </motion.div>
@@ -216,7 +217,7 @@ export default function FavoritesPage() {
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
                 className="space-y-6"
-              >
+                >
                 {/* Current weather header */}
                 <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl shadow-[var(--shadow-sm)] relative overflow-hidden">
                   {current && (
@@ -304,8 +305,8 @@ export default function FavoritesPage() {
                   <div className="flex gap-3 mt-6 overflow-x-auto pb-2 scrollbar-hide">
                     {history.map((h, i) => (
                       <div
-                        key={i}
-                        className="shrink-0 flex flex-col items-center gap-1.5 bg-[var(--bg-surface-hover)]/50 rounded-xl px-3 py-3 min-w-[72px]"
+                      key={i}
+                      className="shrink-0 flex flex-col items-center gap-1.5 bg-[var(--bg-surface-hover)]/50 rounded-xl px-3 py-3 min-w-[72px]"
                       >
                         <span className="text-xs text-[var(--text-muted)]">{h.date}</span>
                         <WeatherIcon condition={h.condition} className="text-xl" />
@@ -323,7 +324,7 @@ export default function FavoritesPage() {
       </div>
     </div>
   );
-}
+};
 
 function SidebarItem({ city, isSelected, onClick }: { city: City; isSelected: boolean; onClick: () => void }) {
   const [weather, setWeather] = useState<{ temperature: number; condition: string } | null>(null);

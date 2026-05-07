@@ -72,9 +72,19 @@ export function CityCard({ city, onToggleFavorite, onDelete }: Props) {
     );
   }
 
+  const glowColor = weather
+    ? {
+        sunny: '0 8px 24px rgba(251,191,36,0.12)',
+        cloudy: '0 8px 24px rgba(148,163,184,0.1)',
+        rainy: '0 8px 24px rgba(59,130,246,0.12)',
+        snowy: '0 8px 24px rgba(186,230,253,0.12)',
+        stormy: '0 8px 24px rgba(71,85,105,0.12)',
+      }[weather.condition] || '0 8px 24px rgba(37,99,235,0.08)'
+    : '0 8px 24px rgba(37,99,235,0.08)';
+
   return (
     <motion.div
-      whileHover={{ scale: 1.02, y: -2 }}
+      whileHover={{ scale: 1.02, y: -2, boxShadow: glowColor }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl relative group shadow-[var(--shadow-sm)] cursor-default h-full flex flex-col justify-between overflow-hidden"
     >

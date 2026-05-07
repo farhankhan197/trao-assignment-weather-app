@@ -78,10 +78,11 @@ export default function AlertsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-6">
+    <div className="max-w-4xl mx-auto px-4 py-8 relative">
+      <div className="absolute inset-x-0 top-0 h-[20%] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.03) 0%, transparent 100%)' }} />
+      <div className="relative flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-display text-3xl text-[var(--text-primary)] mb-1">Weather Alerts</h1>
+          <h1 className="font-display text-3xl text-[var(--text-primary)] mb-1" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>Weather Alerts</h1>
           <p className="text-sm text-[var(--text-muted)]">Calendar events with unusual weather forecasts</p>
         </div>
       </div>
@@ -95,7 +96,7 @@ export default function AlertsPage() {
           </p>
           <Link
             href="/settings"
-            className="inline-block bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            className="inline-block bg-gradient-to-r from-[var(--accent)] to-sky-400 hover:from-[var(--accent-hover)] hover:to-sky-300 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
           >
             Go to Settings
           </Link>
@@ -111,7 +112,7 @@ export default function AlertsPage() {
                 onClick={() => setFilter(f)}
                 className={`text-sm px-4 py-2 rounded-lg transition-colors ${
                   filter === f
-                    ? 'bg-[var(--accent)] text-white'
+                    ? 'bg-gradient-to-r from-[var(--accent)] to-sky-400 text-white shadow-sm'
                     : 'bg-[var(--bg-surface-hover)] text-[var(--text-muted)] hover:bg-[var(--bg-input-hover)]'
                 }`}
               >

@@ -34,8 +34,9 @@ export default function RegisterPage() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-      className="min-h-screen flex items-center justify-center px-4"
+      className="min-h-screen flex items-center justify-center px-4 relative"
     >
+      <div className="absolute inset-x-0 top-0 h-[30%] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.03) 0%, transparent 100%)' }} />
       <div className="w-full max-w-md">
         <h1 className="font-display text-3xl text-center text-[var(--text-primary)] mb-1">Create your account</h1>
         <p className="text-sm text-[var(--text-muted)] text-center mb-6">Join Mausam and track weather across the world</p>
@@ -91,7 +92,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 rounded-lg transition-colors"
+            className="w-full bg-gradient-to-r from-[var(--accent)] to-sky-400 hover:from-[var(--accent-hover)] hover:to-sky-300 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 rounded-lg transition-all shadow-md hover:shadow-lg"
           >
             {loading ? 'Creating account...' : 'Create Account'}
           </button>

@@ -171,7 +171,7 @@ export function AIChatSidebar() {
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-40 disabled:hover:bg-[var(--accent)] text-white p-2.5 rounded-xl transition-colors shrink-0"
+              className="bg-gradient-to-r from-[var(--accent)] to-sky-400 hover:from-[var(--accent-hover)] hover:to-sky-300 disabled:opacity-40 text-white p-2.5 rounded-xl transition-all shadow-sm hover:shadow-md shrink-0"
               aria-label="Send message"
             >
               <SendIcon />
