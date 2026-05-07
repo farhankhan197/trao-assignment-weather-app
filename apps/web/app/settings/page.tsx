@@ -86,8 +86,8 @@ export default function SettingsPage() {
         <p className="text-sm text-[var(--text-muted)]">Manage your account and integrations</p>
       </div>
 
-      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-8 shadow-[var(--shadow-sm)]">
-        <div className="flex items-start justify-between">
+      <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-[var(--shadow-sm)]">
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6">
           <div>
             <h2 className="font-display text-xl mb-2">Google Calendar</h2>
             <p className="text-[var(--text-muted)] text-sm max-w-md">
@@ -100,27 +100,27 @@ export default function SettingsPage() {
               </p>
             )}
           </div>
-          <div>
+          <div className="w-full sm:w-auto">
             {!calendarConnected ? (
               <button
                 onClick={handleConnectCalendar}
-                className="bg-gradient-to-r from-[var(--accent)] to-sky-400 hover:from-[var(--accent-hover)] hover:to-sky-300 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
+                className="w-full sm:w-auto bg-gradient-to-r from-[var(--accent)] to-sky-400 hover:from-[var(--accent-hover)] hover:to-sky-300 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
               >
                 Connect Google Calendar
               </button>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   onClick={handleManualCheck}
                   disabled={checking}
-                  className="text-sm bg-[var(--bg-surface-hover)] hover:bg-[var(--bg-input-hover)] text-[var(--text-secondary)] px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                  className="text-sm bg-[var(--bg-surface-hover)] hover:bg-[var(--bg-input-hover)] text-[var(--text-secondary)] px-4 py-2 rounded-lg transition-colors disabled:opacity-50 flex-1 sm:flex-none"
                 >
                   {checking ? 'Checking...' : 'Refresh Alerts'}
                 </button>
                 <button
                   onClick={handleDisconnectCalendar}
                   disabled={disconnecting}
-                  className="text-sm bg-[var(--danger-light)] hover:bg-[var(--danger-muted)] text-[var(--danger)] px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                  className="text-sm bg-[var(--danger-light)] hover:bg-[var(--danger-muted)] text-[var(--danger)] px-4 py-2 rounded-lg transition-colors disabled:opacity-50 flex-1 sm:flex-none"
                 >
                   {disconnecting ? 'Disconnecting...' : 'Disconnect'}
                 </button>
