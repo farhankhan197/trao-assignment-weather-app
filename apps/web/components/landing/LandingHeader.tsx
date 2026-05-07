@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { Logo } from '@/components/Logo';
 
 export default function LandingHeader() {
   const { user } = useAuth();
@@ -9,8 +10,8 @@ export default function LandingHeader() {
   return (
     <header className="absolute top-0 left-0 right-0 z-50 px-6 py-5">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
-        <Link href="/" className="font-display text-xl text-white tracking-tight">
-          Mausam
+        <Link href="/">
+          <Logo variant="light" />
         </Link>
 
         <div className="flex items-center gap-4">

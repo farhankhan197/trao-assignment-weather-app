@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import { useAIChat } from '@/context/AIChatContext';
+import { Logo } from '@/components/Logo';
 
 function BellIcon() {
   return (
@@ -122,8 +123,8 @@ export function Navbar() {
 
       <div className="relative max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="font-display text-xl tracking-tight text-[var(--text-primary)]">
-          Mausam
+        <Link href="/">
+          <Logo variant="dark" />
         </Link>
 
         {/* Desktop nav */}

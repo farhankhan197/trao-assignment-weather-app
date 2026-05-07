@@ -10,6 +10,9 @@ const display = DM_Serif_Display({ subsets: ['latin'], weight: '400', variable: 
 const body = DM_Sans({ subsets: ['latin'], variable: '--font-body' });
 
 export const metadata: Metadata = {
+  icons: {
+    icon: '/app-logo.ico',
+  },
   title: 'Mausam',
   description: 'Track weather across multiple cities',
 };
