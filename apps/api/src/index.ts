@@ -14,6 +14,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+const isServerless = process.env.VERCEL === '1';
 
 // ─── Middleware ────────────────────────────────────────────────────────────────
 const ALLOWED_ORIGINS = [
@@ -33,6 +34,17 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+// ─── Lazy DB connection for serverless ─────────────────────────────────────────
+app.use(async (_req, _res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err: any) {
+    console.error('[DB Connect Error]', err.message);
+    next(err);
+  }
+});
+
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/auth', authRoutes);
 app.use('/api/cities', cityRoutes);
@@ -41,7 +53,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/', calendarRoutes);
 
 // ─── Health check ─────────────────────────────────────────────────────────────
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+app.get('/health', (_req, res) => res.json({ status: 'ok', env: process.env.NODE_ENV || 'unknown' }));
 
 // ─── Global error handler ─────────────────────────────────────────────────────
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
@@ -49,10 +61,12 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// ─── Start ────────────────────────────────────────────────────────────────────
-connectDB().then(() => {
-  startCalendarAlertJob();
-  app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
-});
+// ─── Start (local only) ────────────────────────────────────────────────────────
+if (!isServerless) {
+  connectDB().then(() => {
+    startCalendarAlertJob();
+    app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
+  });
+}
 
 export default app;
