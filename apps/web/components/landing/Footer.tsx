@@ -10,9 +10,9 @@ export default function Footer() {
 
       {/* Links */}
       <div className="flex items-center justify-center gap-4 text-xs text-[var(--text-muted)] font-light flex-wrap mb-4">
-        <Link href="/readme" className="hover:text-[var(--text-primary)] transition-colors">
+        <a href="https://github.com/farhankhan197/trao-assignment-weather-app/blob/main/README.md" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--text-primary)] transition-colors">
           Read Me
-        </Link>
+        </a>
         <span className="text-[var(--border)]">·</span>
         <Link href="/privacy-policy" className="hover:text-[var(--text-primary)] transition-colors">
           Privacy Policy
