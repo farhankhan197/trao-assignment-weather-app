@@ -5,7 +5,7 @@ export default function Footer() {
     <footer className="bg-[var(--bg-primary)] py-16 px-6 text-center">
       {/* Thank You Message — Prominent */}
       <p className="text-base md:text-lg text-[var(--text-secondary)] font-light tracking-wide mb-6">
-        A huge thank you to <span className="font-medium text-[var(--text-primary)]">TRAO</span> for their time
+        thank you to <span className="font-medium text-[var(--text-primary)]">TRAO</span> for your time
       </p>
 
       {/* Links */}
@@ -23,15 +23,15 @@ export default function Footer() {
         </Link>
         <span className="text-[var(--border)]">·</span>
         <Link href="https://www.youtube.com/watch?v=placeholder" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--text-primary)] transition-colors">
-          YouTube
+          Walkthrough Video
         </Link>
       </div>
 
       {/* Brand Line */}
       <p className="text-xs text-[var(--text-muted)] font-light tracking-wide">
-        Made with ☁️ in India &nbsp;·&nbsp;{" "}
-        <span className="text-[var(--accent)]">Mausam Weather</span>
-        &nbsp;·&nbsp; Your sky, always
+        Made with ☁️ by Farhan Khan &nbsp;·&nbsp;{" "}
+    
+       
       </p>
     </footer>
   );

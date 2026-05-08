@@ -40,6 +40,7 @@ These decisions helped me spend my time actually building the product instead of
 | **Monorepo** | Turborepo + pnpm | Shared types, coordinated builds, caching, workspace-aware installs |
 | **API Dev Runtime** | Bun | `--hot` reload is faster than `ts-node`/`nodemon` for local API development |
 | **Deployment** | Vercel (both frontend + backend) | Zero-config Next.js; serverless Express API with `export default app` |
+| **Frontend Cache** | Axios request/response interceptors | 5-minute in-memory TTL cache for GET requests |
 
 ---
 
@@ -318,11 +319,19 @@ This demonstrates OAuth integration, background job design with `node-cron`, and
 
 **Trade-off**: Two external dependencies instead of one. If either API goes down, the app breaks in different ways (can't search cities vs. can't fetch weather). Also, Open-Meteo doesn't have a city search/geocoding endpoint, so I'm locked into OWM for that one feature regardless.
 
+### 10. Frontend In-Memory Cache Over No Cache
+
+**Decision**: I added a simple in-memory cache to the axios client (`lib/api.ts`) that caches GET responses for 5 minutes.
+
+**Reason**: Without caching, switching between dashboard, favorites, and city detail pages causes redundant API calls for the same weather data. The cache dramatically reduces server load and makes navigation feel snappier — especially on mobile connections.
+
+**Trade-off**: It's an in-memory cache (not localStorage or IndexedDB), so it clears on page refresh. It also means data can be stale for up to 5 minutes. For write operations (add city, toggle favorite), the cache is bypassed, but GET requests still show old data briefly. A more robust solution would be TanStack Query with proper invalidation.
+
 ---
 
 ## Known Limitations
 
-1. **No Redis caching**: Live historical data is fetched on every city detail view. With many users, this could hit Open-Meteo rate limits.
+1. **No Redis caching on backend**: Live historical data is fetched on every city detail view. With many users, this could hit Open-Meteo rate limits. The frontend does have a 5-minute in-memory axios cache to reduce redundant API calls.
 2. **No rate limiting on backend**: The Express server is open to abuse. I should add `express-rate-limit`.
 3. **AI agent tool errors are silent to the user**: If a tool fails (e.g., city not found), the agent retries but does not always surface the error clearly in the chat.
 4. **No offline support**: All weather data requires an internet connection.
