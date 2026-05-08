@@ -249,15 +249,7 @@ This demonstrates OAuth integration, background job design with `node-cron`, and
 
 ## Key Design Decisions & Trade-offs
 
-### 1. Light Theme Over Dark
-
-**Decision**: I switched from a dark `slate-950` theme to a light `#f8fafc` theme.
-
-**Reason**: Weather apps feel more natural in light — it evokes daylight, open skies, and clarity. Dark themes feel more suited to developer tools or entertainment.
-
-**Trade-off**: Light themes can look "boring" if not carefully designed. I added glassmorphism, subtle gradients, and weather-themed particle effects (rain, snow, sun glow) to maintain visual interest.
-
-### 2. Live Historical Data Over DB Snapshots
+### 1. Live Historical Data Over DB Snapshots
 
 **Decision**: I removed the `WeatherSnapshot` model and cron job entirely.
 
@@ -265,29 +257,7 @@ This demonstrates OAuth integration, background job design with `node-cron`, and
 
 **Trade-off**: One extra API call per city detail view. In production, Redis caching (TTL 1 hour) would mitigate this.
 
-### 3. AI Sidebar Over Dedicated Page
-
-**Decision**: I replaced the `/ai-insights` page route with a slide-in chat sidebar.
-
-**Reason**: AI should be contextually available, not buried in a separate page. Users can ask "How's London?" while looking at their dashboard.
-
-**Trade-off**: The sidebar has less space than a full page, so conversations are naturally more concise.
-
-### 4. City Detail Page (`/city/[id]`)
-
-**Decision**: I kept a dedicated city detail page in addition to the favorites sidebar.
-
-**Reason**: A shareable `/city/[id]` link is useful, and the detail page can show richer data (7-day forecast grid + past week table) without cluttering the dashboard.
-
-**Trade-off**: Users have two ways to view city details, which could feel redundant. I mitigated this by making the dashboard cards link to the detail page for deeper exploration.
-
-### 5. CSS Variables Over Tailwind darkMode
-
-**Decision**: I used custom CSS properties (`--bg-primary`, `--accent`, etc.) instead of Tailwind's `darkMode: 'media'`.
-
-**Reason**: Light theme only — no need for dual-theme complexity. CSS variables allow runtime theming if needed later.
-
-### 6. Turborepo for a 2-App Project
+### 2. Turborepo for a 2-App Project
 
 **Decision**: I used Turborepo even though this is just a frontend + backend monorepo.
 
@@ -295,7 +265,7 @@ This demonstrates OAuth integration, background job design with `node-cron`, and
 
 **Trade-off**: For only two apps, Turborepo is arguably overkill — `pnpm` workspaces alone would handle package isolation. The `turbo.json` and `packages/*` scaffolding adds files that wouldn't exist in a simpler setup.
 
-### 7. Bun for API Development
+### 3. Bun for API Development
 
 **Decision**: I used Bun (`bun --hot src/index.ts`) for the local API dev server instead of `ts-node` or `nodemon`.
 
@@ -303,7 +273,7 @@ This demonstrates OAuth integration, background job design with `node-cron`, and
 
 **Trade-off**: Bun is newer than Node and occasionally has edge cases with native modules. For deployment, I still build with `tsc` and the server runs on standard Node.js (via `node dist/index.js` or Vercel's runtime), so Bun is strictly a local dev convenience, not a production dependency.
 
-### 8. Serverless Vercel for the Backend
+### 4. Serverless Vercel for the Backend
 
 **Decision**: I deployed the Express API to Vercel serverless functions (`export default app`) instead of a long-running VPS or Railway.
 
@@ -311,7 +281,7 @@ This demonstrates OAuth integration, background job design with `node-cron`, and
 
 **Trade-off**: Serverless functions have cold starts and ephemeral state. The `node-cron` calendar alert job (`startCalendarAlertJob()`) only runs in local/non-serverless mode — on Vercel production, background cron jobs don't persist. I would need Vercel's separate Cron Jobs feature (or move to Railway/Render) for the daily 6 AM scan to actually execute reliably in production.
 
-### 9. Open-Meteo + OpenWeatherMap Instead of Just OWM
+### 5. Open-Meteo + OpenWeatherMap Instead of Just OWM
 
 **Decision**: I use OpenWeatherMap only for geocoding (city search), and Open-Meteo for all actual weather data (current, forecast, historical).
 
@@ -319,7 +289,7 @@ This demonstrates OAuth integration, background job design with `node-cron`, and
 
 **Trade-off**: Two external dependencies instead of one. If either API goes down, the app breaks in different ways (can't search cities vs. can't fetch weather). Also, Open-Meteo doesn't have a city search/geocoding endpoint, so I'm locked into OWM for that one feature regardless.
 
-### 10. Frontend In-Memory Cache Over No Cache
+### 6. Frontend In-Memory Cache Over No Cache
 
 **Decision**: I added a simple in-memory cache to the axios client (`lib/api.ts`) that caches GET responses for 5 minutes.
 
