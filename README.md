@@ -271,6 +271,20 @@ Streaks appear as colored badges on city cards and in the favorites detail view:
 - 🌧️ "Rainy for 8 days"
 - ❄️ "Snow for 3 days"
 
+### Possible Streaks
+
+Streaks count **backwards from today**. The same condition must hold for **at least 2 consecutive days** to trigger a badge.
+
+| Condition | Label Format | Example |
+|-----------|-------------|---------|
+| **sunny** | `{n}-day sunshine streak` | "5-day sunshine streak" |
+| **cloudy** | `Overcast {n} days running` | "Overcast 4 days running" |
+| **rainy** | `Rainy for {n} days` | "Rainy for 8 days" |
+| **snowy** | `Snow for {n} days` | "Snow for 3 days" |
+| **stormy** | `Stormy {n}-day stretch` | "Stormy 2-day stretch" |
+
+When conditions have been mixed or today's weather is only a single-day occurrence, no streak badge appears.
+
 ---
 
 ## Bonus Feature: Calendar Weather Alerts
