@@ -342,6 +342,38 @@ This demonstrates OAuth integration, background job design with `node-cron`, and
 
 **Reason**: Light theme only — no need for dual-theme complexity. CSS variables allow runtime theming if needed later.
 
+### 6. Turborepo for a 2-App Project
+
+**Decision**: I used Turborepo even though this is just a frontend + backend monorepo.
+
+**Reason**: `turbo run dev` starts both apps with one command. The build pipeline (`turbo.json`) caches `.next/**` and `dist/**` outputs, so subsequent builds skip unchanged packages. I also get shared `typescript-config` and `eslint-config` packages for free, which keeps both apps on the same TypeScript strictness rules and avoids version drift.
+
+**Trade-off**: For only two apps, Turborepo is arguably overkill — `pnpm` workspaces alone would handle package isolation. The `turbo.json` and `packages/*` scaffolding adds files that wouldn't exist in a simpler setup.
+
+### 7. Bun for API Development
+
+**Decision**: I used Bun (`bun --hot src/index.ts`) for the local API dev server instead of `ts-node` or `nodemon`.
+
+**Reason**: Bun's `--hot` reload is genuinely faster than `nodemon` + `ts-node` for this scale. File changes restart the server almost instantly, which matters when you're iterating on AI agent prompts and weather data parsing. It's also a single binary install.
+
+**Trade-off**: Bun is newer than Node and occasionally has edge cases with native modules. For deployment, I still build with `tsc` and the server runs on standard Node.js (via `node dist/index.js` or Vercel's runtime), so Bun is strictly a local dev convenience, not a production dependency.
+
+### 8. Serverless Vercel for the Backend
+
+**Decision**: I deployed the Express API to Vercel serverless functions (`export default app`) instead of a long-running VPS or Railway.
+
+**Reason**: Zero-config deployment from the same platform as the frontend — no CORS issues, no domain management, no server patching. The `isServerless` flag skips `app.listen()` locally so the same code runs on both local dev and serverless. For an assessment project, it's one less infrastructure concern.
+
+**Trade-off**: Serverless functions have cold starts and ephemeral state. The `node-cron` calendar alert job (`startCalendarAlertJob()`) only runs in local/non-serverless mode — on Vercel production, background cron jobs don't persist. I would need Vercel's separate Cron Jobs feature (or move to Railway/Render) for the daily 6 AM scan to actually execute reliably in production.
+
+### 9. Open-Meteo + OpenWeatherMap Instead of Just OWM
+
+**Decision**: I use OpenWeatherMap only for geocoding (city search), and Open-Meteo for all actual weather data (current, forecast, historical).
+
+**Reason**: Open-Meteo is completely free, requires no API key, and has generous rate limits. OWM's free tier caps at 60 calls/minute, requires an API key, and historical data access is more limited. Open-Meteo is purpose-built for weather forecasting and has a much richer parameter set (WMO codes, apparent temperature, etc.).
+
+**Trade-off**: Two external dependencies instead of one. If either API goes down, the app breaks in different ways (can't search cities vs. can't fetch weather). Also, Open-Meteo doesn't have a city search/geocoding endpoint, so I'm locked into OWM for that one feature regardless.
+
 ---
 
 ## Known Limitations
