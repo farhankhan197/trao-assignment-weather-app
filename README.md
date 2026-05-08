@@ -175,7 +175,7 @@ I built the agent with **LangChain.js + Groq** using the `openai/gpt-oss-120b` m
 
 ### Conversation Flow
 
-<img width="1732" height="908" alt="ai assistabnt conversation flow" src="https://github.com/user-attachments/assets/53e85500-03d1-4a78-ab47-c0fde279cd19" />
+<img width="1732" height="908" alt="ai assistant conversation flow" src="https://github.com/user-attachments/assets/53e85500-03d1-4a78-ab47-c0fde279cd19" />
 
 
 ### UI Integration
