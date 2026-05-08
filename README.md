@@ -104,60 +104,9 @@ bun --hot src/index.ts
 
 ---
 
-## Architecture
+## System and Monorepo Architecture
+<img width="1370" height="1148" alt="system and monorepo architecture" src="https://github.com/user-attachments/assets/733a9f69-7c46-4984-9c95-f53323aea58b" />
 
-```
-Browser (Next.js App Router)
-       │
-       │ fetch/axios (withCredentials)
-       ▼
-Express API (apps/api)  ◄──── JWT middleware
-       │                           │
-       │                    MongoDB Atlas
-       │                    (Users, Cities, CalendarAlerts)
-       │
-       ├── Open-Meteo API (weather data, historical)
-       ├── OWM Geocoding API (city search)
-       ├── Google Calendar API (OAuth + event fetching)
-       └── LangChain Agent (Groq openai/gpt-oss-120b)
-```
-
-### Monorepo Structure
-
-```
-mausam/
-├── apps/
-│   ├── api/          # Express backend
-│   │   ├── src/
-│   │   │   ├── controllers/    # Auth, City, Weather, AI, Calendar
-│   │   │   ├── middleware/     # JWT authenticate
-│   │   │   ├── models/         # User, City, CalendarAlert
-│   │   │   ├── routes/         # API routes
-│   │   │   ├── agents/         # LangChain tools + weatherAgent
-│   │   │   └── utils/          # weather.service, streak, calendarAlertJob, alertEngine
-│   │   └── .env.example
-│   └── web/          # Next.js frontend
-│       ├── app/                # Pages
-│       │   ├── page.tsx        # Landing page
-│       │   ├── login/page.tsx
-│       │   ├── register/page.tsx
-│       │   ├── dashboard/page.tsx
-│       │   ├── city/[id]/page.tsx   # Individual city detail
-│       │   ├── favorites/page.tsx
-│       │   ├── alerts/page.tsx
-│       │   ├── settings/page.tsx
-│       │   ├── readme/page.tsx
-│       │   ├── privacy-policy/page.tsx
-│       │   └── terms-of-service/page.tsx
-│       ├── components/         # Reusable UI (Navbar, CityCard, CitySearch, AIChatSidebar)
-│       ├── components/landing/ # Landing page sections
-│       ├── components/weather/ # Weather atmosphere effects (Rain, Snow, Storm, SunGlow)
-│       ├── context/            # SessionContext, AIChatContext
-│       ├── hooks/              # useRequireAuth
-│       └── lib/                # api.ts (axios client), weather.ts
-├── turbo.json        # Pipeline config
-└── package.json      # Workspace root (pnpm)
-```
 
 ---
 
@@ -226,13 +175,8 @@ I built the agent with **LangChain.js + Groq** using the `openai/gpt-oss-120b` m
 
 ### Conversation Flow
 
-```
-User: "Which of my cities is best for a run today?"
-  → Agent calls get_user_cities
-  → Agent calls get_weather_current for each city
-  → Agent synthesizes: "London is 12°C and cloudy — ideal for running.
-     Paris is 28°C and sunny — bring water."
-```
+<img width="1732" height="908" alt="ai assistabnt conversation flow" src="https://github.com/user-attachments/assets/53e85500-03d1-4a78-ab47-c0fde279cd19" />
+
 
 ### UI Integration
 
@@ -443,11 +387,12 @@ I made this test user with auto fill credentials button to help test the apps fu
 
 ## Walkthrough Video
 
-[Watch the 3-minute walkthrough](https://loom.com/share/your-link-here)
+[Watch the 3-minute walkthrough]()
 
 Covers: app flow, authentication, multi-city dashboard, city detail page, favorites with charts, AI agent, calendar alerts, weather streaks, and architecture overview.
 
 ---
 
 Built by Farhan
+
 Thank you for your time and consideration.
