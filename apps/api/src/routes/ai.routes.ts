@@ -23,28 +23,28 @@ router.post('/chat', authenticate, async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/ai/briefing
-// generates briefing for favorite cities
-router.get('/briefing', authenticate, async (req: Request, res: Response) => {
+// GET /api/ai/insights
+// auto-generates personalized weather insights for favorite cities
+router.get('/insights', authenticate, async (req: Request, res: Response) => {
   try {
     const favorites = await City.find({ userId: req.user!.id, isFavorite: true });
 
     if (!favorites.length) {
-      res.json({ briefing: 'No favorite cities set. Mark some cities as favorites to get a personalized briefing.' });
+      res.json({ insights: 'No favorite cities set. Mark some cities as favorites to get personalized insights.' });
       return;
     }
 
     const cityList = favorites.map(c => c.name).join(', ');
-    const prompt = `Generate a concise, friendly weather briefing for my favorite cities: ${cityList}. 
-    For each city, get the current weather, then provide actionable insights: 
-    what to wear, whether to carry an umbrella, best time to go outside. 
+    const prompt = `Generate a concise, friendly weather overview for my favorite cities: ${cityList}.
+    For each city, get the current weather, then provide actionable insights:
+    what to wear, whether to carry an umbrella, best time to go outside.
     Keep the total response under 300 words. Be warm and conversational.`;
 
-    const briefing = await runWeatherAgent(req.user!.id, prompt);
-    res.json({ briefing });
+    const insights = await runWeatherAgent(req.user!.id, prompt);
+    res.json({ insights });
   } catch (err: any) {
     console.error('[AI Agent Error]', err.message);
-    res.status(500).json({ error: 'Failed to generate briefing' });
+    res.status(500).json({ error: 'Failed to generate insights' });
   }
 });
 

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from '@/context/SessionContext';
 import { useAIChat } from '@/context/AIChatContext';
 import { Logo } from '@/components/Logo';
 
@@ -81,7 +81,7 @@ function MobileLink({ href, label, pathname, badge }: { href: string; label: str
 
 export function Navbar() {
   const pathname = usePathname();
-  const { user, logout, unreadAlertCount } = useAuth();
+  const { user, logout, unreadAlertCount } = useSession();
   const { toggle: toggleChat } = useAIChat();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);

@@ -9,7 +9,7 @@ export interface User {
   email: string;
 }
 
-interface AuthContextType {
+interface SessionContextType {
   user: User | null;
   loading: boolean;
   unreadAlertCount: number;
@@ -19,9 +19,9 @@ interface AuthContextType {
   logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const SessionContext = createContext<SessionContextType | null>(null);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [unreadAlertCount, setUnreadAlertCount] = useState(0);
@@ -71,14 +71,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 
   return (
-    <AuthContext.Provider value={value}>
+    <SessionContext.Provider value={value}>
       {children}
-    </AuthContext.Provider>
+    </SessionContext.Provider>
   );
 };
 
-export const useAuth = () => {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
+export const useSession = () => {
+  const ctx = useContext(SessionContext);
+  if (!ctx) throw new Error('useSession must be used inside SessionProvider');
   return ctx;
 };

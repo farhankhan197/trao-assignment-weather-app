@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { DM_Serif_Display, DM_Sans } from 'next/font/google';
 import './globals.css';
-import { AuthProvider } from '@/context/AuthContext';
+import { SessionProvider } from '@/context/SessionContext';
 import { AIChatProvider } from '@/context/AIChatContext';
 import { Navbar } from '@/components/Navbar';
 import { AIChatSidebar } from '@/components/AIChatSidebar';
@@ -22,7 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
       <body className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] font-body antialiased">
-        <AuthProvider>
+        <SessionProvider>
           <AIChatProvider>
             <Navbar />
             <main>
@@ -30,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </main>
             <AIChatSidebar />
           </AIChatProvider>
-        </AuthProvider>
+        </SessionProvider>
       </body>
     </html>
   );

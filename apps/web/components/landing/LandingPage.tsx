@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from '@/context/SessionContext';
 import api from '@/lib/api';
 import LandingHeader from './LandingHeader';
 import HeroSection from './HeroSection';
@@ -49,7 +49,7 @@ function getConditionDesc(code: number): string {
 }
 
 export default function LandingPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useSession();
   const [weatherData, setWeatherData] = useState<WeatherData[]>(DEMO_WEATHER);
   const [loading, setLoading] = useState(true);
 

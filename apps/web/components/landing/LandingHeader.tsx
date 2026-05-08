@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from '@/context/SessionContext';
 import { Logo } from '@/components/Logo';
 
 export default function LandingHeader() {
-  const { user } = useAuth();
+  const { user } = useSession();
 
   return (
     <header className="absolute top-0 left-0 right-0 z-50 px-4 sm:px-6 py-4 sm:py-5">

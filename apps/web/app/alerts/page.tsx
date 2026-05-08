@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from '@/context/SessionContext';
 import { AlertCard } from '@/components/AlertCard';
 import Link from 'next/link';
 import api from '@/lib/api';
@@ -25,7 +25,7 @@ type FilterType = 'all' | 'unread' | 'high';
 
 export default function AlertsPage() {
   const { loading: authLoading } = useRequireAuth();
-  const { refreshAlertCount } = useAuth();
+  const { refreshAlertCount } = useSession();
 
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [filteredAlerts, setFilteredAlerts] = useState<Alert[]>([]);

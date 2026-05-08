@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { useAuth } from '@/context/AuthContext';
+import { useSession } from '@/context/SessionContext';
 import api from '@/lib/api';
 
 export default function SettingsPage() {
   const { loading: authLoading } = useRequireAuth();
-  const { refreshAlertCount } = useAuth();
+  const { refreshAlertCount } = useSession();
 
   const [calendarConnected, setCalendarConnected] = useState<boolean | null>(null);
   const [googleEmail, setGoogleEmail] = useState<string | null>(null);
