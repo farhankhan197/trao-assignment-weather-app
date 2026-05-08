@@ -22,7 +22,7 @@ export default function Footer() {
           Terms of Service
         </Link>
         <span className="text-[var(--border)]">·</span>
-        <Link href="https://www.youtube.com/watch?v=placeholder" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--text-primary)] transition-colors">
+        <Link href="https://youtu.be/8RchmKMz9eI?si=lkcQZAUOAYwRoXHO" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--text-primary)] transition-colors">
           Walkthrough Video
         </Link>
       </div>

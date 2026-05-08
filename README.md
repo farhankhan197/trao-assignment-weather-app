@@ -398,7 +398,7 @@ I made this test user with auto fill credentials button to help test the apps fu
 
 ## Walkthrough Video
 
-[Watch the 3-minute walkthrough]()
+[Watch the 3-minute walkthrough](https://youtu.be/8RchmKMz9eI?si=lkcQZAUOAYwRoXHO)
 
 Covers: app flow, authentication, multi-city dashboard, city detail page, favorites with charts, AI agent, calendar alerts, weather streaks, and architecture overview.
 
