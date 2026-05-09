@@ -17,24 +17,19 @@ const cache = new Map<string, CacheEntry>();
 // 5 minute time to live for cache entries
 const DEFAULT_TTL_MS = 5 * 60 * 1000; 
 
-// 5 minute time to live for cache entries
-const DEFAULT_TTL_MS = 5 * 60 * 1000;
-
 function getCacheKey(config: AxiosRequestConfig): string {
   return `${config.method?.toUpperCase() || 'GET'}:${config.url}${config.params ? ':' + JSON.stringify(config.params) : ''}`;
 }
 
-
 //interceptor to validate cache entry
 api.interceptors.request.use(
-  (config) => {
+  (config: any) => {
     if (config.method?.toLowerCase() !== 'get') return config;
     if (config.skipCache) return config;
 
     const key = getCacheKey(config);
     const entry = cache.get(key);
     if (entry && Date.now() - entry.timestamp < DEFAULT_TTL_MS) {
-      (config as any).__cachedData = entry.data;
       config.__cachedData = entry.data;
     }
     return config;
@@ -42,23 +37,17 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-
 //interceptor to invalidate cache entry
 api.interceptors.response.use(
   (res) => {
-    const config = res.config;
+    const config = res.config as any;
 
-    if ((config as any).__cachedData) {
-      return { ...res, data: (config as any).__cachedData, status: 200, statusText: 'OK (cached)' } as any;
-    }
-
-    if (config.method?.toLowerCase() === 'get' && !(config as any).skipCache) {
     if (config.__cachedData) {
-      return {
-        ...res,
-        data: config.__cachedData,
-        status: 200,
-        statusText: 'OK (cached)',
+      return { 
+        ...res, 
+        data: config.__cachedData, 
+        status: 200, 
+        statusText: 'OK (cached)' 
       } as AxiosResponse<unknown>;
     }
 
@@ -91,12 +80,12 @@ api.interceptors.response.use(
     }
 
     return res;
-  }
+  }, // <--- Fixed: Added missing comma
   (error: AxiosError) => {
     if (
       error.response?.status === 401 &&
       typeof window !== 'undefined' &&
-      !error.config?.skipAuthRedirect &&
+      !(error.config as any)?.skipAuthRedirect &&
       !window.location.pathname.startsWith('/login') &&
       !window.location.pathname.startsWith('/register')
     ) {
@@ -105,7 +94,6 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-}
 
 export default api;
 
