@@ -5,20 +5,24 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// ─── In-Memory Cache ───────────────────────────────────────────────────────────
+
+// cached data
 interface CacheEntry {
   data: unknown;
   timestamp: number;
 }
 
 const cache = new Map<string, CacheEntry>();
-const DEFAULT_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+// 5 minute time to live for cache entries
+const DEFAULT_TTL_MS = 5 * 60 * 1000; 
 
 function getCacheKey(config: any): string {
   return `${config.method?.toUpperCase() || 'GET'}:${config.url}${config.params ? ':' + JSON.stringify(config.params) : ''}`;
 }
 
-// Request interceptor: serve from cache if available
+
+//interceptor to validate cache entry
 api.interceptors.request.use(
   (config) => {
     if (config.method?.toLowerCase() !== 'get') return config;
@@ -27,7 +31,6 @@ api.interceptors.request.use(
     const key = getCacheKey(config);
     const entry = cache.get(key);
     if (entry && Date.now() - entry.timestamp < DEFAULT_TTL_MS) {
-      // Mark config so response interceptor knows to return cached data
       (config as any).__cachedData = entry.data;
     }
     return config;
@@ -35,20 +38,42 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor: store in cache and serve cached data
+
+//interceptor to invalidate cache entry
 api.interceptors.response.use(
   (res) => {
     const config = res.config;
 
-    // Return cached data if it was a cache hit
     if ((config as any).__cachedData) {
       return { ...res, data: (config as any).__cachedData, status: 200, statusText: 'OK (cached)' } as any;
     }
 
-    // Store successful GET responses in cache
     if (config.method?.toLowerCase() === 'get' && !(config as any).skipCache) {
       const key = getCacheKey(config);
       cache.set(key, { data: res.data, timestamp: Date.now() });
+    }
+
+    const method = config.method?.toLowerCase();
+    if (method && ['post', 'patch', 'put', 'delete'].includes(method)) {
+      const url = config.url || '';
+
+      for (const key of cache.keys()) {
+        if (!key.startsWith('GET:')) continue;
+        const cacheUrl = key.split(':')[1]; 
+        if (cacheUrl === url || cacheUrl.startsWith(url + '/')) {
+          cache.delete(key);
+        }
+      }
+
+      const parentMatch = url.match(/^(.*)\/[^/]+$/);
+      if (parentMatch) {
+        const parentUrl = parentMatch[1];
+        for (const key of cache.keys()) {
+          if (key === `GET:${parentUrl}` || key.startsWith(`GET:${parentUrl}:`)) {
+            cache.delete(key);
+          }
+        }
+      }
     }
 
     return res;
@@ -69,7 +94,8 @@ api.interceptors.response.use(
 
 export default api;
 
-// Helper to clear the entire cache or a specific URL pattern
+
+//helper to clear cache
 export function clearApiCache(pattern?: string) {
   if (!pattern) {
     cache.clear();
