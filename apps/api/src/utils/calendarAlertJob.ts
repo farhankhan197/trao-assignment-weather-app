@@ -1,15 +1,13 @@
 import cron from 'node-cron';
 import { User } from '../models/User';
 import { CalendarAlert } from '../models/CalendarAlert';
-import {
-  getValidAccessToken,
-  fetchUpcomingEvents,
-  geocodeLocation,
-} from './calendar.service';
+import { getValidAccessToken, fetchUpcomingEvents, geocodeLocation } from './calendar.service';
 import { fetchCurrentWeather } from './weather.service';
 import { checkWeatherForAlert } from './alertEngine';
 
-const todayStr = () => new Date().toISOString().split('T')[0];
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : '';
+}
 
 export async function runCalendarAlertScanForUser(userId: string) {
   const user = await User.findById(userId);
@@ -76,8 +74,8 @@ export async function runCalendarAlertScanForUser(userId: string) {
             forecastDate: eventDate,
           });
         }
-      } catch (err: any) {
-        console.error(`[CalendarAlertJob] Event scan failed:`, err.message);
+      } catch (err: unknown) {
+        console.error(`[CalendarAlertJob] Event scan failed:`, getErrorMessage(err));
       }
     }
 
@@ -86,14 +84,16 @@ export async function runCalendarAlertScanForUser(userId: string) {
       userId: user._id,
       eventStart: { $lt: new Date() },
     });
-  } catch (err: any) {
-    const errorMessage = err.message || '';
+  } catch (err: unknown) {
+    const errorMessage = getErrorMessage(err);
     const isScopeError =
       errorMessage.includes('insufficient authentication scopes') ||
       errorMessage.includes('insufficient permissions');
 
     if (isScopeError && user) {
-      console.error(`[CalendarAlertJob] Insufficient scopes for user ${userId}. Disconnecting calendar.`);
+      console.error(
+        `[CalendarAlertJob] Insufficient scopes for user ${userId}. Disconnecting calendar.`
+      );
       user.calendarConnected = false;
       user.googleAccessToken = undefined;
       user.googleRefreshToken = undefined;
@@ -101,7 +101,7 @@ export async function runCalendarAlertScanForUser(userId: string) {
       await user.save();
     }
 
-    console.error(`[CalendarAlertJob] Scan failed for user ${userId}:`, err.message);
+    console.error(`[CalendarAlertJob] Scan failed for user ${userId}:`, errorMessage);
   }
 }
 

@@ -1,10 +1,10 @@
 import axios from 'axios';
+import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 const api = axios.create({
   baseURL: '',
   withCredentials: true,
 });
-
 
 // cached data
 interface CacheEntry {
@@ -17,7 +17,10 @@ const cache = new Map<string, CacheEntry>();
 // 5 minute time to live for cache entries
 const DEFAULT_TTL_MS = 5 * 60 * 1000; 
 
-function getCacheKey(config: any): string {
+// 5 minute time to live for cache entries
+const DEFAULT_TTL_MS = 5 * 60 * 1000;
+
+function getCacheKey(config: AxiosRequestConfig): string {
   return `${config.method?.toUpperCase() || 'GET'}:${config.url}${config.params ? ':' + JSON.stringify(config.params) : ''}`;
 }
 
@@ -26,12 +29,13 @@ function getCacheKey(config: any): string {
 api.interceptors.request.use(
   (config) => {
     if (config.method?.toLowerCase() !== 'get') return config;
-    if ((config as any).skipCache) return config;
+    if (config.skipCache) return config;
 
     const key = getCacheKey(config);
     const entry = cache.get(key);
     if (entry && Date.now() - entry.timestamp < DEFAULT_TTL_MS) {
       (config as any).__cachedData = entry.data;
+      config.__cachedData = entry.data;
     }
     return config;
   },
@@ -49,6 +53,16 @@ api.interceptors.response.use(
     }
 
     if (config.method?.toLowerCase() === 'get' && !(config as any).skipCache) {
+    if (config.__cachedData) {
+      return {
+        ...res,
+        data: config.__cachedData,
+        status: 200,
+        statusText: 'OK (cached)',
+      } as AxiosResponse<unknown>;
+    }
+
+    if (config.method?.toLowerCase() === 'get' && !config.skipCache) {
       const key = getCacheKey(config);
       cache.set(key, { data: res.data, timestamp: Date.now() });
     }
@@ -59,7 +73,7 @@ api.interceptors.response.use(
 
       for (const key of cache.keys()) {
         if (!key.startsWith('GET:')) continue;
-        const cacheUrl = key.split(':')[1]; 
+        const cacheUrl = key.split(':')[1];
         if (cacheUrl === url || cacheUrl.startsWith(url + '/')) {
           cache.delete(key);
         }
@@ -78,7 +92,7 @@ api.interceptors.response.use(
 
     return res;
   },
-  (error) => {
+  (error: AxiosError) => {
     if (
       error.response?.status === 401 &&
       typeof window !== 'undefined' &&
@@ -93,7 +107,6 @@ api.interceptors.response.use(
 );
 
 export default api;
-
 
 //helper to clear cache
 export function clearApiCache(pattern?: string) {

@@ -5,12 +5,19 @@ import { CalendarAlert } from '../models/CalendarAlert';
 import {
   generateAuthUrl,
   exchangeCodeForTokens,
-  getValidAccessToken,
   refreshAccessToken,
 } from '../utils/calendar.service';
 import { runCalendarAlertScanForUser } from '../utils/calendarAlertJob';
 
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
+
+interface CalendarStatePayload {
+  userId: string;
+}
+
+interface GoogleIdTokenPayload {
+  email?: string;
+}
 
 // GET /auth/calendar/connect
 // Redirects user to Google's OAuth consent screen
@@ -22,7 +29,9 @@ export const connectCalendar = async (req: Request, res: Response): Promise<void
     }
 
     // Create a signed JWT state parameter to prevent CSRF
-    const state = jwt.sign({ userId: req.user.id }, process.env.JWT_SECRET as string, { expiresIn: '10m' });
+    const state = jwt.sign({ userId: req.user.id }, process.env.JWT_SECRET as string, {
+      expiresIn: '10m',
+    });
 
     const url = generateAuthUrl(state);
     res.json({ url });
@@ -43,9 +52,13 @@ export const calendarCallback = async (req: Request, res: Response): Promise<voi
     }
 
     // Verify state JWT
-    let payload: any;
+    let payload: CalendarStatePayload;
     try {
-      payload = jwt.verify(state, process.env.JWT_SECRET as string);
+      const verifiedState = jwt.verify(state, process.env.JWT_SECRET as string);
+      if (typeof verifiedState === 'string' || !('userId' in verifiedState)) {
+        throw new Error('Invalid state payload');
+      }
+      payload = verifiedState as CalendarStatePayload;
     } catch {
       res.redirect(`${CLIENT_URL}/dashboard?calendar=error&message=Invalid or expired state`);
       return;
@@ -62,7 +75,7 @@ export const calendarCallback = async (req: Request, res: Response): Promise<voi
     // Decode Google ID token to capture the connected Google account email
     let googleEmail: string | undefined;
     if (tokens.id_token) {
-      const idPayload = jwt.decode(tokens.id_token) as any;
+      const idPayload = jwt.decode(tokens.id_token) as GoogleIdTokenPayload | null;
       googleEmail = idPayload?.email;
     }
 
@@ -74,7 +87,9 @@ export const calendarCallback = async (req: Request, res: Response): Promise<voi
     await user.save();
 
     // Run initial scan immediately
-    runCalendarAlertScanForUser(user._id.toString()).catch(() => { /* ignore */ });
+    runCalendarAlertScanForUser(user._id.toString()).catch(() => {
+      /* ignore */
+    });
 
     res.redirect(`${CLIENT_URL}/dashboard?calendar=connected`);
   } catch {
@@ -92,7 +107,10 @@ export const getCalendarStatus = async (req: Request, res: Response): Promise<vo
     }
 
     const user = await User.findById(req.user.id).select('calendarConnected googleEmail');
-    res.json({ connected: user?.calendarConnected ?? false, googleEmail: user?.googleEmail || null });
+    res.json({
+      connected: user?.calendarConnected ?? false,
+      googleEmail: user?.googleEmail || null,
+    });
   } catch {
     res.status(500).json({ error: 'Failed to check calendar status' });
   }
@@ -148,8 +166,10 @@ export const getCalendarAlerts = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    const alerts = await CalendarAlert.find({ userId: req.user.id })
-      .sort({ read: 1, createdAt: -1 });
+    const alerts = await CalendarAlert.find({ userId: req.user.id }).sort({
+      read: 1,
+      createdAt: -1,
+    });
 
     const unreadCount = await CalendarAlert.countDocuments({
       userId: req.user.id,

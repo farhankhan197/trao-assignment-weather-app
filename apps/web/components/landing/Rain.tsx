@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 export default function Rain() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -12,8 +12,8 @@ export default function Rain() {
     const count = window.innerWidth < 640 ? 20 : 70;
 
     for (let i = 0; i < count; i++) {
-      const drop = document.createElement("div");
-      drop.className = "rain-drop";
+      const drop = document.createElement('div');
+      drop.className = 'rain-drop';
       const h = Math.random() * 60 + 15;
       drop.style.cssText = [
         `left: ${Math.random() * 100}%`,
@@ -21,12 +21,12 @@ export default function Rain() {
         `animation-duration: ${(Math.random() * 1.2 + 0.7).toFixed(2)}s`,
         `animation-delay: -${(Math.random() * 3).toFixed(2)}s`,
         `opacity: ${(Math.random() * 0.35 + 0.15).toFixed(2)}`,
-      ].join(";");
+      ].join(';');
       container.appendChild(drop);
     }
 
     return () => {
-      container.innerHTML = "";
+      container.innerHTML = '';
     };
   }, []);
 

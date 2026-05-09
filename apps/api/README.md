@@ -1,15 +1,15 @@
-# api
+# API
 
-To install dependencies:
-
-```bash
-bun install
-```
-
-To run:
+Install dependencies from the repository root:
 
 ```bash
-bun run index.ts
+pnpm install
 ```
 
-This project was created using `bun init` in bun v1.3.13. [Bun](https://bun.com) is a fast all-in-one JavaScript runtime.
+Run the API dev server from this package:
+
+```bash
+pnpm dev
+```
+
+The monorepo uses pnpm for dependency management. Bun is only used as the API runtime in the package scripts.

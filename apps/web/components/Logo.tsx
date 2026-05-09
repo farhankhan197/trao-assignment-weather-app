@@ -22,25 +22,95 @@ export function Logo({ size = 32, className = '', variant = 'dark' }: LogoProps)
       >
         <defs>
           <filter id={`cloud-shadow-${variant}`} x="-2" y="-2" width="44" height="44">
-            <feDropShadow dx="0" dy="1.5" stdDeviation="2" floodColor={cloudShadow} floodOpacity="0.4"/>
+            <feDropShadow
+              dx="0"
+              dy="1.5"
+              stdDeviation="2"
+              floodColor={cloudShadow}
+              floodOpacity="0.4"
+            />
           </filter>
         </defs>
-        
+
         {/* Sun - positioned behind and peeking out */}
         <circle cx="20" cy="16" r="9" fill={sunColor} opacity="0.9" />
-        
+
         {/* Sun rays */}
         <g opacity="0.7">
-          <line x1="20" y1="3" x2="20" y2="6" stroke={sunColor} strokeWidth="2" strokeLinecap="round" />
-          <line x1="20" y1="26" x2="20" y2="29" stroke={sunColor} strokeWidth="2" strokeLinecap="round" />
-          <line x1="7" y1="16" x2="10" y2="16" stroke={sunColor} strokeWidth="2" strokeLinecap="round" />
-          <line x1="30" y1="16" x2="33" y2="16" stroke={sunColor} strokeWidth="2" strokeLinecap="round" />
-          <line x1="10.8" y1="6.8" x2="12.9" y2="8.9" stroke={sunColor} strokeWidth="2" strokeLinecap="round" />
-          <line x1="27.1" y1="23.1" x2="29.2" y2="25.2" stroke={sunColor} strokeWidth="2" strokeLinecap="round" />
-          <line x1="10.8" y1="25.2" x2="12.9" y2="23.1" stroke={sunColor} strokeWidth="2" strokeLinecap="round" />
-          <line x1="27.1" y1="8.9" x2="29.2" y2="6.8" stroke={sunColor} strokeWidth="2" strokeLinecap="round" />
+          <line
+            x1="20"
+            y1="3"
+            x2="20"
+            y2="6"
+            stroke={sunColor}
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+          <line
+            x1="20"
+            y1="26"
+            x2="20"
+            y2="29"
+            stroke={sunColor}
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+          <line
+            x1="7"
+            y1="16"
+            x2="10"
+            y2="16"
+            stroke={sunColor}
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+          <line
+            x1="30"
+            y1="16"
+            x2="33"
+            y2="16"
+            stroke={sunColor}
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+          <line
+            x1="10.8"
+            y1="6.8"
+            x2="12.9"
+            y2="8.9"
+            stroke={sunColor}
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+          <line
+            x1="27.1"
+            y1="23.1"
+            x2="29.2"
+            y2="25.2"
+            stroke={sunColor}
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+          <line
+            x1="10.8"
+            y1="25.2"
+            x2="12.9"
+            y2="23.1"
+            stroke={sunColor}
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+          <line
+            x1="27.1"
+            y1="8.9"
+            x2="29.2"
+            y2="6.8"
+            stroke={sunColor}
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
         </g>
-        
+
         {/* Cloud - overlapping the sun */}
         <g filter={`url(#cloud-shadow-${variant})`}>
           <path
@@ -51,11 +121,8 @@ export function Logo({ size = 32, className = '', variant = 'dark' }: LogoProps)
           />
         </g>
       </svg>
-      
-      <span 
-        className="font-display text-xl tracking-tight" 
-        style={{ color: textColor }}
-      >
+
+      <span className="font-display text-xl tracking-tight" style={{ color: textColor }}>
         Mausam
       </span>
     </div>

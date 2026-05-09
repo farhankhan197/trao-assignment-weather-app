@@ -2,13 +2,21 @@ import axios from 'axios';
 
 const OWM_KEY = process.env.OWM_API_KEY;
 
+interface GeocodeResult {
+  name: string;
+  country: string;
+  lat: number;
+  lon: number;
+  state?: string;
+}
+
 // Search for cities using OWM Geocoding API
 export const geocodeCity = async (query: string) => {
   const url = `https://api.openweathermap.org/geo/1.0/direct`;
-  const { data } = await axios.get(url, {
+  const { data } = await axios.get<GeocodeResult[]>(url, {
     params: { q: query, limit: 5, appid: OWM_KEY },
   });
-  return data.map((r: any) => ({
+  return data.map((r) => ({
     name: r.name,
     country: r.country,
     countryCode: r.country,
@@ -33,12 +41,9 @@ export const fetchCurrentWeather = async (lat: number, lon: number) => {
         'wind_speed_10m',
         'precipitation',
       ].join(','),
-      daily: [
-        'temperature_2m_max',
-        'temperature_2m_min',
-        'precipitation_sum',
-        'weather_code',
-      ].join(','),
+      daily: ['temperature_2m_max', 'temperature_2m_min', 'precipitation_sum', 'weather_code'].join(
+        ','
+      ),
       forecast_days: 7,
       timezone: 'auto',
     },
@@ -53,12 +58,9 @@ export const fetchHistoricalWeather = async (lat: number, lon: number, pastDays:
     params: {
       latitude: lat,
       longitude: lon,
-      daily: [
-        'temperature_2m_max',
-        'temperature_2m_min',
-        'precipitation_sum',
-        'weather_code',
-      ].join(','),
+      daily: ['temperature_2m_max', 'temperature_2m_min', 'precipitation_sum', 'weather_code'].join(
+        ','
+      ),
       past_days: pastDays,
       forecast_days: 1,
       timezone: 'auto',

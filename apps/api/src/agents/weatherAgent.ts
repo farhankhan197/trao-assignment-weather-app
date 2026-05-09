@@ -1,8 +1,12 @@
 import { ChatGroq } from '@langchain/groq';
-import { HumanMessage, AIMessage, ToolMessage, SystemMessage, BaseMessage } from '@langchain/core/messages';
+import { HumanMessage, ToolMessage, SystemMessage, BaseMessage } from '@langchain/core/messages';
 import { createWeatherTools } from './tools';
 
 const MAX_ITERATIONS = 10;
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Unknown error';
+}
 
 const SYSTEM_PROMPT = `You are Mausam, a friendly and knowledgeable personal weather analyst.
 
@@ -30,17 +34,14 @@ export const runWeatherAgent = async (userId: string, userMessage: string): Prom
   const toolMap = new Map(tools.map((t) => [t.name, t]));
   const modelWithTools = llm.bindTools(tools);
 
-  const messages: BaseMessage[] = [
-    new SystemMessage(SYSTEM_PROMPT),
-    new HumanMessage(userMessage),
-  ];
+  const messages: BaseMessage[] = [new SystemMessage(SYSTEM_PROMPT), new HumanMessage(userMessage)];
 
   for (let i = 0; i < MAX_ITERATIONS; i++) {
     let response;
     try {
       response = await modelWithTools.invoke(messages);
-    } catch (err: any) {
-      throw new Error(`LLM invoke failed: ${err.message}`);
+    } catch (err: unknown) {
+      throw new Error(`LLM invoke failed: ${getErrorMessage(err)}`);
     }
 
     // If the model returns tool calls, execute them and continue the loop
@@ -54,8 +55,8 @@ export const runWeatherAgent = async (userId: string, userMessage: string): Prom
         if (tool) {
           try {
             toolResult = await tool.invoke(toolCall.args);
-          } catch (err: any) {
-            toolResult = `Error: ${err.message || 'Tool execution failed'}`;
+          } catch (err: unknown) {
+            toolResult = `Error: ${getErrorMessage(err) || 'Tool execution failed'}`;
           }
         } else {
           toolResult = `Error: Tool "${toolCall.name}" not found.`;
@@ -77,8 +78,8 @@ export const runWeatherAgent = async (userId: string, userMessage: string): Prom
 
   // Max iterations reached — return last message
   const lastMessage = messages[messages.length - 1];
-  if (lastMessage && 'content' in lastMessage) {
-    return String((lastMessage as any).content);
+  if (lastMessage) {
+    return String(lastMessage.content);
   }
 
   return 'I was unable to complete your request after multiple attempts. Please try rephrasing your question.';

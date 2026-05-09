@@ -1,11 +1,17 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt';
 
+interface AuthenticatedUser {
+  id: string;
+  email: string;
+}
+
 // Extend Express Request to carry user info
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
-      user?: { id: string; email: string };
+      user?: AuthenticatedUser;
     }
   }
 }

@@ -3,10 +3,17 @@ import { City } from '../models/City';
 import { calculateStreak } from '../utils/streak';
 import { fetchHistoricalWeather, getConditionFromCode } from '../utils/weather.service';
 
+function isDuplicateKeyError(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 11000;
+}
+
 // GET /api/cities — all cities for the authenticated user
 export const getCities = async (req: Request, res: Response): Promise<void> => {
   try {
-    const cities = await City.find({ userId: req.user!.id }).sort({ isFavorite: -1, addedAt: -1 });
+    const cities = await City.find({ userId: req.user!.id }).sort({
+      isFavorite: -1,
+      addedAt: -1,
+    });
     res.json({ cities });
   } catch (err) {
     console.error('[City List Error]', err);
@@ -26,12 +33,16 @@ export const addCity = async (req: Request, res: Response): Promise<void> => {
 
     const city = await City.create({
       userId: req.user!.id,
-      name, country, countryCode, lat, lon,
+      name,
+      country,
+      countryCode,
+      lat,
+      lon,
     });
 
     res.status(201).json({ city });
-  } catch (err: any) {
-    if (err.code === 11000) {
+  } catch (err: unknown) {
+    if (isDuplicateKeyError(err)) {
       res.status(409).json({ error: 'City already added to your dashboard' });
       return;
     }
@@ -43,7 +54,10 @@ export const addCity = async (req: Request, res: Response): Promise<void> => {
 // PATCH /api/cities/:id — toggle favorite
 export const toggleFavorite = async (req: Request, res: Response): Promise<void> => {
   try {
-    const city = await City.findOne({ _id: req.params.id, userId: req.user!.id });
+    const city = await City.findOne({
+      _id: req.params.id,
+      userId: req.user!.id,
+    });
 
     if (!city) {
       res.status(404).json({ error: 'City not found' });
@@ -63,7 +77,10 @@ export const toggleFavorite = async (req: Request, res: Response): Promise<void>
 // DELETE /api/cities/:id — remove city
 export const deleteCity = async (req: Request, res: Response): Promise<void> => {
   try {
-    const city = await City.findOneAndDelete({ _id: req.params.id, userId: req.user!.id });
+    const city = await City.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user!.id,
+    });
 
     if (!city) {
       res.status(404).json({ error: 'City not found' });
@@ -80,7 +97,10 @@ export const deleteCity = async (req: Request, res: Response): Promise<void> => 
 // GET /api/cities/:id — single city detail
 export const getCityById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const city = await City.findOne({ _id: req.params.id, userId: req.user!.id });
+    const city = await City.findOne({
+      _id: req.params.id,
+      userId: req.user!.id,
+    });
     if (!city) {
       res.status(404).json({ error: 'City not found' });
       return;
@@ -95,7 +115,10 @@ export const getCityById = async (req: Request, res: Response): Promise<void> =>
 // GET /api/cities/:id/streak — weather memory streak
 export const getCityStreak = async (req: Request, res: Response): Promise<void> => {
   try {
-    const city = await City.findOne({ _id: req.params.id, userId: req.user!.id });
+    const city = await City.findOne({
+      _id: req.params.id,
+      userId: req.user!.id,
+    });
     if (!city) {
       res.status(404).json({ error: 'City not found' });
       return;
@@ -118,7 +141,10 @@ export const getCityStreak = async (req: Request, res: Response): Promise<void> 
 // GET /api/cities/:id/history — last 15 days of weather
 export const getCityHistory = async (req: Request, res: Response): Promise<void> => {
   try {
-    const city = await City.findOne({ _id: req.params.id, userId: req.user!.id });
+    const city = await City.findOne({
+      _id: req.params.id,
+      userId: req.user!.id,
+    });
     if (!city) {
       res.status(404).json({ error: 'City not found' });
       return;

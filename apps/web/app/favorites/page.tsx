@@ -34,6 +34,13 @@ interface HistoryPoint {
   tempMin: number;
 }
 
+interface ApiHistoryPoint {
+  date: string;
+  condition: string;
+  tempMax: number;
+  tempMin: number;
+}
+
 interface CurrentWeather {
   temperature: number;
   condition: string;
@@ -45,9 +52,8 @@ interface CurrentWeather {
 }
 
 export default function FavoritesPage() {
-  const { user, loading: authLoading } = useRequireAuth();
+  const { loading: authLoading } = useRequireAuth();
   const router = useRouter();
-  const [cities, setCities] = useState<City[]>([]);
   const [favorites, setFavorites] = useState<City[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [current, setCurrent] = useState<CurrentWeather | null>(null);
@@ -60,7 +66,6 @@ export default function FavoritesPage() {
     try {
       const res = await api.get('/api/cities');
       const all = res.data.cities || [];
-      setCities(all);
       const favs = all.filter((c: City) => c.isFavorite);
       setFavorites(favs);
       if (favs.length > 0 && !selectedId) {
@@ -86,7 +91,9 @@ export default function FavoritesPage() {
         const city = favorites.find((c) => c._id === selectedId);
         if (!city) return;
         const [wRes, hRes, sRes] = await Promise.all([
-          api.get('/api/weather/current', { params: { lat: city.lat, lon: city.lon } }),
+          api.get('/api/weather/current', {
+            params: { lat: city.lat, lon: city.lon },
+          }),
           api.get(`/api/cities/${selectedId}/history`).catch(() => null),
           api.get(`/api/cities/${selectedId}/streak`).catch(() => null),
         ]);
@@ -103,7 +110,7 @@ export default function FavoritesPage() {
         });
         if (hRes?.data?.history) {
           setHistory(
-            hRes.data.history.map((h: any) => ({
+            hRes.data.history.map((h: ApiHistoryPoint) => ({
               date: formatDateShort(h.date),
               condition: h.condition,
               tempMax: h.tempMax,
@@ -120,7 +127,9 @@ export default function FavoritesPage() {
         if (!cancelled) setDetailLoading(false);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [selectedId, favorites]);
 
   if (authLoading || loading) {
@@ -137,7 +146,8 @@ export default function FavoritesPage() {
         <p className="text-5xl mb-4">⭐</p>
         <h1 className="font-display text-4xl mb-2">No Favorites Yet</h1>
         <p className="text-[var(--text-muted)] text-sm max-w-md mx-auto mb-6">
-          Mark cities as favorites from your dashboard to see them here with detailed weather history.
+          Mark cities as favorites from your dashboard to see them here with detailed weather
+          history.
         </p>
         <button
           onClick={() => router.push('/dashboard')}
@@ -153,198 +163,282 @@ export default function FavoritesPage() {
 
   return (
     <div className="relative min-h-screen">
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.03) 0%, transparent 60%)' }} />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'linear-gradient(180deg, rgba(37,99,235,0.03) 0%, transparent 60%)',
+        }}
+      />
       <div className="relative max-w-7xl mx-auto px-4 py-6 lg:py-8">
         <div className="mb-4">
-        <h1 className="font-display text-2xl lg:text-3xl text-[var(--text-primary)] mb-1" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>Favorites</h1>
-        <p className="text-sm text-[var(--text-muted)]">Detailed weather for your favorite cities</p>
-      </div>
-
-      <div className="relative flex flex-col lg:flex-row gap-6">
-        {/* Sidebar - all favorites */}
-        <div className="lg:w-64 shrink-0">
-          <div className="lg:bg-[var(--bg-surface)] lg:border lg:border-[var(--border)] lg:rounded-2xl lg:p-4 lg:shadow-[var(--shadow-sm)]">
-            <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3 hidden lg:block">
-              Your Cities
-            </h3>
-            <motion.div
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: {},
-                visible: { transition: { staggerChildren: 0.04 } },
-              }}
-              className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-hide"
-              >
-              {favorites.map((city) => (
-                <motion.div
-                key={city._id}
-                variants={{
-                  hidden: { opacity: 0, x: -12 },
-                  visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 350, damping: 25 } },
-                  }}
-                  >
-                  <SidebarItem
-                    city={city}
-                    isSelected={city._id === selectedId}
-                    onClick={() => setSelectedId(city._id)}
-                    />
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
+          <h1
+            className="font-display text-2xl lg:text-3xl text-[var(--text-primary)] mb-1"
+            style={{ textShadow: '0 2px 8px rgba(0,0,0,0.04)' }}
+          >
+            Favorites
+          </h1>
+          <p className="text-sm text-[var(--text-muted)]">
+            Detailed weather for your favorite cities
+          </p>
         </div>
 
-        {/* Main detail area */}
-        <div className="flex-1 min-w-0">
-          <AnimatePresence mode="wait">
-            {detailLoading ? (
+        <div className="relative flex flex-col lg:flex-row gap-6">
+          {/* Sidebar - all favorites */}
+          <div className="lg:w-64 shrink-0">
+            <div className="lg:bg-[var(--bg-surface)] lg:border lg:border-[var(--border)] lg:rounded-2xl lg:p-4 lg:shadow-[var(--shadow-sm)]">
+              <h3 className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3 hidden lg:block">
+                Your Cities
+              </h3>
               <motion.div
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-8 animate-pulse shadow-[var(--shadow-sm)]"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: {},
+                  visible: { transition: { staggerChildren: 0.04 } },
+                }}
+                className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 scrollbar-hide"
               >
-                <div className="h-8 bg-[var(--bg-surface-hover)] rounded w-40 mb-4" />
-                <div className="h-16 bg-[var(--bg-surface-hover)] rounded w-32 mb-6" />
-                <div className="h-48 bg-[var(--bg-surface-hover)] rounded w-full" />
+                {favorites.map((city) => (
+                  <motion.div
+                    key={city._id}
+                    variants={{
+                      hidden: { opacity: 0, x: -12 },
+                      visible: {
+                        opacity: 1,
+                        x: 0,
+                        transition: {
+                          type: 'spring',
+                          stiffness: 350,
+                          damping: 25,
+                        },
+                      },
+                    }}
+                  >
+                    <SidebarItem
+                      city={city}
+                      isSelected={city._id === selectedId}
+                      onClick={() => setSelectedId(city._id)}
+                    />
+                  </motion.div>
+                ))}
               </motion.div>
-            ) : (
-              <motion.div
-                key={selectedId}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12 }}
-                transition={{ duration: 0.25, ease: 'easeOut' }}
-                className="space-y-6"
+            </div>
+          </div>
+
+          {/* Main detail area */}
+          <div className="flex-1 min-w-0">
+            <AnimatePresence mode="wait">
+              {detailLoading ? (
+                <motion.div
+                  key="loading"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-8 animate-pulse shadow-[var(--shadow-sm)]"
                 >
-                {/* Current weather header */}
-                <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl shadow-[var(--shadow-sm)] relative overflow-hidden">
-                  {current && (
-                    <WeatherAtmosphere condition={current.condition} intensity="dramatic" />
-                  )}
-                  <div className="relative z-10 p-4 lg:p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h2 className="font-display text-2xl lg:text-3xl text-[var(--text-primary)]">{selected.name}</h2>
-                        <p className="text-[var(--text-muted)] text-sm">{selected.country}</p>
+                  <div className="h-8 bg-[var(--bg-surface-hover)] rounded w-40 mb-4" />
+                  <div className="h-16 bg-[var(--bg-surface-hover)] rounded w-32 mb-6" />
+                  <div className="h-48 bg-[var(--bg-surface-hover)] rounded w-full" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={selectedId}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -12 }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  className="space-y-6"
+                >
+                  {/* Current weather header */}
+                  <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl shadow-[var(--shadow-sm)] relative overflow-hidden">
+                    {current && (
+                      <WeatherAtmosphere condition={current.condition} intensity="dramatic" />
+                    )}
+                    <div className="relative z-10 p-4 lg:p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h2 className="font-display text-2xl lg:text-3xl text-[var(--text-primary)]">
+                            {selected.name}
+                          </h2>
+                          <p className="text-[var(--text-muted)] text-sm">{selected.country}</p>
+                        </div>
+                        {current && (
+                          <div className="text-right">
+                            <WeatherIcon
+                              condition={current.condition}
+                              className="text-4xl lg:text-5xl"
+                            />
+                          </div>
+                        )}
                       </div>
+
                       {current && (
-                        <div className="text-right">
-                          <WeatherIcon condition={current.condition} className="text-4xl lg:text-5xl" />
+                        <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6">
+                          <div>
+                            <span className="text-4xl lg:text-5xl font-light text-[var(--text-primary)]">
+                              {Math.round(current.temperature)}°
+                            </span>
+                            <span className="text-[var(--text-muted)] text-base ml-2 capitalize">
+                              {current.condition}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-[var(--text-muted)]">
+                            <span>H {Math.round(current.tempMax)}°</span>
+                            <span>L {Math.round(current.tempMin)}°</span>
+                            <span>Humidity {current.humidity}%</span>
+                            <span>Wind {Math.round(current.windSpeed)} km/h</span>
+                            <span>Precip {current.precipitation} mm</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {streak && (
+                        <div className="mt-4 text-sm text-[var(--warning)]/80 bg-[var(--warning-light)] rounded-lg px-3 py-2 inline-block">
+                          {streak}
                         </div>
                       )}
                     </div>
+                  </div>
 
-                    {current && (
-                      <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6">
-                        <div>
-                          <span className="text-4xl lg:text-5xl font-light text-[var(--text-primary)]">{Math.round(current.temperature)}°</span>
-                          <span className="text-[var(--text-muted)] text-base ml-2 capitalize">{current.condition}</span>
-                        </div>
-                        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-[var(--text-muted)]">
-                          <span>H {Math.round(current.tempMax)}°</span>
-                          <span>L {Math.round(current.tempMin)}°</span>
-                          <span>Humidity {current.humidity}%</span>
-                          <span>Wind {Math.round(current.windSpeed)} km/h</span>
-                          <span>Precip {current.precipitation} mm</span>
-                        </div>
+                  {/* Past week chart */}
+                  <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 lg:p-6 shadow-[var(--shadow-sm)]">
+                    <h3 className="font-display text-base text-[var(--text-primary)] mb-4">
+                      Past 15 Days
+                    </h3>
+                    {history.length > 0 ? (
+                      <div className="h-64 w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <AreaChart
+                            data={history}
+                            margin={{ top: 5, right: 24, left: -10, bottom: 5 }}
+                          >
+                            <defs>
+                              <linearGradient id="tempMaxGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
+                                <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                              </linearGradient>
+                              <linearGradient id="tempMinGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#64748b" stopOpacity={0.2} />
+                                <stop offset="95%" stopColor="#64748b" stopOpacity={0} />
+                              </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                            <XAxis
+                              dataKey="date"
+                              stroke="var(--text-muted)"
+                              fontSize={12}
+                              tickLine={false}
+                              axisLine={false}
+                              padding={{ left: 10, right: 10 }}
+                            />
+                            <YAxis
+                              stroke="var(--text-muted)"
+                              fontSize={12}
+                              tickLine={false}
+                              axisLine={false}
+                              unit="°"
+                            />
+                            <Tooltip
+                              contentStyle={{
+                                backgroundColor: 'var(--bg-surface)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '12px',
+                                fontSize: '12px',
+                              }}
+                              labelStyle={{ color: 'var(--text-muted)' }}
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="tempMax"
+                              stroke="#0ea5e9"
+                              strokeWidth={2}
+                              fill="url(#tempMaxGrad)"
+                              name="High"
+                            />
+                            <Area
+                              type="monotone"
+                              dataKey="tempMin"
+                              stroke="#64748b"
+                              strokeWidth={2}
+                              fill="url(#tempMinGrad)"
+                              name="Low"
+                            />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <p className="text-[var(--text-muted)] text-sm">
+                          No history data available.
+                        </p>
                       </div>
                     )}
 
-                    {streak && (
-                      <div className="mt-4 text-sm text-[var(--warning)]/80 bg-[var(--warning-light)] rounded-lg px-3 py-2 inline-block">
-                        {streak}
+                    {/* Day-by-day row */}
+                    {history.length > 0 && (
+                      <div className="flex gap-3 mt-6 overflow-x-auto pb-2 scrollbar-hide">
+                        {history.map((h, i) => (
+                          <div
+                            key={i}
+                            className="shrink-0 flex flex-col items-center gap-1.5 bg-[var(--bg-surface-hover)]/50 rounded-xl px-3 py-3 min-w-[72px]"
+                          >
+                            <span className="text-xs text-[var(--text-muted)]">{h.date}</span>
+                            <WeatherIcon condition={h.condition} className="text-xl" />
+                            <span className="text-sm font-medium text-[var(--text-primary)]">
+                              {Math.round(h.tempMax)}°
+                            </span>
+                            <span className="text-xs text-[var(--text-muted)]">
+                              {Math.round(h.tempMin)}°
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
-                </div>
-
-              {/* Past week chart */}
-              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 lg:p-6 shadow-[var(--shadow-sm)]">
-                <h3 className="font-display text-base text-[var(--text-primary)] mb-4">Past 15 Days</h3>
-                {history.length > 0 ? (
-                  <div className="h-64 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={history} margin={{ top: 5, right: 24, left: -10, bottom: 5 }}>
-                        <defs>
-                          <linearGradient id="tempMaxGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
-                            <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
-                          </linearGradient>
-                          <linearGradient id="tempMinGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#64748b" stopOpacity={0.2} />
-                            <stop offset="95%" stopColor="#64748b" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                        <XAxis dataKey="date" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} padding={{ left: 10, right: 10 }} />
-                        <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} unit="°" />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: 'var(--bg-surface)',
-                            border: '1px solid var(--border)',
-                            borderRadius: '12px',
-                            fontSize: '12px',
-                          }}
-                          labelStyle={{ color: 'var(--text-muted)' }}
-                        />
-                        <Area type="monotone" dataKey="tempMax" stroke="#0ea5e9" strokeWidth={2} fill="url(#tempMaxGrad)" name="High" />
-                        <Area type="monotone" dataKey="tempMin" stroke="#64748b" strokeWidth={2} fill="url(#tempMinGrad)" name="Low" />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <p className="text-[var(--text-muted)] text-sm">No history data available.</p>
-                  </div>
-                )}
-
-                {/* Day-by-day row */}
-                {history.length > 0 && (
-                  <div className="flex gap-3 mt-6 overflow-x-auto pb-2 scrollbar-hide">
-                    {history.map((h, i) => (
-                      <div
-                      key={i}
-                      className="shrink-0 flex flex-col items-center gap-1.5 bg-[var(--bg-surface-hover)]/50 rounded-xl px-3 py-3 min-w-[72px]"
-                      >
-                        <span className="text-xs text-[var(--text-muted)]">{h.date}</span>
-                        <WeatherIcon condition={h.condition} className="text-xl" />
-                        <span className="text-sm font-medium text-[var(--text-primary)]">{Math.round(h.tempMax)}°</span>
-                        <span className="text-xs text-[var(--text-muted)]">{Math.round(h.tempMin)}°</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
       </div>
     </div>
   );
-};
+}
 
-function SidebarItem({ city, isSelected, onClick }: { city: City; isSelected: boolean; onClick: () => void }) {
-  const [weather, setWeather] = useState<{ temperature: number; condition: string } | null>(null);
+function SidebarItem({
+  city,
+  isSelected,
+  onClick,
+}: {
+  city: City;
+  isSelected: boolean;
+  onClick: () => void;
+}) {
+  const [weather, setWeather] = useState<{
+    temperature: number;
+    condition: string;
+  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await api.get('/api/weather/current', { params: { lat: city.lat, lon: city.lon } });
+        const res = await api.get('/api/weather/current', {
+          params: { lat: city.lat, lon: city.lon },
+        });
         if (cancelled) return;
         setWeather({
           temperature: res.data.current.temperature_2m,
           condition: getCondition(res.data.current.weather_code),
         });
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [city.lat, city.lon]);
 
   return (
@@ -360,8 +454,14 @@ function SidebarItem({ city, isSelected, onClick }: { city: City; isSelected: bo
         <WeatherIcon condition={weather?.condition || 'sunny'} className="text-xl" />
       </div>
       <div className="min-w-0">
-        <p className={`text-sm font-medium truncate ${isSelected ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}>{city.name}</p>
-        <p className="text-xs text-[var(--text-muted)]">{weather ? `${Math.round(weather.temperature)}°` : '—'}</p>
+        <p
+          className={`text-sm font-medium truncate ${isSelected ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}
+        >
+          {city.name}
+        </p>
+        <p className="text-xs text-[var(--text-muted)]">
+          {weather ? `${Math.round(weather.temperature)}°` : '—'}
+        </p>
       </div>
     </button>
   );

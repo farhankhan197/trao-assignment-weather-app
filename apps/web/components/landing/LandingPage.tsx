@@ -26,10 +26,10 @@ interface WeatherData {
 }
 
 const DEMO_WEATHER: WeatherData[] = [
-  { icon: "☀️", temp: 34, city: "Mumbai",  desc: "Sunny",   delay: 600 },
-  { icon: "🌧️", temp: 22, city: "Delhi",   desc: "Rainy",   delay: 700 },
-  { icon: "⛅", temp: 28, city: "Bhopal",  desc: "Cloudy",  delay: 800 },
-  { icon: "🌤️", temp: 19, city: "Shimla",  desc: "Clear",   delay: 900 },
+  { icon: '☀️', temp: 34, city: 'Mumbai', desc: 'Sunny', delay: 600 },
+  { icon: '🌧️', temp: 22, city: 'Delhi', desc: 'Rainy', delay: 700 },
+  { icon: '⛅', temp: 28, city: 'Bhopal', desc: 'Cloudy', delay: 800 },
+  { icon: '🌤️', temp: 19, city: 'Shimla', desc: 'Clear', delay: 900 },
 ];
 
 function getConditionIcon(code: number): string {
@@ -112,7 +112,7 @@ export default function LandingPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
-        <MausamLoader variant="inline" hint="Mausam kaisa hai?"/>
+        <MausamLoader variant="inline" hint="Mausam kaisa hai?" />
       </div>
     );
   }
@@ -128,11 +128,7 @@ export default function LandingPage() {
   return (
     <div className="relative">
       <LandingHeader />
-      <HeroSection
-        weatherData={weatherData}
-        ctaPrimary={ctaPrimary}
-        ctaSecondary={ctaSecondary}
-      />
+      <HeroSection weatherData={weatherData} ctaPrimary={ctaPrimary} ctaSecondary={ctaSecondary} />
       <Footer />
     </div>
   );

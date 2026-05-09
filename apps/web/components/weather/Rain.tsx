@@ -20,13 +20,15 @@ export default function Rain({ count = 8, intensity = 'subtle' }: RainProps) {
       const drop = document.createElement('div');
       drop.className = 'rain-drop-mini';
       const h = intensity === 'dramatic' ? Math.random() * 40 + 20 : Math.random() * 15 + 8;
-      const duration = intensity === 'dramatic'
-        ? (Math.random() * 0.8 + 0.5).toFixed(2)
-        : (Math.random() * 1.5 + 1).toFixed(2);
+      const duration =
+        intensity === 'dramatic'
+          ? (Math.random() * 0.8 + 0.5).toFixed(2)
+          : (Math.random() * 1.5 + 1).toFixed(2);
       const delay = (Math.random() * 3).toFixed(2);
-      const opacity = intensity === 'dramatic'
-        ? (Math.random() * 0.3 + 0.2).toFixed(2)
-        : (Math.random() * 0.25 + 0.1).toFixed(2);
+      const opacity =
+        intensity === 'dramatic'
+          ? (Math.random() * 0.3 + 0.2).toFixed(2)
+          : (Math.random() * 0.25 + 0.1).toFixed(2);
 
       drop.style.cssText = [
         `left: ${Math.random() * 100}%`,

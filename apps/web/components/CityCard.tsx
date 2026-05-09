@@ -39,7 +39,9 @@ function CityCardComponent({ city, onToggleFavorite, onDelete }: Props) {
     (async () => {
       try {
         const [wRes, sRes] = await Promise.all([
-          api.get('/api/weather/current', { params: { lat: city.lat, lon: city.lon } }),
+          api.get('/api/weather/current', {
+            params: { lat: city.lat, lon: city.lon },
+          }),
           api.get(`/api/cities/${city._id}/streak`).catch(() => null),
         ]);
         if (cancelled) return;
@@ -60,7 +62,9 @@ function CityCardComponent({ city, onToggleFavorite, onDelete }: Props) {
         if (!cancelled) setLoading(false);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [city.lat, city.lon, city._id]);
 
   if (loading) {
@@ -92,9 +96,7 @@ function CityCardComponent({ city, onToggleFavorite, onDelete }: Props) {
       onClick={() => router.push(`/city/${city._id}`)}
       className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl relative group shadow-[var(--shadow-sm)] cursor-pointer h-full flex flex-col justify-between overflow-hidden"
     >
-      {weather && (
-        <WeatherAtmosphere condition={weather.condition} intensity="subtle" />
-      )}
+      {weather && <WeatherAtmosphere condition={weather.condition} intensity="subtle" />}
       <div className="relative z-10 p-4 flex flex-col justify-between h-full">
         <div className="flex items-start justify-between mb-2">
           <div>
@@ -103,21 +105,48 @@ function CityCardComponent({ city, onToggleFavorite, onDelete }: Props) {
           </div>
           <div className="flex items-center gap-1">
             <button
-              onClick={(e) => { e.stopPropagation(); onToggleFavorite(city._id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(city._id);
+              }}
               className="p-1.5 rounded-lg hover:bg-[var(--bg-surface-hover)] transition-colors text-[var(--text-muted)] hover:text-[var(--warning)]"
               aria-label={city.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill={city.isFavorite ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1-1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill={city.isFavorite ? 'currentColor' : 'none'}
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1-1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
               </svg>
             </button>
             <button
-              onClick={(e) => { e.stopPropagation(); onDelete(city._id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(city._id);
+              }}
               className="p-1.5 rounded-lg hover:bg-[var(--bg-surface-hover)] transition-colors text-[var(--text-muted)] hover:text-[var(--danger)]"
               aria-label="Delete city"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 6 6 18" />
+                <path d="m6 6 12 12" />
               </svg>
             </button>
           </div>
@@ -127,8 +156,12 @@ function CityCardComponent({ city, onToggleFavorite, onDelete }: Props) {
           <div className="flex items-center gap-2.5 mb-2">
             <WeatherIcon condition={weather.condition} className="text-xl" />
             <div>
-              <span className="text-2xl font-light text-[var(--text-primary)]">{Math.round(weather.temperature)}°</span>
-              <span className="text-xs text-[var(--text-muted)] ml-1.5 capitalize">{weather.condition}</span>
+              <span className="text-2xl font-light text-[var(--text-primary)]">
+                {Math.round(weather.temperature)}°
+              </span>
+              <span className="text-xs text-[var(--text-muted)] ml-1.5 capitalize">
+                {weather.condition}
+              </span>
             </div>
           </div>
         )}

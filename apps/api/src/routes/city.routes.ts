@@ -1,5 +1,13 @@
 import { Router } from 'express';
-import { getCities, addCity, toggleFavorite, deleteCity, getCityById, getCityStreak, getCityHistory } from '../controllers/city.controller';
+import {
+  getCities,
+  addCity,
+  toggleFavorite,
+  deleteCity,
+  getCityById,
+  getCityStreak,
+  getCityHistory,
+} from '../controllers/city.controller';
 import { authenticate } from '../middleware/authenticate';
 
 const router = Router();
