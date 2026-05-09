@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState, useCallback, useMemo, ReactNode } from 'react';
-import api from '@/lib/api';
+import api, { clearApiCache } from '@/lib/api';
 
 export interface User {
   _id: string;
@@ -51,16 +51,19 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await api.post('/auth/login', { email, password });
+    clearApiCache();
     setUser(res.data.user);
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
     const res = await api.post('/auth/register', { name, email, password });
+    clearApiCache();
     setUser(res.data.user);
   }, []);
 
   const logout = useCallback(async () => {
     await api.post('/auth/logout');
+    clearApiCache();
     setUser(null);
     setUnreadAlertCount(0);
   }, []);
