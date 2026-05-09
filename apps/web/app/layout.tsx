@@ -7,7 +7,11 @@ import { Navbar } from '@/components/Navbar';
 import { AIChatSidebar } from '@/components/AIChatSidebar';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
-const display = DM_Serif_Display({ subsets: ['latin'], weight: '400', variable: '--font-display' });
+const display = DM_Serif_Display({
+  subsets: ['latin'],
+  weight: '400',
+  variable: '--font-display',
+});
 const body = DM_Sans({ subsets: ['latin'], variable: '--font-body' });
 
 export const metadata: Metadata = {

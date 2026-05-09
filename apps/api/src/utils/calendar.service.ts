@@ -19,11 +19,7 @@ export function generateAuthUrl(state: string): string {
   const oauth2Client = getOAuthClient();
   return oauth2Client.generateAuthUrl({
     access_type: 'offline',
-    scope: [
-      'https://www.googleapis.com/auth/calendar.readonly',
-      'openid',
-      'email',
-    ],
+    scope: ['https://www.googleapis.com/auth/calendar.readonly', 'openid', 'email'],
     prompt: 'consent',
     state,
   });
@@ -47,7 +43,9 @@ export async function refreshAccessToken(user: IUser): Promise<string | null> {
 
     if (credentials.access_token) {
       user.googleAccessToken = credentials.access_token;
-      user.googleTokenExpiry = credentials.expiry_date ? new Date(credentials.expiry_date) : undefined;
+      user.googleTokenExpiry = credentials.expiry_date
+        ? new Date(credentials.expiry_date)
+        : undefined;
       await user.save();
       return credentials.access_token;
     }
@@ -120,7 +118,9 @@ export async function fetchUpcomingEvents(accessToken: string) {
 }
 
 // Geocode a raw location string using OpenWeatherMap Geocoding API
-export async function geocodeLocation(location: string): Promise<{ lat: number; lon: number; name: string } | null> {
+export async function geocodeLocation(
+  location: string
+): Promise<{ lat: number; lon: number; name: string } | null> {
   const OWM_KEY = process.env.OWM_API_KEY;
   if (!OWM_KEY) return null;
 

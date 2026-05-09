@@ -35,12 +35,24 @@ export default function LoginPage() {
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className="min-h-screen flex items-center justify-center px-4 relative"
     >
-      <div className="absolute inset-x-0 top-0 h-[30%] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.03) 0%, transparent 100%)' }} />
+      <div
+        className="absolute inset-x-0 top-0 h-[30%] pointer-events-none"
+        style={{
+          background: 'linear-gradient(180deg, rgba(37,99,235,0.03) 0%, transparent 100%)',
+        }}
+      />
       <div className="w-full max-w-md">
-        <h1 className="font-display text-3xl text-center text-[var(--text-primary)] mb-1">Welcome back</h1>
-        <p className="text-sm text-[var(--text-muted)] text-center mb-6">Sign in to your Mausam account</p>
+        <h1 className="font-display text-3xl text-center text-[var(--text-primary)] mb-1">
+          Welcome back
+        </h1>
+        <p className="text-sm text-[var(--text-muted)] text-center mb-6">
+          Sign in to your Mausam account
+        </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-[var(--shadow-md)]">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-[var(--shadow-md)]"
+        >
           {error && (
             <div className="bg-[var(--danger-light)] border border-[var(--danger)]/30 text-[var(--danger)] text-sm rounded-lg px-4 py-3">
               {error}
@@ -48,7 +60,9 @@ export default function LoginPage() {
           )}
 
           <div>
-            <label className="block text-sm text-[var(--text-muted)] mb-1" htmlFor="email">Email</label>
+            <label className="block text-sm text-[var(--text-muted)] mb-1" htmlFor="email">
+              Email
+            </label>
             <input
               id="email"
               type="email"
@@ -61,7 +75,9 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-[var(--text-muted)] mb-1" htmlFor="password">Password</label>
+            <label className="block text-sm text-[var(--text-muted)] mb-1" htmlFor="password">
+              Password
+            </label>
             <input
               id="password"
               type="password"
@@ -84,13 +100,19 @@ export default function LoginPage() {
 
         <p className="text-center text-[var(--text-muted)] text-sm mt-4">
           Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-[var(--accent)] hover:text-[var(--accent-hover)]">Register free</Link>
+          <Link href="/register" className="text-[var(--accent)] hover:text-[var(--accent-hover)]">
+            Register free
+          </Link>
         </p>
 
         <div className="mt-6 bg-[var(--bg-input)]/50 border border-[var(--border)] rounded-xl p-4 text-center shadow-[var(--shadow-sm)]">
           <p className="text-[var(--accent)] text-sm font-medium mb-2">Try the Demo</p>
-          <p className="text-[var(--text-muted)] text-xs mb-1">Email: <span className="text-[var(--text-secondary)]">test@mausam.me</span></p>
-          <p className="text-[var(--text-muted)] text-xs mb-2">Password: <span className="text-[var(--text-secondary)]">password123</span></p>
+          <p className="text-[var(--text-muted)] text-xs mb-1">
+            Email: <span className="text-[var(--text-secondary)]">test@mausam.me</span>
+          </p>
+          <p className="text-[var(--text-muted)] text-xs mb-2">
+            Password: <span className="text-[var(--text-secondary)]">password123</span>
+          </p>
           <button
             type="button"
             onClick={() => {

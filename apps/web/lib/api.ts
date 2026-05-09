@@ -5,7 +5,6 @@ const api = axios.create({
   withCredentials: true,
 });
 
-
 // cached data
 interface CacheEntry {
   data: unknown;
@@ -15,12 +14,11 @@ interface CacheEntry {
 const cache = new Map<string, CacheEntry>();
 
 // 5 minute time to live for cache entries
-const DEFAULT_TTL_MS = 5 * 60 * 1000; 
+const DEFAULT_TTL_MS = 5 * 60 * 1000;
 
 function getCacheKey(config: any): string {
   return `${config.method?.toUpperCase() || 'GET'}:${config.url}${config.params ? ':' + JSON.stringify(config.params) : ''}`;
 }
-
 
 //interceptor to validate cache entry
 api.interceptors.request.use(
@@ -38,14 +36,18 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-
 //interceptor to invalidate cache entry
 api.interceptors.response.use(
   (res) => {
     const config = res.config;
 
     if ((config as any).__cachedData) {
-      return { ...res, data: (config as any).__cachedData, status: 200, statusText: 'OK (cached)' } as any;
+      return {
+        ...res,
+        data: (config as any).__cachedData,
+        status: 200,
+        statusText: 'OK (cached)',
+      } as any;
     }
 
     if (config.method?.toLowerCase() === 'get' && !(config as any).skipCache) {
@@ -59,7 +61,7 @@ api.interceptors.response.use(
 
       for (const key of cache.keys()) {
         if (!key.startsWith('GET:')) continue;
-        const cacheUrl = key.split(':')[1]; 
+        const cacheUrl = key.split(':')[1];
         if (cacheUrl === url || cacheUrl.startsWith(url + '/')) {
           cache.delete(key);
         }
@@ -93,7 +95,6 @@ api.interceptors.response.use(
 );
 
 export default api;
-
 
 //helper to clear cache
 export function clearApiCache(pattern?: string) {

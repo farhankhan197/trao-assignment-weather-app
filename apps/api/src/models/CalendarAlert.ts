@@ -20,23 +20,31 @@ export interface ICalendarAlert extends Document {
   createdAt: Date;
 }
 
-const CalendarAlertSchema = new Schema<ICalendarAlert>({
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-  eventId: { type: String, required: true },
-  eventTitle: { type: String, required: true },
-  eventStart: { type: Date, required: true },
-  eventLocation: { type: String, required: true },
-  lat: { type: Number, required: true },
-  lon: { type: Number, required: true },
-  forecastDate: { type: String, required: true },
-  condition: { type: String, required: true },
-  tempMax: { type: Number, required: true },
-  tempMin: { type: Number, required: true },
-  precipitation: { type: Number, default: 0 },
-  severity: { type: String, enum: ['low', 'medium', 'high'], required: true },
-  message: { type: String, required: true },
-  read: { type: Boolean, default: false },
-}, { timestamps: true });
+const CalendarAlertSchema = new Schema<ICalendarAlert>(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true,
+    },
+    eventId: { type: String, required: true },
+    eventTitle: { type: String, required: true },
+    eventStart: { type: Date, required: true },
+    eventLocation: { type: String, required: true },
+    lat: { type: Number, required: true },
+    lon: { type: Number, required: true },
+    forecastDate: { type: String, required: true },
+    condition: { type: String, required: true },
+    tempMax: { type: Number, required: true },
+    tempMin: { type: Number, required: true },
+    precipitation: { type: Number, default: 0 },
+    severity: { type: String, enum: ['low', 'medium', 'high'], required: true },
+    message: { type: String, required: true },
+    read: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
 
 // Prevent duplicate alerts for same user+event+date
 CalendarAlertSchema.index({ userId: 1, eventId: 1, forecastDate: 1 }, { unique: true });

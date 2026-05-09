@@ -154,7 +154,9 @@ export default function CityDetailPage() {
     <div className="relative min-h-screen">
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.08) 0%, transparent 60%)' }}
+        style={{
+          background: 'linear-gradient(180deg, rgba(37,99,235,0.08) 0%, transparent 60%)',
+        }}
       />
 
       <div className="relative max-w-5xl mx-auto px-4 py-8">
@@ -163,7 +165,18 @@ export default function CityDetailPage() {
           onClick={() => router.push('/dashboard')}
           className="inline-flex items-center text-sm text-[var(--accent)] hover:text-[var(--accent-hover)] mb-6 transition-colors"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mr-2"
+          >
             <path d="m15 18-6-6 6-6" />
           </svg>
           Back to Dashboard
@@ -209,19 +222,27 @@ export default function CityDetailPage() {
             <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-[var(--border-subtle)]">
               <div className="text-center">
                 <p className="text-xs text-[var(--text-muted)] mb-1">Feels Like</p>
-                <p className="text-lg font-medium text-[var(--text-primary)]">{Math.round(current.feelsLike)}°</p>
+                <p className="text-lg font-medium text-[var(--text-primary)]">
+                  {Math.round(current.feelsLike)}°
+                </p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-[var(--text-muted)] mb-1">Humidity</p>
-                <p className="text-lg font-medium text-[var(--text-primary)]">{current.humidity}%</p>
+                <p className="text-lg font-medium text-[var(--text-primary)]">
+                  {current.humidity}%
+                </p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-[var(--text-muted)] mb-1">Wind</p>
-                <p className="text-lg font-medium text-[var(--text-primary)]">{Math.round(current.windSpeed)} km/h</p>
+                <p className="text-lg font-medium text-[var(--text-primary)]">
+                  {Math.round(current.windSpeed)} km/h
+                </p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-[var(--text-muted)] mb-1">Precipitation</p>
-                <p className="text-lg font-medium text-[var(--text-primary)]">{current.precipitation} mm</p>
+                <p className="text-lg font-medium text-[var(--text-primary)]">
+                  {current.precipitation} mm
+                </p>
               </div>
             </div>
           )}
@@ -248,9 +269,13 @@ export default function CityDetailPage() {
                 <div className="flex justify-center mb-2">
                   <WeatherIcon condition={day.condition} className="text-2xl" />
                 </div>
-                <p className="text-sm font-medium text-[var(--text-primary)] capitalize mb-1">{day.condition}</p>
+                <p className="text-sm font-medium text-[var(--text-primary)] capitalize mb-1">
+                  {day.condition}
+                </p>
                 <div className="flex items-center justify-center gap-2 text-xs">
-                  <span className="text-[var(--text-primary)] font-medium">{Math.round(day.tempMax)}°</span>
+                  <span className="text-[var(--text-primary)] font-medium">
+                    {Math.round(day.tempMax)}°
+                  </span>
                   <span className="text-[var(--text-muted)]">{Math.round(day.tempMin)}°</span>
                 </div>
                 {day.precipitation > 0 && (
@@ -276,11 +301,21 @@ export default function CityDetailPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface-hover)]/50">
-                      <th className="text-left px-4 py-3 text-xs text-[var(--text-muted)] font-medium">Day</th>
-                      <th className="text-center px-4 py-3 text-xs text-[var(--text-muted)] font-medium">Condition</th>
-                      <th className="text-right px-4 py-3 text-xs text-[var(--text-muted)] font-medium">High</th>
-                      <th className="text-right px-4 py-3 text-xs text-[var(--text-muted)] font-medium">Low</th>
-                      <th className="text-right px-4 py-3 text-xs text-[var(--text-muted)] font-medium hidden sm:table-cell">Rain</th>
+                      <th className="text-left px-4 py-3 text-xs text-[var(--text-muted)] font-medium">
+                        Day
+                      </th>
+                      <th className="text-center px-4 py-3 text-xs text-[var(--text-muted)] font-medium">
+                        Condition
+                      </th>
+                      <th className="text-right px-4 py-3 text-xs text-[var(--text-muted)] font-medium">
+                        High
+                      </th>
+                      <th className="text-right px-4 py-3 text-xs text-[var(--text-muted)] font-medium">
+                        Low
+                      </th>
+                      <th className="text-right px-4 py-3 text-xs text-[var(--text-muted)] font-medium hidden sm:table-cell">
+                        Rain
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -289,16 +324,26 @@ export default function CityDetailPage() {
                         key={day.date}
                         className={`border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-surface-hover)]/30 transition-colors ${i % 2 === 0 ? 'bg-transparent' : 'bg-[var(--bg-surface-hover)]/20'}`}
                       >
-                        <td className="px-4 py-3 text-[var(--text-primary)] font-medium">{day.dayName}</td>
+                        <td className="px-4 py-3 text-[var(--text-primary)] font-medium">
+                          {day.dayName}
+                        </td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-1.5">
                             <WeatherIcon condition={day.condition} className="text-lg" />
-                            <span className="text-[var(--text-secondary)] capitalize hidden sm:inline">{day.condition}</span>
+                            <span className="text-[var(--text-secondary)] capitalize hidden sm:inline">
+                              {day.condition}
+                            </span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-right text-[var(--text-primary)] font-medium">{Math.round(day.tempMax)}°</td>
-                        <td className="px-4 py-3 text-right text-[var(--text-muted)]">{Math.round(day.tempMin)}°</td>
-                        <td className="px-4 py-3 text-right text-[var(--text-muted)] hidden sm:table-cell">{day.precipitation}mm</td>
+                        <td className="px-4 py-3 text-right text-[var(--text-primary)] font-medium">
+                          {Math.round(day.tempMax)}°
+                        </td>
+                        <td className="px-4 py-3 text-right text-[var(--text-muted)]">
+                          {Math.round(day.tempMin)}°
+                        </td>
+                        <td className="px-4 py-3 text-right text-[var(--text-muted)] hidden sm:table-cell">
+                          {day.precipitation}mm
+                        </td>
                       </tr>
                     ))}
                   </tbody>

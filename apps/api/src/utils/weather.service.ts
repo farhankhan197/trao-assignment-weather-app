@@ -33,12 +33,9 @@ export const fetchCurrentWeather = async (lat: number, lon: number) => {
         'wind_speed_10m',
         'precipitation',
       ].join(','),
-      daily: [
-        'temperature_2m_max',
-        'temperature_2m_min',
-        'precipitation_sum',
-        'weather_code',
-      ].join(','),
+      daily: ['temperature_2m_max', 'temperature_2m_min', 'precipitation_sum', 'weather_code'].join(
+        ','
+      ),
       forecast_days: 7,
       timezone: 'auto',
     },
@@ -53,12 +50,9 @@ export const fetchHistoricalWeather = async (lat: number, lon: number, pastDays:
     params: {
       latitude: lat,
       longitude: lon,
-      daily: [
-        'temperature_2m_max',
-        'temperature_2m_min',
-        'precipitation_sum',
-        'weather_code',
-      ].join(','),
+      daily: ['temperature_2m_max', 'temperature_2m_min', 'precipitation_sum', 'weather_code'].join(
+        ','
+      ),
       past_days: pastDays,
       forecast_days: 1,
       timezone: 'auto',

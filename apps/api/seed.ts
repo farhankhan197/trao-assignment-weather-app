@@ -13,10 +13,38 @@ const TEST_USER = {
 };
 
 const DEMO_CITIES = [
-  { name: 'London', country: 'United Kingdom', countryCode: 'GB', lat: 51.5074, lon: -0.1278, isFavorite: true },
-  { name: 'Tokyo', country: 'Japan', countryCode: 'JP', lat: 35.6762, lon: 139.6503, isFavorite: true },
-  { name: 'Dubai', country: 'United Arab Emirates', countryCode: 'AE', lat: 25.2048, lon: 55.2708, isFavorite: true },
-  { name: 'New York', country: 'United States', countryCode: 'US', lat: 40.7128, lon: -74.006, isFavorite: true },
+  {
+    name: 'London',
+    country: 'United Kingdom',
+    countryCode: 'GB',
+    lat: 51.5074,
+    lon: -0.1278,
+    isFavorite: true,
+  },
+  {
+    name: 'Tokyo',
+    country: 'Japan',
+    countryCode: 'JP',
+    lat: 35.6762,
+    lon: 139.6503,
+    isFavorite: true,
+  },
+  {
+    name: 'Dubai',
+    country: 'United Arab Emirates',
+    countryCode: 'AE',
+    lat: 25.2048,
+    lon: 55.2708,
+    isFavorite: true,
+  },
+  {
+    name: 'New York',
+    country: 'United States',
+    countryCode: 'US',
+    lat: 40.7128,
+    lon: -74.006,
+    isFavorite: true,
+  },
 ];
 
 async function seed() {
@@ -43,7 +71,10 @@ async function seed() {
   const userId = user._id;
 
   // 2. Remove existing demo cities for this user
-  await City.deleteMany({ userId, name: { $in: DEMO_CITIES.map(c => c.name) } });
+  await City.deleteMany({
+    userId,
+    name: { $in: DEMO_CITIES.map((c) => c.name) },
+  });
 
   // 3. Add demo cities
   for (const cityData of DEMO_CITIES) {

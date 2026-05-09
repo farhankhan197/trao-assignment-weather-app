@@ -12,7 +12,11 @@ export interface AlertCheckResult {
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('en', { weekday: 'short', month: 'short', day: 'numeric' });
+  return d.toLocaleDateString('en', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 export function checkWeatherForAlert(

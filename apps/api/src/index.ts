@@ -22,15 +22,17 @@ const ALLOWED_ORIGINS = [
   'https://mausam.farhankhan.site',
 ];
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
-    if (!origin) return callback(null, true);
-    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
-    callback(new Error(`CORS blocked: ${origin}`));
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS blocked: ${origin}`));
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 
@@ -52,7 +54,9 @@ app.use('/api/ai', aiRoutes);
 app.use('/', calendarRoutes);
 
 // ─── Health check ─────────────────────────────────────────────────────────────
-app.get('/health', (_req, res) => res.json({ status: 'ok', env: process.env.NODE_ENV || 'unknown' }));
+app.get('/health', (_req, res) =>
+  res.json({ status: 'ok', env: process.env.NODE_ENV || 'unknown' })
+);
 
 // ─── Global error handler ─────────────────────────────────────────────────────
 app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

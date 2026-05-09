@@ -1,8 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-
-
 // user interface
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
@@ -18,31 +16,33 @@ export interface IUser extends Document {
   comparePassword(password: string): Promise<boolean>;
 }
 
-
 // user schema
-const UserSchema = new Schema<IUser>({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true,
+const UserSchema = new Schema<IUser>(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    passwordHash: {
+      type: String,
+      required: true,
+    },
+    googleAccessToken: { type: String, default: null },
+    googleRefreshToken: { type: String, default: null },
+    googleTokenExpiry: { type: Date, default: null },
+    googleEmail: { type: String, default: null },
+    calendarConnected: { type: Boolean, default: false },
   },
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  passwordHash: {
-    type: String,
-    required: true,
-  },
-  googleAccessToken: { type: String, default: null },
-  googleRefreshToken: { type: String, default: null },
-  googleTokenExpiry: { type: Date, default: null },
-  googleEmail: { type: String, default: null },
-  calendarConnected: { type: Boolean, default: false },
-}, { timestamps: true });
+  { timestamps: true }
+);
 
 // delete sensitive fields in JSON responses
 UserSchema.set('toJSON', {

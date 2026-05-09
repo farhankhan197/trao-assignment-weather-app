@@ -1,11 +1,7 @@
 import cron from 'node-cron';
 import { User } from '../models/User';
 import { CalendarAlert } from '../models/CalendarAlert';
-import {
-  getValidAccessToken,
-  fetchUpcomingEvents,
-  geocodeLocation,
-} from './calendar.service';
+import { getValidAccessToken, fetchUpcomingEvents, geocodeLocation } from './calendar.service';
 import { fetchCurrentWeather } from './weather.service';
 import { checkWeatherForAlert } from './alertEngine';
 
@@ -93,7 +89,9 @@ export async function runCalendarAlertScanForUser(userId: string) {
       errorMessage.includes('insufficient permissions');
 
     if (isScopeError && user) {
-      console.error(`[CalendarAlertJob] Insufficient scopes for user ${userId}. Disconnecting calendar.`);
+      console.error(
+        `[CalendarAlertJob] Insufficient scopes for user ${userId}. Disconnecting calendar.`
+      );
       user.calendarConnected = false;
       user.googleAccessToken = undefined;
       user.googleRefreshToken = undefined;

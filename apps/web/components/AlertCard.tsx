@@ -69,9 +69,7 @@ export function AlertCard({ alert, onMarkRead }: Props) {
             </span>
             <span className="text-[var(--border)]">·</span>
             <span className="text-xs text-[var(--text-muted)]">{timeStr}</span>
-            {!alert.read && (
-              <span className="w-2 h-2 bg-[var(--accent)] rounded-full ml-1" />
-            )}
+            {!alert.read && <span className="w-2 h-2 bg-[var(--accent)] rounded-full ml-1" />}
           </div>
 
           <h3 className="font-display text-lg text-[var(--text-primary)] mb-1 truncate">
@@ -79,8 +77,19 @@ export function AlertCard({ alert, onMarkRead }: Props) {
           </h3>
 
           <div className="flex items-center gap-1 text-xs text-[var(--text-muted)]">
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
             </svg>
             {alert.eventLocation}
           </div>
@@ -90,7 +99,9 @@ export function AlertCard({ alert, onMarkRead }: Props) {
         <div className="shrink-0 text-right">
           <div className="text-3xl mb-1.5">{CONDITION_ICONS[alert.condition] || '☁️'}</div>
 
-          <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider border ${SEVERITY_BADGE[alert.severity]}`}>
+          <span
+            className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider border ${SEVERITY_BADGE[alert.severity]}`}
+          >
             {alert.severity}
           </span>
 
@@ -106,9 +117,7 @@ export function AlertCard({ alert, onMarkRead }: Props) {
       {/* Bottom: Message with Markdown */}
       <div className="px-5 py-4">
         <div className="text-sm text-[var(--text-secondary)] leading-relaxed prose prose-sm max-w-none alert-message">
-          <ReactMarkdown>
-            {alert.message}
-          </ReactMarkdown>
+          <ReactMarkdown>{alert.message}</ReactMarkdown>
         </div>
 
         {/* Mark Read */}

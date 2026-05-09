@@ -1,5 +1,11 @@
 import { ChatGroq } from '@langchain/groq';
-import { HumanMessage, AIMessage, ToolMessage, SystemMessage, BaseMessage } from '@langchain/core/messages';
+import {
+  HumanMessage,
+  AIMessage,
+  ToolMessage,
+  SystemMessage,
+  BaseMessage,
+} from '@langchain/core/messages';
 import { createWeatherTools } from './tools';
 
 const MAX_ITERATIONS = 10;
@@ -30,10 +36,7 @@ export const runWeatherAgent = async (userId: string, userMessage: string): Prom
   const toolMap = new Map(tools.map((t) => [t.name, t]));
   const modelWithTools = llm.bindTools(tools);
 
-  const messages: BaseMessage[] = [
-    new SystemMessage(SYSTEM_PROMPT),
-    new HumanMessage(userMessage),
-  ];
+  const messages: BaseMessage[] = [new SystemMessage(SYSTEM_PROMPT), new HumanMessage(userMessage)];
 
   for (let i = 0; i < MAX_ITERATIONS; i++) {
     let response;

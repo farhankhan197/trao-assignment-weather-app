@@ -27,14 +27,20 @@ router.post('/chat', authenticate, async (req: Request, res: Response) => {
 // auto-generates personalized weather insights for favorite cities
 router.get('/insights', authenticate, async (req: Request, res: Response) => {
   try {
-    const favorites = await City.find({ userId: req.user!.id, isFavorite: true });
+    const favorites = await City.find({
+      userId: req.user!.id,
+      isFavorite: true,
+    });
 
     if (!favorites.length) {
-      res.json({ insights: 'No favorite cities set. Mark some cities as favorites to get personalized insights.' });
+      res.json({
+        insights:
+          'No favorite cities set. Mark some cities as favorites to get personalized insights.',
+      });
       return;
     }
 
-    const cityList = favorites.map(c => c.name).join(', ');
+    const cityList = favorites.map((c) => c.name).join(', ');
     const prompt = `Generate a concise, friendly weather overview for my favorite cities: ${cityList}.
     For each city, get the current weather, then provide actionable insights:
     what to wear, whether to carry an umbrella, best time to go outside.

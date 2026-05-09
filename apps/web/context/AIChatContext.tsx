@@ -42,11 +42,12 @@ export function AIChatProvider({ children }: { children: ReactNode }) {
       const res = await api.post('/api/ai/chat', { message: text.trim() });
       const assistantMessage: ChatMessage = {
         role: 'assistant',
-        content: res.data.response || 'I\'m not sure how to respond to that.',
+        content: res.data.response || "I'm not sure how to respond to that.",
       };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err: any) {
-      const errorText = err?.response?.data?.error || err?.message || 'Something went wrong. Please try again.';
+      const errorText =
+        err?.response?.data?.error || err?.message || 'Something went wrong. Please try again.';
       const errorMessage: ChatMessage = {
         role: 'assistant',
         content: `Error: ${errorText}`,
@@ -62,11 +63,7 @@ export function AIChatProvider({ children }: { children: ReactNode }) {
     [isOpen, messages, isLoading, toggle, close, open, sendMessage]
   );
 
-  return (
-    <AIChatContext.Provider value={value}>
-      {children}
-    </AIChatContext.Provider>
-  );
+  return <AIChatContext.Provider value={value}>{children}</AIChatContext.Provider>;
 }
 
 export function useAIChat() {
