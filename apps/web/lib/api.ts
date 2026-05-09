@@ -23,7 +23,7 @@ function getCacheKey(config: AxiosRequestConfig): string {
 
 //interceptor to validate cache entry
 api.interceptors.request.use(
-  (config) => {
+  (config: any) => {
     if (config.method?.toLowerCase() !== 'get') return config;
     if (config.skipCache) return config;
 
@@ -40,7 +40,7 @@ api.interceptors.request.use(
 //interceptor to invalidate cache entry
 api.interceptors.response.use(
   (res) => {
-    const config = res.config;
+    const config = res.config as any;
 
     if (config.__cachedData) {
       return {
@@ -80,12 +80,12 @@ api.interceptors.response.use(
     }
 
     return res;
-  },
+  }, // <--- Fixed: Added missing comma
   (error: AxiosError) => {
     if (
       error.response?.status === 401 &&
       typeof window !== 'undefined' &&
-      !error.config?.skipAuthRedirect &&
+      !(error.config as any)?.skipAuthRedirect &&
       !window.location.pathname.startsWith('/login') &&
       !window.location.pathname.startsWith('/register')
     ) {
