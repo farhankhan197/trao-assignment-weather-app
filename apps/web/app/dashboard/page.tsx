@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { CitySearch } from '@/components/CitySearch';
 import { CityCard } from '@/components/CityCard';
@@ -26,7 +27,7 @@ interface SearchResult {
 }
 
 export default function DashboardPage() {
-  const { user, loading: authLoading } = useRequireAuth();
+  const { loading: authLoading } = useRequireAuth();
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -55,8 +56,8 @@ export default function DashboardPage() {
         lon: result.lon,
       });
       setCities((prev) => [res.data.city, ...prev]);
-    } catch (err: any) {
-      if (err.response?.status === 409) {
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err) && err.response?.status === 409) {
         alert('City already added to your dashboard');
       } else {
         alert('Failed to add city');
@@ -121,7 +122,7 @@ export default function DashboardPage() {
           <div className="relative text-center py-20">
             <h2 className="font-display text-xl mb-2 text-[var(--text-primary)]">No cities yet</h2>
             <p className="text-[var(--text-muted)] text-sm max-w-md mx-auto">
-              Search for a city above to add it to your dashboard. You'll see live weather and
+              Search for a city above to add it to your dashboard. You&apos;ll see live weather and
               streaks for each city.
             </p>
           </div>

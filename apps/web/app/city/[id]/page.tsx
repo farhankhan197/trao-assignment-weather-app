@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { WeatherIcon } from '@/components/WeatherIcon';
 import WeatherAtmosphere from '@/components/weather/WeatherAtmosphere';
@@ -36,6 +37,14 @@ interface HistoryDay {
   precipitation: number;
 }
 
+interface ApiHistoryDay {
+  date: string;
+  condition: string;
+  tempMax: number;
+  tempMin: number;
+  precipitation: number;
+}
+
 interface CurrentWeather {
   temperature: number;
   feelsLike: number;
@@ -48,7 +57,7 @@ interface CurrentWeather {
 export default function CityDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { user, loading: authLoading } = useRequireAuth();
+  const { loading: authLoading } = useRequireAuth();
 
   const [city, setCity] = useState<City | null>(null);
   const [current, setCurrent] = useState<CurrentWeather | null>(null);
@@ -103,7 +112,7 @@ export default function CityDetailPage() {
       const histData = historyRes.data.history;
       const last7 = histData.slice(-7);
       setHistory(
-        last7.map((h: any) => {
+        last7.map((h: ApiHistoryDay) => {
           const d = new Date(h.date);
           return {
             date: h.date,
@@ -115,8 +124,12 @@ export default function CityDetailPage() {
           };
         })
       );
-    } catch (err: any) {
-      setError(err?.response?.data?.error || 'Failed to load city data');
+    } catch (err: unknown) {
+      const errorMessage =
+        axios.isAxiosError<{ error?: string }>(err) && err.response?.data?.error
+          ? err.response.data.error
+          : 'Failed to load city data';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

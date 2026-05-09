@@ -5,6 +5,10 @@ import { City } from '../models/City';
 
 const router = Router();
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Unknown error';
+}
+
 // POST /api/ai/chat
 // natural language interaction with weather agent
 router.post('/chat', authenticate, async (req: Request, res: Response) => {
@@ -17,9 +21,10 @@ router.post('/chat', authenticate, async (req: Request, res: Response) => {
 
     const response = await runWeatherAgent(req.user!.id, message);
     res.json({ response });
-  } catch (err: any) {
-    console.error('[AI Agent Error]', err.message);
-    res.status(500).json({ error: err.message || 'AI agent failed' });
+  } catch (err: unknown) {
+    const message = getErrorMessage(err);
+    console.error('[AI Agent Error]', message);
+    res.status(500).json({ error: message || 'AI agent failed' });
   }
 });
 
@@ -48,8 +53,8 @@ router.get('/insights', authenticate, async (req: Request, res: Response) => {
 
     const insights = await runWeatherAgent(req.user!.id, prompt);
     res.json({ insights });
-  } catch (err: any) {
-    console.error('[AI Agent Error]', err.message);
+  } catch (err: unknown) {
+    console.error('[AI Agent Error]', getErrorMessage(err));
     res.status(500).json({ error: 'Failed to generate insights' });
   }
 });

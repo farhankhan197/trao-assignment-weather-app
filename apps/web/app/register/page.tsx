@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import axios from 'axios';
 import { useSession } from '@/context/SessionContext';
 
 export default function RegisterPage() {
@@ -22,8 +23,12 @@ export default function RegisterPage() {
     try {
       await register(name, email, password);
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Registration failed. Please try again.');
+    } catch (err: unknown) {
+      const errorMessage =
+        axios.isAxiosError<{ error?: string }>(err) && err.response?.data?.error
+          ? err.response.data.error
+          : 'Registration failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -3,6 +3,10 @@ import { City } from '../models/City';
 import { calculateStreak } from '../utils/streak';
 import { fetchHistoricalWeather, getConditionFromCode } from '../utils/weather.service';
 
+function isDuplicateKeyError(error: unknown): boolean {
+  return typeof error === 'object' && error !== null && 'code' in error && error.code === 11000;
+}
+
 // GET /api/cities — all cities for the authenticated user
 export const getCities = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -37,8 +41,8 @@ export const addCity = async (req: Request, res: Response): Promise<void> => {
     });
 
     res.status(201).json({ city });
-  } catch (err: any) {
-    if (err.code === 11000) {
+  } catch (err: unknown) {
+    if (isDuplicateKeyError(err)) {
       res.status(409).json({ error: 'City already added to your dashboard' });
       return;
     }

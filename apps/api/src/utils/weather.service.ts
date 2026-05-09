@@ -2,13 +2,21 @@ import axios from 'axios';
 
 const OWM_KEY = process.env.OWM_API_KEY;
 
+interface GeocodeResult {
+  name: string;
+  country: string;
+  lat: number;
+  lon: number;
+  state?: string;
+}
+
 // Search for cities using OWM Geocoding API
 export const geocodeCity = async (query: string) => {
   const url = `https://api.openweathermap.org/geo/1.0/direct`;
-  const { data } = await axios.get(url, {
+  const { data } = await axios.get<GeocodeResult[]>(url, {
     params: { q: query, limit: 5, appid: OWM_KEY },
   });
-  return data.map((r: any) => ({
+  return data.map((r) => ({
     name: r.name,
     country: r.country,
     countryCode: r.country,

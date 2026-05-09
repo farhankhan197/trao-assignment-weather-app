@@ -9,15 +9,43 @@ import { City } from '../models/City';
 import { CalendarAlert } from '../models/CalendarAlert';
 import { calculateStreak } from '../utils/streak';
 
+type ToolInput = string | string[] | Record<string, unknown>;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
 // Helper: extract string arg from either a raw string or { field: string }
-function extractStringArg(input: any, fieldName = 'input'): string {
+function extractStringArg(input: unknown, fieldName = 'input'): string {
   if (typeof input === 'string') return input;
-  if (input && typeof input === 'object') {
-    return (
-      input[fieldName] || input.query || input.city_name || input.city || JSON.stringify(input)
-    );
+  if (Array.isArray(input)) return input.map(String).join(', ');
+  if (isRecord(input)) {
+    const value = input[fieldName] ?? input.query ?? input.city_name ?? input.city;
+    return typeof value === 'string' ? value : JSON.stringify(input);
   }
   return String(input);
+}
+
+function extractCityNames(input: ToolInput): string[] {
+  if (Array.isArray(input))
+    return input
+      .map(String)
+      .map((name) => name.trim())
+      .filter(Boolean);
+
+  if (isRecord(input)) {
+    const value = input.city_names;
+    if (Array.isArray(value))
+      return value
+        .map(String)
+        .map((name) => name.trim())
+        .filter(Boolean);
+  }
+
+  return extractStringArg(input, 'city_names')
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean);
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -81,7 +109,7 @@ const getWeatherCurrent = (userId: string) =>
     name: 'get_weather_current',
     description:
       'Fetches current weather for a saved city by name. Returns temperature, condition, humidity, wind speed, and precipitation. Input: city name.',
-    func: async (input: any) => {
+    func: async (input: ToolInput) => {
       const city_name = extractStringArg(input, 'city_name');
       const city = await City.findOne({
         userId,
@@ -113,7 +141,7 @@ const getWeatherForecast = (userId: string) =>
     name: 'get_weather_forecast',
     description:
       'Fetches a 7-day daily weather forecast for a saved city. Returns day-by-day highs, lows, conditions, and precipitation. Input: city name.',
-    func: async (input: any) => {
+    func: async (input: ToolInput) => {
       const city_name = extractStringArg(input, 'city_name');
       const city = await City.findOne({
         userId,
@@ -146,7 +174,7 @@ const getWeatherStreak = (userId: string) =>
     name: 'get_weather_streak',
     description:
       'Analyzes the last 15 days of weather for a saved city and reports any consecutive-day streak (e.g., "Rainy for 5 days", "Sunny streak"). Input: city name.',
-    func: async (input: any) => {
+    func: async (input: ToolInput) => {
       const city_name = extractStringArg(input, 'city_name');
       const city = await City.findOne({
         userId,
@@ -178,7 +206,7 @@ const searchCityWeather = new DynamicTool({
   name: 'search_city_weather',
   description:
     'Searches for any city worldwide by name, geocodes it, and returns current weather. Use this when the user asks about a city they have NOT saved in their dashboard. Input: city name or query.',
-  func: async (input: any) => {
+  func: async (input: ToolInput) => {
     const query = extractStringArg(input, 'query');
     const results = await geocodeCity(query);
     if (!results.length) return `No city found matching "${query}".`;
@@ -233,14 +261,8 @@ const compareCities = (userId: string) =>
     name: 'compare_cities',
     description:
       'Compares current weather across multiple saved cities at once. Input: array of city names (e.g., ["Mumbai", "Delhi", "Shimla"]).',
-    func: async (input: any) => {
-      const raw = extractStringArg(input, 'city_names');
-      const cityNames = Array.isArray(raw)
-        ? raw
-        : raw
-            .split(',')
-            .map((n: string) => n.trim())
-            .filter(Boolean);
+    func: async (input: ToolInput) => {
+      const cityNames = extractCityNames(input);
       if (cityNames.length < 2) return 'Please provide at least 2 city names separated by commas.';
 
       const results = await Promise.all(

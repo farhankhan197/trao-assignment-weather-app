@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
+import axios from 'axios';
 import api from '@/lib/api';
 
 export interface ChatMessage {
@@ -45,9 +46,10 @@ export function AIChatProvider({ children }: { children: ReactNode }) {
         content: res.data.response || "I'm not sure how to respond to that.",
       };
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err: any) {
-      const errorText =
-        err?.response?.data?.error || err?.message || 'Something went wrong. Please try again.';
+    } catch (err: unknown) {
+      const errorText = axios.isAxiosError<{ error?: string }>(err)
+        ? err.response?.data?.error || err.message
+        : 'Something went wrong. Please try again.';
       const errorMessage: ChatMessage = {
         role: 'assistant',
         content: `Error: ${errorText}`,

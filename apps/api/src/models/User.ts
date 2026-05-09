@@ -46,7 +46,7 @@ const UserSchema = new Schema<IUser>(
 
 // delete sensitive fields in JSON responses
 UserSchema.set('toJSON', {
-  transform: (_doc: any, ret: any) => {
+  transform: (_doc, ret: Partial<IUser> & { __v?: number }) => {
     delete ret.passwordHash;
     delete ret.googleAccessToken;
     delete ret.googleRefreshToken;

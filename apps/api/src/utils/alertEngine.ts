@@ -1,4 +1,4 @@
-import { fetchCurrentWeather, getConditionFromCode } from './weather.service';
+import { getConditionFromCode } from './weather.service';
 
 export interface AlertCheckResult {
   shouldAlert: boolean;
@@ -8,6 +8,13 @@ export interface AlertCheckResult {
   precipitation: number;
   severity: 'low' | 'medium' | 'high';
   message: string;
+}
+
+interface ForecastDay {
+  temperature_2m_max: number;
+  temperature_2m_min: number;
+  precipitation_sum?: number;
+  weather_code: number;
 }
 
 function formatDate(dateStr: string): string {
@@ -23,7 +30,7 @@ export function checkWeatherForAlert(
   eventTitle: string,
   eventLocation: string,
   eventDate: string,
-  forecastDay: any
+  forecastDay: ForecastDay
 ): AlertCheckResult {
   const tempMax = forecastDay.temperature_2m_max;
   const tempMin = forecastDay.temperature_2m_min;

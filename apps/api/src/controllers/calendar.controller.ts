@@ -5,12 +5,19 @@ import { CalendarAlert } from '../models/CalendarAlert';
 import {
   generateAuthUrl,
   exchangeCodeForTokens,
-  getValidAccessToken,
   refreshAccessToken,
 } from '../utils/calendar.service';
 import { runCalendarAlertScanForUser } from '../utils/calendarAlertJob';
 
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
+
+interface CalendarStatePayload {
+  userId: string;
+}
+
+interface GoogleIdTokenPayload {
+  email?: string;
+}
 
 // GET /auth/calendar/connect
 // Redirects user to Google's OAuth consent screen
@@ -45,9 +52,13 @@ export const calendarCallback = async (req: Request, res: Response): Promise<voi
     }
 
     // Verify state JWT
-    let payload: any;
+    let payload: CalendarStatePayload;
     try {
-      payload = jwt.verify(state, process.env.JWT_SECRET as string);
+      const verifiedState = jwt.verify(state, process.env.JWT_SECRET as string);
+      if (typeof verifiedState === 'string' || !('userId' in verifiedState)) {
+        throw new Error('Invalid state payload');
+      }
+      payload = verifiedState as CalendarStatePayload;
     } catch {
       res.redirect(`${CLIENT_URL}/dashboard?calendar=error&message=Invalid or expired state`);
       return;
@@ -64,7 +75,7 @@ export const calendarCallback = async (req: Request, res: Response): Promise<voi
     // Decode Google ID token to capture the connected Google account email
     let googleEmail: string | undefined;
     if (tokens.id_token) {
-      const idPayload = jwt.decode(tokens.id_token) as any;
+      const idPayload = jwt.decode(tokens.id_token) as GoogleIdTokenPayload | null;
       googleEmail = idPayload?.email;
     }
 

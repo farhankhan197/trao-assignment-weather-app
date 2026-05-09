@@ -1,10 +1,30 @@
-import { google } from 'googleapis';
+import { calendar_v3, google } from 'googleapis';
 import axios from 'axios';
-import { User, IUser } from '../models/User';
+import { IUser } from '../models/User';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
+
+interface GoogleOAuthErrorData {
+  error?: string;
+}
+
+interface CalendarEventSummary {
+  id: string;
+  title: string;
+  start: string;
+  location: string;
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : '';
+}
+
+function getOAuthErrorData(error: unknown): GoogleOAuthErrorData | undefined {
+  if (!axios.isAxiosError(error)) return undefined;
+  return error.response?.data as GoogleOAuthErrorData | undefined;
+}
 
 // Build OAuth2 client
 function getOAuthClient() {
@@ -50,9 +70,9 @@ export async function refreshAccessToken(user: IUser): Promise<string | null> {
       return credentials.access_token;
     }
     return null;
-  } catch (err: any) {
-    const errorData = err.response?.data;
-    const errorMessage = err.message || '';
+  } catch (err: unknown) {
+    const errorData = getOAuthErrorData(err);
+    const errorMessage = getErrorMessage(err);
     const isScopeError =
       errorData?.error === 'insufficient_permissions' ||
       errorData?.error === 'insufficient_authentication_scopes' ||
@@ -86,7 +106,7 @@ export async function getValidAccessToken(user: IUser): Promise<string | null> {
 }
 
 // Fetch upcoming events from Google Calendar (next 7 days)
-export async function fetchUpcomingEvents(accessToken: string) {
+export async function fetchUpcomingEvents(accessToken: string): Promise<CalendarEventSummary[]> {
   const oauth2Client = new google.auth.OAuth2();
   oauth2Client.setCredentials({ access_token: accessToken });
 
@@ -108,12 +128,12 @@ export async function fetchUpcomingEvents(accessToken: string) {
   const items = res.data.items || [];
 
   return items
-    .filter((event: any) => !!event.location)
-    .map((event: any) => ({
-      id: event.id,
+    .filter((event: calendar_v3.Schema$Event) => !!event.location && !!event.id)
+    .map((event: calendar_v3.Schema$Event) => ({
+      id: event.id as string,
       title: event.summary || 'Untitled Event',
-      start: event.start?.dateTime || event.start?.date,
-      location: event.location,
+      start: event.start?.dateTime || event.start?.date || new Date().toISOString(),
+      location: event.location as string,
     }));
 }
 

@@ -59,7 +59,7 @@ app.get('/health', (_req, res) =>
 );
 
 // ─── Global error handler ─────────────────────────────────────────────────────
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: Error, _req: express.Request, res: express.Response) => {
   console.error('[Error]', err.message);
   res.status(500).json({ error: 'Internal server error' });
 });

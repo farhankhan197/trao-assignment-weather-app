@@ -34,6 +34,13 @@ interface HistoryPoint {
   tempMin: number;
 }
 
+interface ApiHistoryPoint {
+  date: string;
+  condition: string;
+  tempMax: number;
+  tempMin: number;
+}
+
 interface CurrentWeather {
   temperature: number;
   condition: string;
@@ -45,9 +52,8 @@ interface CurrentWeather {
 }
 
 export default function FavoritesPage() {
-  const { user, loading: authLoading } = useRequireAuth();
+  const { loading: authLoading } = useRequireAuth();
   const router = useRouter();
-  const [cities, setCities] = useState<City[]>([]);
   const [favorites, setFavorites] = useState<City[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [current, setCurrent] = useState<CurrentWeather | null>(null);
@@ -60,7 +66,6 @@ export default function FavoritesPage() {
     try {
       const res = await api.get('/api/cities');
       const all = res.data.cities || [];
-      setCities(all);
       const favs = all.filter((c: City) => c.isFavorite);
       setFavorites(favs);
       if (favs.length > 0 && !selectedId) {
@@ -105,7 +110,7 @@ export default function FavoritesPage() {
         });
         if (hRes?.data?.history) {
           setHistory(
-            hRes.data.history.map((h: any) => ({
+            hRes.data.history.map((h: ApiHistoryPoint) => ({
               date: formatDateShort(h.date),
               condition: h.condition,
               tempMax: h.tempMax,
