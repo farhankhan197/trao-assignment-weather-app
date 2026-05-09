@@ -91,7 +91,7 @@ api.interceptors.response.use(
     }
 
     return res;
-  },
+  }
   (error: AxiosError) => {
     if (
       error.response?.status === 401 &&
