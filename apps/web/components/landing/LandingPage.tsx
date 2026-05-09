@@ -109,7 +109,7 @@ export default function LandingPage() {
     }
   }, [authLoading, user, fetchFavorites]);
 
-  if (loading && authLoading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
         <MausamLoader variant="inline" hint="Mausam kaisa hai?"/>
