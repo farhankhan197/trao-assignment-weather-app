@@ -19,7 +19,7 @@ I believe the preferred stack is genuinely well-suited for this kind of CRUD + e
 
 I used turborepo to help me organize the codebase and to take advantage of the caching and build speed features. I used pnpm as the package manager because it is a fast and efficient package manager and it is a dependency of turborepo.
 
-I also used Bun as the runtime for the API because it is a fast and efficient runtime and the server hot reloading functionality. 
+I also used Bun as the runtime for the API because it is a fast and efficient runtime and the server hot reloading functionality.
 
 These decisions helped me spend my time actually building the product instead of hopping between terminals.
 

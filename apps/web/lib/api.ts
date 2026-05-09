@@ -15,7 +15,7 @@ interface CacheEntry {
 const cache = new Map<string, CacheEntry>();
 
 // 5 minute time to live for cache entries
-const DEFAULT_TTL_MS = 5 * 60 * 1000; 
+const DEFAULT_TTL_MS = 5 * 60 * 1000;
 
 function getCacheKey(config: AxiosRequestConfig): string {
   return `${config.method?.toUpperCase() || 'GET'}:${config.url}${config.params ? ':' + JSON.stringify(config.params) : ''}`;
@@ -43,11 +43,11 @@ api.interceptors.response.use(
     const config = res.config as any;
 
     if (config.__cachedData) {
-      return { 
-        ...res, 
-        data: config.__cachedData, 
-        status: 200, 
-        statusText: 'OK (cached)' 
+      return {
+        ...res,
+        data: config.__cachedData,
+        status: 200,
+        statusText: 'OK (cached)',
       } as AxiosResponse<unknown>;
     }
 
