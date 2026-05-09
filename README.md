@@ -1,5 +1,8 @@
 # Mausam
 
+## This branch contains minor fixes and improvements I made after submitting the assignment.
+## The main branch still contains the same code as the submission.
+
 An assignment I built for the TRAO hiring process.
 
 **Web App**: [https://mausam.farhankhan.site](https://mausam.farhankhan.site)  
