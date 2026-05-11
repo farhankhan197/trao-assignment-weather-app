@@ -1,10 +1,8 @@
 # Mausam
 
-## This branch contains minor fixes and improvements I made after submitting the assignment.
-
-## The main branch still contains the same code as the submission.
-
 An assignment I built for the TRAO hiring process.
+
+> **Note on `post-submission-enhancements` branch:** This branch contains fixes and improvements I made after submitting the assignment. The `main` branch still contains the same code as the submission. See [Post-Submission Enhancements](#post-submission-enhancements) for details.
 
 **Web App**: [https://mausam.farhankhan.site](https://mausam.farhankhan.site)  
 **API**: [https://api-mausam.farhankhan.site](https://api-mausam.farhankhan.site)
@@ -46,6 +44,52 @@ These decisions helped me spend my time actually building the product instead of
 | **API Dev Runtime** | Bun                                         | `--hot` reload is faster than `ts-node`/`nodemon` for local API development |
 | **Deployment**      | Vercel (both frontend + backend)            | Zero-config Next.js; serverless Express API with `export default app`       |
 | **Frontend Cache**  | Axios request/response interceptors         | 5-minute in-memory TTL cache for GET requests                               |
+| **Server Cache**    | Upstash Redis (via `@upstash/redis`)        | Serverless-compatible Redis caching for weather & geocoding                 |
+
+---
+
+## Post-Submission Enhancements
+
+This branch (`post-submission-enhancements`) contains iterative improvements I made after the initial submission. Below is a summary of what was added.
+
+### 1. Server-Side Redis Caching
+
+**What changed:** Added Upstash Redis (`@upstash/redis`) to cache expensive external API calls on the backend. The cache is designed for serverless environments (Vercel) with graceful degradation — if credentials are missing, caching is silently skipped and the app continues to work.
+
+**Cached data & TTLs:**
+
+| Data                            | Cache Key                         | TTL    | Rationale                        |
+| ------------------------------- | --------------------------------- | ------ | -------------------------------- |
+| City geocoding (OWM)            | `geo:{query}`                     | 24h    | City coordinates rarely change   |
+| Current weather (Open-Meteo)    | `weather:current:{lat}:{lon}`     | 15 min | Weather updates ~every 10–30 min |
+| Historical weather (Open-Meteo) | `weather:hist:{lat}:{lon}:{days}` | 6h     | Past weather is immutable        |
+| Calendar location geocoding     | `geo:{location}`                  | 24h    | Same as city search              |
+
+**Files changed:**
+
+- `apps/api/src/utils/redis.ts` — Redis client with no-op stub for local dev without credentials
+- `apps/api/src/utils/cache.ts` — Generic `getCachedData` / `setCachedData` / `delCachedData` helpers
+- `apps/api/src/utils/weather.service.ts` — Cache-first logic in `geocodeCity`, `fetchCurrentWeather`, `fetchHistoricalWeather`
+- `apps/api/src/utils/calendar.service.ts` — Cached `geocodeLocation`
+- `apps/api/package.json` — Added `@upstash/redis` dependency
+
+**Env vars to add:**
+
+```env
+REDIS_URL=https://your-url.upstash.io
+REDIS_TOKEN=your-token
+```
+
+### 2. CI/CD & Code Quality
+
+- **GitHub Actions CI** (`.github/workflows/ci.yml`) — Automated type-check, lint, and build on every push
+- **Pre-commit hooks** (Husky + lint-staged) — Enforces Prettier formatting before every commit to eliminate formatting drift
+- **Build fixes** — Resolved TypeScript strict-mode errors and cross-platform line-ending issues
+
+### 3. Server Bug Fixes
+
+- Fixed server-side issues related to session state management (clearing cache on auth state changes)
+- Cleaned up lockfiles (removed `bun.lockfile` to standardize on `pnpm-lock.yaml`)
 
 ---
 
@@ -81,9 +125,13 @@ CLIENT_URL=http://localhost:3000
 OWM_API_KEY=your_openweathermap_key
 GROQ_API_KEY=your_groq_key
 NODE_ENV=development
+REDIS_URL=https://your-url.upstash.io
+REDIS_TOKEN=your-token
 ```
 
 > Optional for Calendar Alerts: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`
+>
+> Optional for server-side caching: `REDIS_URL`, `REDIS_TOKEN` (uses Upstash Redis; if omitted, caching is silently disabled)
 
 **Frontend** — create `apps/web/.env.local`:
 
@@ -262,7 +310,7 @@ This demonstrates OAuth integration, background job design with `node-cron`, and
 
 **Reason**: Snapshots require infrastructure (cron job, background worker) and produce stale data for newly-added cities. Live data from Open-Meteo gives instant historical context for any city.
 
-**Trade-off**: One extra API call per city detail view. In production, Redis caching (TTL 1 hour) would mitigate this.
+**Trade-off**: One extra API call per city detail view. **Post-submission fix**: Added Upstash Redis caching (6h TTL for historical data, 15 min for current weather) to mitigate this.
 
 ### 2. Turborepo for a 2-App Project
 
@@ -308,7 +356,7 @@ This demonstrates OAuth integration, background job design with `node-cron`, and
 
 ## Known Limitations
 
-1. **No Redis caching on backend**: Live historical data is fetched on every city detail view. With many users, this could hit Open-Meteo rate limits. The frontend does have a 5-minute in-memory axios cache to reduce redundant API calls.
+1. ~~**No Redis caching on backend**~~ ✅ **Fixed**: Added Upstash Redis caching for weather data and geocoding (15 min–24h TTL). This reduces redundant Open-Meteo calls and improves response times.
 2. **No rate limiting on backend**: The Express server is open to abuse. I should add `express-rate-limit`.
 3. **AI agent tool errors are silent to the user**: If a tool fails (e.g., city not found), the agent retries but does not always surface the error clearly in the chat.
 4. **No offline support**: All weather data requires an internet connection.
@@ -342,9 +390,13 @@ OWM_API_KEY=
 GROQ_API_KEY=
 CLIENT_URL=https://mausam.farhankhan.site
 NODE_ENV=production
+REDIS_URL=
+REDIS_TOKEN=
 ```
 
 > Optional for Calendar Alerts: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`
+>
+> Optional for server-side caching: `REDIS_URL`, `REDIS_TOKEN`
 
 ### Deploy from CLI
 
