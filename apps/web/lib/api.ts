@@ -124,7 +124,6 @@ function getCacheKey(config: AxiosRequestConfig): string {
 }
 
 // ─── Request interceptor ─────────────────────────────────────────────────────
-// If we have a valid cached entry, short-circuit the network request entirely.
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (config.method?.toLowerCase() !== 'get') return config;
@@ -135,16 +134,16 @@ api.interceptors.request.use(
 
     if (entry) {
       if (DEBUG) console.log(`[API Cache] HIT ${key}`);
-      // Return a promise that resolves to a fake AxiosResponse
-      // This prevents the actual HTTP request from firing.
-      return Promise.resolve({
-        data: entry.data,
-        status: 200,
-        statusText: 'OK (cached)',
-        headers: {},
-        config,
-        request: {},
-      }) as unknown as Promise<InternalAxiosRequestConfig>;
+      (config as any).adapter = () =>
+        Promise.resolve({
+          data: entry.data,
+          status: 200,
+          statusText: 'OK (cached)',
+          headers: {},
+          config,
+          request: {},
+        });
+      return config;
     }
 
     if (DEBUG) console.log(`[API Cache] MISS ${key}`);
