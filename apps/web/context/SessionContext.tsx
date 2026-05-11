@@ -28,7 +28,9 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshAlertCount = useCallback(async () => {
     try {
-      const res = await api.get('/api/calendar/alerts', { skipAuthRedirect: true });
+      const res = await api.get('/api/calendar/alerts', {
+        skipAuthRedirect: true,
+      });
       setUnreadAlertCount(res.data.unreadCount || 0);
     } catch {
       setUnreadAlertCount(0);
@@ -37,16 +39,23 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let cancelled = false;
-    api.get('/auth/me', { skipAuthRedirect: true })
+    api
+      .get('/auth/me', { skipAuthRedirect: true })
       .then((res) => {
         if (!cancelled) {
           setUser(res.data.user);
           refreshAlertCount();
         }
       })
-      .catch(() => { if (!cancelled) setUser(null); })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .catch(() => {
+        if (!cancelled) setUser(null);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [refreshAlertCount]);
 
   const login = useCallback(async (email: string, password: string) => {
@@ -69,15 +78,19 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, unreadAlertCount, refreshAlertCount, login, register, logout }),
+    () => ({
+      user,
+      loading,
+      unreadAlertCount,
+      refreshAlertCount,
+      login,
+      register,
+      logout,
+    }),
     [user, loading, unreadAlertCount, refreshAlertCount, login, register, logout]
   );
 
-  return (
-    <SessionContext.Provider value={value}>
-      {children}
-    </SessionContext.Provider>
-  );
+  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
 };
 
 export const useSession = () => {

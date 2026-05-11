@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import axios from 'axios';
 import { useSession } from '@/context/SessionContext';
 
 export default function RegisterPage() {
@@ -22,8 +23,12 @@ export default function RegisterPage() {
     try {
       await register(name, email, password);
       router.push('/dashboard');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Registration failed. Please try again.');
+    } catch (err: unknown) {
+      const errorMessage =
+        axios.isAxiosError<{ error?: string }>(err) && err.response?.data?.error
+          ? err.response.data.error
+          : 'Registration failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -36,12 +41,24 @@ export default function RegisterPage() {
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       className="min-h-screen flex items-center justify-center px-4 relative"
     >
-      <div className="absolute inset-x-0 top-0 h-[30%] pointer-events-none" style={{ background: 'linear-gradient(180deg, rgba(37,99,235,0.03) 0%, transparent 100%)' }} />
+      <div
+        className="absolute inset-x-0 top-0 h-[30%] pointer-events-none"
+        style={{
+          background: 'linear-gradient(180deg, rgba(37,99,235,0.03) 0%, transparent 100%)',
+        }}
+      />
       <div className="w-full max-w-md">
-        <h1 className="font-display text-3xl text-center text-[var(--text-primary)] mb-1">Create your account</h1>
-        <p className="text-sm text-[var(--text-muted)] text-center mb-6">Join Mausam and track weather across the world</p>
+        <h1 className="font-display text-3xl text-center text-[var(--text-primary)] mb-1">
+          Create your account
+        </h1>
+        <p className="text-sm text-[var(--text-muted)] text-center mb-6">
+          Join Mausam and track weather across the world
+        </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-[var(--shadow-md)]">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 shadow-[var(--shadow-md)]"
+        >
           {error && (
             <div className="bg-[var(--danger-light)] border border-[var(--danger)]/30 text-[var(--danger)] text-sm rounded-lg px-4 py-3">
               {error}
@@ -49,7 +66,9 @@ export default function RegisterPage() {
           )}
 
           <div>
-            <label className="block text-sm text-[var(--text-muted)] mb-1" htmlFor="name">Name</label>
+            <label className="block text-sm text-[var(--text-muted)] mb-1" htmlFor="name">
+              Name
+            </label>
             <input
               id="name"
               type="text"
@@ -62,7 +81,9 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-[var(--text-muted)] mb-1" htmlFor="email">Email</label>
+            <label className="block text-sm text-[var(--text-muted)] mb-1" htmlFor="email">
+              Email
+            </label>
             <input
               id="email"
               type="email"
@@ -75,7 +96,9 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm text-[var(--text-muted)] mb-1" htmlFor="password">Password</label>
+            <label className="block text-sm text-[var(--text-muted)] mb-1" htmlFor="password">
+              Password
+            </label>
             <input
               id="password"
               type="password"
@@ -100,7 +123,9 @@ export default function RegisterPage() {
 
         <p className="text-center text-[var(--text-muted)] text-sm mt-4">
           Already have an account?{' '}
-          <Link href="/login" className="text-[var(--accent)] hover:text-[var(--accent-hover)]">Sign in</Link>
+          <Link href="/login" className="text-[var(--accent)] hover:text-[var(--accent-hover)]">
+            Sign in
+          </Link>
         </p>
       </div>
     </motion.div>

@@ -1,4 +1,4 @@
-import { fetchCurrentWeather, getConditionFromCode } from './weather.service';
+import { getConditionFromCode } from './weather.service';
 
 export interface AlertCheckResult {
   shouldAlert: boolean;
@@ -10,16 +10,27 @@ export interface AlertCheckResult {
   message: string;
 }
 
+interface ForecastDay {
+  temperature_2m_max: number;
+  temperature_2m_min: number;
+  precipitation_sum?: number;
+  weather_code: number;
+}
+
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr);
-  return d.toLocaleDateString('en', { weekday: 'short', month: 'short', day: 'numeric' });
+  return d.toLocaleDateString('en', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 export function checkWeatherForAlert(
   eventTitle: string,
   eventLocation: string,
   eventDate: string,
-  forecastDay: any
+  forecastDay: ForecastDay
 ): AlertCheckResult {
   const tempMax = forecastDay.temperature_2m_max;
   const tempMin = forecastDay.temperature_2m_min;

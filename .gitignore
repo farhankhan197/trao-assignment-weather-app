@@ -4,6 +4,8 @@
 node_modules
 .pnp
 .pnp.js
+bun.lock
+bun.lockb
 
 # Local env files
 .env
@@ -13,6 +15,7 @@ node_modules
 .env.production.local
 *steps.md
 SKILL.md
+REFACTOR_PLAN.md
 
 # Testing
 coverage

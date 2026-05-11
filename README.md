@@ -1,5 +1,9 @@
 # Mausam
 
+## This branch contains minor fixes and improvements I made after submitting the assignment.
+
+## The main branch still contains the same code as the submission.
+
 An assignment I built for the TRAO hiring process.
 
 **Web App**: [https://mausam.farhankhan.site](https://mausam.farhankhan.site)  
@@ -9,14 +13,13 @@ A full-stack weather dashboard where users can track multiple cities, view live 
 
 ---
 
-
-**Why I did not deviate from the given tech stack:** 
+**Why I did not deviate from the given tech stack:**
 
 I believe the preferred stack is genuinely well-suited for this kind of CRUD + external API dashboard.
 
 I used turborepo to help me organize the codebase and to take advantage of the caching and build speed features. I used pnpm as the package manager because it is a fast and efficient package manager and it is a dependency of turborepo.
 
-I also used Bun as the runtime for the API because it is a fast and efficient runtime and the server hot reloading functionality. 
+I also used Bun as the runtime for the API because it is a fast and efficient runtime and the server hot reloading functionality.
 
 These decisions helped me spend my time actually building the product instead of hopping between terminals.
 
@@ -26,23 +29,23 @@ These decisions helped me spend my time actually building the product instead of
 
 ## Tech Stack Details
 
-| Layer | Technology | Reason |
-|-------|-----------|--------|
-| **Frontend** | Next.js 16 (App Router) + TypeScript | Server components, nested layouts, excellent DX |
-| **Styling** | Tailwind CSS 3 + CSS Variables | Utility-first, consistent light theme, runtime theming ready |
-| **Animations** | Framer Motion | Declarative React animations (stagger, spring, layout transitions) |
-| **Charts** | Recharts | Lightweight, composable React charts for the favorites view |
-| **Backend** | Express 5 + TypeScript | Minimal, fast, familiar REST patterns |
-| **Database** | MongoDB Atlas + Mongoose | Flexible schema, easy horizontal scaling, no migrations needed |
-| **Auth** | JWT in httpOnly cookies | XSS-resistant, simple stateless sessions |
-| **AI** | LangChain.js + Groq (`openai/gpt-oss-120b`) | Free tier, fast inference, robust tool-calling support |
-| **Weather Data** | Open-Meteo API | Free, no API key, generous limits |
-| **Geocoding** | OpenWeatherMap Geocoding API | Free tier, accurate city search |
-| **Calendar** | Google Calendar API + OAuth 2.0 | Standard OAuth flow, `node-cron` for background scans |
-| **Monorepo** | Turborepo + pnpm | Shared types, coordinated builds, caching, workspace-aware installs |
-| **API Dev Runtime** | Bun | `--hot` reload is faster than `ts-node`/`nodemon` for local API development |
-| **Deployment** | Vercel (both frontend + backend) | Zero-config Next.js; serverless Express API with `export default app` |
-| **Frontend Cache** | Axios request/response interceptors | 5-minute in-memory TTL cache for GET requests |
+| Layer               | Technology                                  | Reason                                                                      |
+| ------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
+| **Frontend**        | Next.js 16 (App Router) + TypeScript        | Server components, nested layouts, excellent DX                             |
+| **Styling**         | Tailwind CSS 3 + CSS Variables              | Utility-first, consistent light theme, runtime theming ready                |
+| **Animations**      | Framer Motion                               | Declarative React animations (stagger, spring, layout transitions)          |
+| **Charts**          | Recharts                                    | Lightweight, composable React charts for the favorites view                 |
+| **Backend**         | Express 5 + TypeScript                      | Minimal, fast, familiar REST patterns                                       |
+| **Database**        | MongoDB Atlas + Mongoose                    | Flexible schema, easy horizontal scaling, no migrations needed              |
+| **Auth**            | JWT in httpOnly cookies                     | XSS-resistant, simple stateless sessions                                    |
+| **AI**              | LangChain.js + Groq (`openai/gpt-oss-120b`) | Free tier, fast inference, robust tool-calling support                      |
+| **Weather Data**    | Open-Meteo API                              | Free, no API key, generous limits                                           |
+| **Geocoding**       | OpenWeatherMap Geocoding API                | Free tier, accurate city search                                             |
+| **Calendar**        | Google Calendar API + OAuth 2.0             | Standard OAuth flow, `node-cron` for background scans                       |
+| **Monorepo**        | Turborepo + pnpm                            | Shared types, coordinated builds, caching, workspace-aware installs         |
+| **API Dev Runtime** | Bun                                         | `--hot` reload is faster than `ts-node`/`nodemon` for local API development |
+| **Deployment**      | Vercel (both frontend + backend)            | Zero-config Next.js; serverless Express API with `export default app`       |
+| **Frontend Cache**  | Axios request/response interceptors         | 5-minute in-memory TTL cache for GET requests                               |
 
 ---
 
@@ -108,8 +111,8 @@ bun --hot src/index.ts
 ---
 
 ## System and Monorepo Architecture
-<img width="1370" height="1148" alt="system and monorepo architecture" src="https://github.com/user-attachments/assets/733a9f69-7c46-4984-9c95-f53323aea58b" />
 
+<img width="1370" height="1148" alt="system and monorepo architecture" src="https://github.com/user-attachments/assets/733a9f69-7c46-4984-9c95-f53323aea58b" />
 
 ---
 
@@ -156,6 +159,7 @@ CitySchema.index({ userId: 1, lat: 1, lon: 1 }, { unique: true });
 ### Purpose
 
 The AI agent acts as a **personal weather analyst** that can:
+
 - Answer natural language questions about your saved cities
 - Compare weather between multiple cities
 - Generate personalized weather insights for favorite cities
@@ -180,7 +184,6 @@ I built the agent with **LangChain.js + Groq** using the `openai/gpt-oss-120b` m
 
 <img width="1732" height="908" alt="ai assistant conversation flow" src="https://github.com/user-attachments/assets/53e85500-03d1-4a78-ab47-c0fde279cd19" />
 
-
 ### UI Integration
 
 The AI lives in a **slide-in sidebar** (not a separate page) so users can chat without leaving their dashboard context. I used Framer Motion for the sidebar slide animation and message stagger.
@@ -204,16 +207,17 @@ const streak = calculateStreak(historyDays);
 
 ### Why This Approach?
 
-| Approach | Pros | Cons |
-|----------|------|------|
-| **MongoDB snapshots + cron** | Fast reads | Requires cron job, stale for new cities, infrastructure overhead |
-| **Live OpenMeteo historical** (chosen) | No cron, instant for all cities, always fresh | Slightly slower (one extra API call) |
+| Approach                               | Pros                                          | Cons                                                             |
+| -------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------- |
+| **MongoDB snapshots + cron**           | Fast reads                                    | Requires cron job, stale for new cities, infrastructure overhead |
+| **Live OpenMeteo historical** (chosen) | No cron, instant for all cities, always fresh | Slightly slower (one extra API call)                             |
 
 For an assessment, **zero infrastructure dependency** felt like the right trade-off. In production with thousands of users, I would add Redis caching (TTL 1 hour).
 
 ### UI
 
 Streaks appear as colored badges on city cards and in the favorites detail view:
+
 - ☀️ "5-day sunshine streak"
 - 🌧️ "Rainy for 8 days"
 - ❄️ "Snow for 3 days"
@@ -222,13 +226,13 @@ Streaks appear as colored badges on city cards and in the favorites detail view:
 
 Streaks count **backwards from today**. The same condition must hold for **at least 2 consecutive days** to trigger a badge.
 
-| Condition | Label Format | Example |
-|-----------|-------------|---------|
-| **sunny** | `{n}-day sunshine streak` | "5-day sunshine streak" |
+| Condition  | Label Format                | Example                   |
+| ---------- | --------------------------- | ------------------------- |
+| **sunny**  | `{n}-day sunshine streak`   | "5-day sunshine streak"   |
 | **cloudy** | `Overcast {n} days running` | "Overcast 4 days running" |
-| **rainy** | `Rainy for {n} days` | "Rainy for 8 days" |
-| **snowy** | `Snow for {n} days` | "Snow for 3 days" |
-| **stormy** | `Stormy {n}-day stretch` | "Stormy 2-day stretch" |
+| **rainy**  | `Rainy for {n} days`        | "Rainy for 8 days"        |
+| **snowy**  | `Snow for {n} days`         | "Snow for 3 days"         |
+| **stormy** | `Stormy {n}-day stretch`    | "Stormy 2-day stretch"    |
 
 When conditions have been mixed or today's weather is only a single-day occurrence, no streak badge appears.
 
@@ -239,6 +243,7 @@ When conditions have been mixed or today's weather is only a single-day occurren
 I connect your Google Calendar and the app scans upcoming events with locations. If the weather forecast for an event day looks unusual (rain on a usually sunny day, sudden temperature drop, etc.), it creates an alert so you can plan accordingly.
 
 **How it works:**
+
 1. Connect Google Calendar in Settings (`/auth/calendar/connect` OAuth flow).
 2. A daily cron job scans all connected users' calendars at 6:00 AM UTC.
 3. For each event with a location, geocode the location and fetch the weather forecast.
@@ -361,36 +366,37 @@ Make sure the backend `CLIENT_URL` matches your actual Vercel frontend domain fo
 
 ## API Reference
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| POST | /auth/register | ✗ | Create account |
-| POST | /auth/login | ✗ | Login, receive JWT cookie |
-| POST | /auth/logout | ✗ | Clear cookie |
-| GET | /auth/me | ✓ | Get current user |
-| GET | /auth/calendar/connect | ✓ | Get Google OAuth URL |
-| GET | /auth/calendar/callback | ✗ | Google OAuth callback |
-| GET | /auth/calendar/status | ✓ | Check calendar connection |
-| POST | /auth/calendar/disconnect | ✓ | Disconnect calendar |
-| GET | /api/cities | ✓ | Get user's cities |
-| GET | /api/cities/:id | ✓ | Get single city |
-| POST | /api/cities | ✓ | Add city |
-| PATCH | /api/cities/:id | ✓ | Toggle favorite |
-| DELETE | /api/cities/:id | ✓ | Remove city |
-| GET | /api/cities/:id/history | ✓ | 15-day historical weather |
-| GET | /api/cities/:id/streak | ✓ | Weather memory streak |
-| GET | /api/weather/search?q= | ✓ | Geocode city search |
-| GET | /api/weather/current?lat=&lon= | ✓ | Current weather |
-| POST | /api/ai/chat | ✓ | Chat with AI agent |
-| GET | /api/ai/insights | ✓ | Auto-generate insights for favorite cities |
-| GET | /api/calendar/alerts | ✓ | Get calendar weather alerts |
-| PATCH | /api/calendar/alerts/:id/read | ✓ | Mark alert as read |
-| POST | /api/calendar/alerts/check | ✓ | Manually trigger calendar scan |
+| Method | Path                           | Auth | Description                                |
+| ------ | ------------------------------ | ---- | ------------------------------------------ |
+| POST   | /auth/register                 | ✗    | Create account                             |
+| POST   | /auth/login                    | ✗    | Login, receive JWT cookie                  |
+| POST   | /auth/logout                   | ✗    | Clear cookie                               |
+| GET    | /auth/me                       | ✓    | Get current user                           |
+| GET    | /auth/calendar/connect         | ✓    | Get Google OAuth URL                       |
+| GET    | /auth/calendar/callback        | ✗    | Google OAuth callback                      |
+| GET    | /auth/calendar/status          | ✓    | Check calendar connection                  |
+| POST   | /auth/calendar/disconnect      | ✓    | Disconnect calendar                        |
+| GET    | /api/cities                    | ✓    | Get user's cities                          |
+| GET    | /api/cities/:id                | ✓    | Get single city                            |
+| POST   | /api/cities                    | ✓    | Add city                                   |
+| PATCH  | /api/cities/:id                | ✓    | Toggle favorite                            |
+| DELETE | /api/cities/:id                | ✓    | Remove city                                |
+| GET    | /api/cities/:id/history        | ✓    | 15-day historical weather                  |
+| GET    | /api/cities/:id/streak         | ✓    | Weather memory streak                      |
+| GET    | /api/weather/search?q=         | ✓    | Geocode city search                        |
+| GET    | /api/weather/current?lat=&lon= | ✓    | Current weather                            |
+| POST   | /api/ai/chat                   | ✓    | Chat with AI agent                         |
+| GET    | /api/ai/insights               | ✓    | Auto-generate insights for favorite cities |
+| GET    | /api/calendar/alerts           | ✓    | Get calendar weather alerts                |
+| PATCH  | /api/calendar/alerts/:id/read  | ✓    | Mark alert as read                         |
+| POST   | /api/calendar/alerts/check     | ✓    | Manually trigger calendar scan             |
 
 ---
 
 ## Test User Account
 
 For quick testing:
+
 - **Email**: `test@mausam.me`
 - **Password**: `password123`
 

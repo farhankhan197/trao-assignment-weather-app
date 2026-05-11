@@ -5,6 +5,10 @@ import { City } from '../models/City';
 
 const router = Router();
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Unknown error';
+}
+
 // POST /api/ai/chat
 // natural language interaction with weather agent
 router.post('/chat', authenticate, async (req: Request, res: Response) => {
@@ -17,9 +21,10 @@ router.post('/chat', authenticate, async (req: Request, res: Response) => {
 
     const response = await runWeatherAgent(req.user!.id, message);
     res.json({ response });
-  } catch (err: any) {
-    console.error('[AI Agent Error]', err.message);
-    res.status(500).json({ error: err.message || 'AI agent failed' });
+  } catch (err: unknown) {
+    const message = getErrorMessage(err);
+    console.error('[AI Agent Error]', message);
+    res.status(500).json({ error: message || 'AI agent failed' });
   }
 });
 
@@ -27,14 +32,20 @@ router.post('/chat', authenticate, async (req: Request, res: Response) => {
 // auto-generates personalized weather insights for favorite cities
 router.get('/insights', authenticate, async (req: Request, res: Response) => {
   try {
-    const favorites = await City.find({ userId: req.user!.id, isFavorite: true });
+    const favorites = await City.find({
+      userId: req.user!.id,
+      isFavorite: true,
+    });
 
     if (!favorites.length) {
-      res.json({ insights: 'No favorite cities set. Mark some cities as favorites to get personalized insights.' });
+      res.json({
+        insights:
+          'No favorite cities set. Mark some cities as favorites to get personalized insights.',
+      });
       return;
     }
 
-    const cityList = favorites.map(c => c.name).join(', ');
+    const cityList = favorites.map((c) => c.name).join(', ');
     const prompt = `Generate a concise, friendly weather overview for my favorite cities: ${cityList}.
     For each city, get the current weather, then provide actionable insights:
     what to wear, whether to carry an umbrella, best time to go outside.
@@ -42,8 +53,8 @@ router.get('/insights', authenticate, async (req: Request, res: Response) => {
 
     const insights = await runWeatherAgent(req.user!.id, prompt);
     res.json({ insights });
-  } catch (err: any) {
-    console.error('[AI Agent Error]', err.message);
+  } catch (err: unknown) {
+    console.error('[AI Agent Error]', getErrorMessage(err));
     res.status(500).json({ error: 'Failed to generate insights' });
   }
 });

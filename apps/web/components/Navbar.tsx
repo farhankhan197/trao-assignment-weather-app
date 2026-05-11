@@ -10,16 +10,36 @@ import { Logo } from '@/components/Logo';
 
 function BellIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>
-      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
     </svg>
   );
 }
 
 function MenuIcon({ open }: { open: boolean }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       {open ? (
         <>
           <line x1="18" y1="6" x2="6" y2="18" />
@@ -36,7 +56,19 @@ function MenuIcon({ open }: { open: boolean }) {
   );
 }
 
-function NavLink({ href, label, pathname, badge, icon }: { href: string; label: string; pathname: string; badge?: number; icon?: React.ReactNode }) {
+function NavLink({
+  href,
+  label,
+  pathname,
+  badge,
+  icon,
+}: {
+  href: string;
+  label: string;
+  pathname: string;
+  badge?: number;
+  icon?: React.ReactNode;
+}) {
   const isActive = pathname === href;
   return (
     <Link href={href} className="relative px-3 py-1.5 rounded-lg text-sm transition-colors">
@@ -47,7 +79,9 @@ function NavLink({ href, label, pathname, badge, icon }: { href: string; label: 
           transition={{ type: 'spring', stiffness: 380, damping: 30 }}
         />
       )}
-      <span className={`relative z-10 flex items-center gap-1.5 ${isActive ? 'text-[var(--accent)] font-medium' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}>
+      <span
+        className={`relative z-10 flex items-center gap-1.5 ${isActive ? 'text-[var(--accent)] font-medium' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
+      >
         {icon}
         {label}
         {badge !== undefined && badge > 0 && (
@@ -60,13 +94,25 @@ function NavLink({ href, label, pathname, badge, icon }: { href: string; label: 
   );
 }
 
-function MobileLink({ href, label, pathname, badge }: { href: string; label: string; pathname: string; badge?: number }) {
+function MobileLink({
+  href,
+  label,
+  pathname,
+  badge,
+}: {
+  href: string;
+  label: string;
+  pathname: string;
+  badge?: number;
+}) {
   const isActive = pathname === href;
   return (
     <Link
       href={href}
       className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
-        isActive ? 'bg-[var(--accent-light)] text-[var(--accent)] font-medium' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)]'
+        isActive
+          ? 'bg-[var(--accent-light)] text-[var(--accent)] font-medium'
+          : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)]'
       }`}
     >
       <span>{label}</span>
@@ -133,7 +179,13 @@ export function Navbar() {
             <>
               <NavLink href="/dashboard" label="Dashboard" pathname={pathname} />
               <NavLink href="/favorites" label="Favorites" pathname={pathname} />
-              <NavLink href="/alerts" label="Alerts" pathname={pathname} badge={unreadAlertCount} icon={<BellIcon />} />
+              <NavLink
+                href="/alerts"
+                label="Alerts"
+                pathname={pathname}
+                badge={unreadAlertCount}
+                icon={<BellIcon />}
+              />
               <NavLink href="/settings" label="Settings" pathname={pathname} />
 
               <div className="w-px h-5 bg-[var(--border)] mx-1" />
@@ -167,13 +219,18 @@ export function Navbar() {
                       className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-[var(--border)] overflow-hidden"
                     >
                       <div className="px-4 py-3 border-b border-[var(--border)]">
-                        <p className="text-sm font-medium text-[var(--text-primary)]">{user.name}</p>
+                        <p className="text-sm font-medium text-[var(--text-primary)]">
+                          {user.name}
+                        </p>
                         {user.email && (
                           <p className="text-xs text-[var(--text-muted)] mt-0.5">{user.email}</p>
                         )}
                       </div>
                       <button
-                        onClick={() => { setProfileOpen(false); logout(); }}
+                        onClick={() => {
+                          setProfileOpen(false);
+                          logout();
+                        }}
                         className="w-full text-left px-4 py-2.5 text-sm text-[var(--danger)] hover:bg-[var(--danger-light)] transition-colors"
                       >
                         Logout
@@ -220,7 +277,12 @@ export function Navbar() {
                 <>
                   <MobileLink href="/dashboard" label="Dashboard" pathname={pathname} />
                   <MobileLink href="/favorites" label="Favorites" pathname={pathname} />
-                  <MobileLink href="/alerts" label="Alerts" pathname={pathname} badge={unreadAlertCount} />
+                  <MobileLink
+                    href="/alerts"
+                    label="Alerts"
+                    pathname={pathname}
+                    badge={unreadAlertCount}
+                  />
                   <MobileLink href="/settings" label="Settings" pathname={pathname} />
                   <div className="pt-2 border-t border-[var(--border)] mt-2">
                     <button
@@ -238,7 +300,10 @@ export function Navbar() {
                       <p className="text-sm font-medium text-[var(--text-primary)]">{user.name}</p>
                     </div>
                     <button
-                      onClick={() => { setMobileOpen(false); logout(); }}
+                      onClick={() => {
+                        setMobileOpen(false);
+                        logout();
+                      }}
                       className="text-sm text-[var(--danger)] hover:bg-[var(--danger-light)] px-3 py-1.5 rounded-lg transition-colors"
                     >
                       Logout

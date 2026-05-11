@@ -1,13 +1,17 @@
 {
   "name": "@repo/api",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "bun --hot src/index.ts",
     "build": "tsc",
     "start": "bun dist/index.js",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "lint": "eslint ."
   },
   "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "eslint": "^9.39.1",
     "@types/bun": "latest",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
