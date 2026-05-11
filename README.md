@@ -20,7 +20,10 @@ I also used Bun as the runtime for the API because it is a fast and efficient ru
 
 These decisions helped me spend my time actually building the product instead of hopping between terminals.
 
-### since the api is also hosted on vercel, a serverless hosting platform, cold starts to the first request are to be expected. i used vercel to deploy the backend for its ease of use and to quickly have the production version up but in a real world production grade scenario i would rather host my backend on a vps or a 24/7 up server.
+### POST SUBMISSION ISSUES
+i noticed issues with the in memory cache that was tinkering with the apps functionality and security, it was two minor fixes that i opened issues for and the commits fixing them are mentioned in the issues section. other improvements i made upon the existing code after submission exists on the branch `post-submission-enhancements`.
+
+##### since the api is also hosted on vercel, a serverless hosting platform, cold starts to the first request are to be expected. i used vercel to deploy the backend for its ease of use and to quickly have the production version up but in a real world production grade scenario i would rather host my backend on a vps or a 24/7 up server.
 
 ---
 
