@@ -1,6 +1,7 @@
 import { calendar_v3, google } from 'googleapis';
 import axios from 'axios';
 import { IUser } from '../models/User';
+import { getCachedData, setCachedData } from './cache';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -137,12 +138,19 @@ export async function fetchUpcomingEvents(accessToken: string): Promise<Calendar
     }));
 }
 
-// Geocode a raw location string using OpenWeatherMap Geocoding API
+// Geocode a raw location string using OpenWeatherMap Geocoding API (cached 24h)
 export async function geocodeLocation(
   location: string
 ): Promise<{ lat: number; lon: number; name: string } | null> {
   const OWM_KEY = process.env.OWM_API_KEY;
   if (!OWM_KEY) return null;
+
+  const cacheKey = `geo:${location.toLowerCase().trim()}`;
+  const cached = await getCachedData<{ lat: number; lon: number; name: string }>(cacheKey);
+  if (cached) {
+    console.log(`[geocodeLocation] Returning cached result for "${location}"`);
+    return cached;
+  }
 
   try {
     const url = 'https://api.openweathermap.org/geo/1.0/direct';
@@ -152,11 +160,14 @@ export async function geocodeLocation(
 
     if (!data || !data.length) return null;
 
-    return {
+    const result = {
       lat: data[0].lat,
       lon: data[0].lon,
       name: data[0].name,
     };
+
+    await setCachedData(cacheKey, result, 60 * 60 * 24);
+    return result;
   } catch {
     return null;
   }

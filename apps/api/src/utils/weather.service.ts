@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getCachedData, setCachedData } from './cache';
 
 const OWM_KEY = process.env.OWM_API_KEY;
 
@@ -10,13 +11,29 @@ interface GeocodeResult {
   state?: string;
 }
 
-// Search for cities using OWM Geocoding API
-export const geocodeCity = async (query: string) => {
+export interface CitySearchResult {
+  name: string;
+  country: string;
+  countryCode: string;
+  lat: number;
+  lon: number;
+  state: string | null;
+}
+
+// Search for cities using OWM Geocoding API (cached 24h)
+export const geocodeCity = async (query: string): Promise<CitySearchResult[]> => {
+  const cacheKey = `geo:${query.toLowerCase().trim()}`;
+  const cached = await getCachedData<CitySearchResult[]>(cacheKey);
+  if (cached) {
+    console.log(`[geocodeCity] Returning cached result for "${query}"`);
+    return cached;
+  }
+
   const url = `https://api.openweathermap.org/geo/1.0/direct`;
   const { data } = await axios.get<GeocodeResult[]>(url, {
     params: { q: query, limit: 5, appid: OWM_KEY },
   });
-  return data.map((r) => ({
+  const results = data.map((r) => ({
     name: r.name,
     country: r.country,
     countryCode: r.country,
@@ -24,10 +41,20 @@ export const geocodeCity = async (query: string) => {
     lon: r.lon,
     state: r.state || null,
   }));
+
+  await setCachedData(cacheKey, results, 60 * 60 * 24);
+  return results;
 };
 
-// Fetch current weather from Open-Meteo (no API key needed)
+// Fetch current weather from Open-Meteo (no API key needed) — cached 15 min
 export const fetchCurrentWeather = async (lat: number, lon: number) => {
+  const cacheKey = `weather:current:${lat}:${lon}`;
+  const cached = await getCachedData<unknown>(cacheKey);
+  if (cached) {
+    console.log(`[fetchCurrentWeather] Returning cached result for lat=${lat}, lon=${lon}`);
+    return cached;
+  }
+
   const url = `https://api.open-meteo.com/v1/forecast`;
   const { data } = await axios.get(url, {
     params: {
@@ -48,11 +75,22 @@ export const fetchCurrentWeather = async (lat: number, lon: number) => {
       timezone: 'auto',
     },
   });
+
+  await setCachedData(cacheKey, data, 15 * 60);
   return data;
 };
 
-// Fetch historical weather from Open-Meteo using past_days
+// Fetch historical weather from Open-Meteo using past_days — cached 6h
 export const fetchHistoricalWeather = async (lat: number, lon: number, pastDays: number = 14) => {
+  const cacheKey = `weather:hist:${lat}:${lon}:${pastDays}`;
+  const cached = await getCachedData<unknown>(cacheKey);
+  if (cached) {
+    console.log(
+      `[fetchHistoricalWeather] Returning cached result for lat=${lat}, lon=${lon}, pastDays=${pastDays}`
+    );
+    return cached;
+  }
+
   const url = `https://api.open-meteo.com/v1/forecast`;
   const { data } = await axios.get(url, {
     params: {
@@ -66,6 +104,8 @@ export const fetchHistoricalWeather = async (lat: number, lon: number, pastDays:
       timezone: 'auto',
     },
   });
+
+  await setCachedData(cacheKey, data, 6 * 60 * 60);
   return data;
 };
 
