@@ -29,6 +29,7 @@ interface City {
 
 interface HistoryPoint {
   date: string;
+  formattedDate: string;
   condition: string;
   tempMax: number;
   tempMin: number;
@@ -110,12 +111,16 @@ export default function FavoritesPage() {
         });
         if (hRes?.data?.history) {
           setHistory(
-            hRes.data.history.map((h: ApiHistoryPoint) => ({
-              date: formatDateShort(h.date),
-              condition: h.condition,
-              tempMax: h.tempMax,
-              tempMin: h.tempMin,
-            }))
+            hRes.data.history.map((h: ApiHistoryPoint) => {
+              const d = new Date(h.date + 'T00:00:00');
+              return {
+                date: formatDateShort(h.date),
+                formattedDate: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }),
+                condition: h.condition,
+                tempMax: h.tempMax,
+                tempMin: h.tempMin,
+              };
+            })
           );
         } else {
           setHistory([]);
@@ -381,9 +386,12 @@ export default function FavoritesPage() {
                         {history.map((h, i) => (
                           <div
                             key={i}
-                            className="shrink-0 flex flex-col items-center gap-1.5 bg-[var(--bg-surface-hover)]/50 rounded-xl px-3 py-3 min-w-[72px]"
+                            className="shrink-0 flex flex-col items-center gap-1 bg-[var(--bg-surface-hover)]/50 rounded-xl px-3 py-3 min-w-[72px]"
                           >
                             <span className="text-xs text-[var(--text-muted)]">{h.date}</span>
+                            <span className="text-[10px] text-[var(--text-muted)]">
+                              {h.formattedDate}
+                            </span>
                             <WeatherIcon condition={h.condition} className="text-xl" />
                             <span className="text-sm font-medium text-[var(--text-primary)]">
                               {Math.round(h.tempMax)}°

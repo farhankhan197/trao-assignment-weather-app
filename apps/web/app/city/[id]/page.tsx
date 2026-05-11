@@ -22,6 +22,7 @@ interface City {
 interface ForecastDay {
   date: string;
   dayName: string;
+  formattedDate: string;
   condition: string;
   tempMax: number;
   tempMin: number;
@@ -31,6 +32,7 @@ interface ForecastDay {
 interface HistoryDay {
   date: string;
   dayName: string;
+  formattedDate: string;
   condition: string;
   tempMax: number;
   tempMin: number;
@@ -63,6 +65,8 @@ export default function CityDetailPage() {
   const [current, setCurrent] = useState<CurrentWeather | null>(null);
   const [forecast, setForecast] = useState<ForecastDay[]>([]);
   const [history, setHistory] = useState<HistoryDay[]>([]);
+  const [allHistory, setAllHistory] = useState<HistoryDay[]>([]);
+  const [historyLimit, setHistoryLimit] = useState<number>(7);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -100,6 +104,7 @@ export default function CityDetailPage() {
         forecastDays.push({
           date: wDaily.time[i],
           dayName: d.toLocaleDateString('en', { weekday: 'short' }),
+          formattedDate: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }),
           condition: getCondition(wDaily.weather_code[i]),
           tempMax: wDaily.temperature_2m_max[i],
           tempMin: wDaily.temperature_2m_min[i],
@@ -108,22 +113,24 @@ export default function CityDetailPage() {
       }
       setForecast(forecastDays);
 
-      // History - last 7 days from the 15-day history response
+      // History - all 15 days of historical data, reversed to show latest first
       const histData = historyRes.data.history;
-      const last7 = histData.slice(-7);
-      setHistory(
-        last7.map((h: ApiHistoryDay) => {
+      const allHistoryData = histData
+        .map((h: ApiHistoryDay) => {
           const d = new Date(h.date);
           return {
             date: h.date,
             dayName: d.toLocaleDateString('en', { weekday: 'short' }),
+            formattedDate: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }),
             condition: h.condition,
             tempMax: h.tempMax,
             tempMin: h.tempMin,
             precipitation: h.precipitation,
           };
         })
-      );
+        .reverse(); // Reverse to show latest (most recent) first
+      setAllHistory(allHistoryData);
+      setHistory(allHistoryData.slice(0, historyLimit));
     } catch (err: unknown) {
       const errorMessage =
         axios.isAxiosError<{ error?: string }>(err) && err.response?.data?.error
@@ -138,6 +145,12 @@ export default function CityDetailPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    if (allHistory.length > 0) {
+      setHistory(allHistory.slice(0, historyLimit));
+    }
+  }, [historyLimit, allHistory]);
 
   if (authLoading || loading) {
     return (
@@ -269,33 +282,64 @@ export default function CityDetailPage() {
           className="mb-8"
         >
           <h2 className="font-display text-xl text-[var(--text-primary)] mb-4">7-Day Forecast</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3">
-            {forecast.map((day, i) => (
-              <motion.div
-                key={day.date}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4 text-center shadow-[var(--shadow-sm)] hover:shadow-[var(--shadow-md)] transition-shadow"
-              >
-                <p className="text-xs text-[var(--text-muted)] mb-2">{day.dayName}</p>
-                <div className="flex justify-center mb-2">
-                  <WeatherIcon condition={day.condition} className="text-2xl" />
-                </div>
-                <p className="text-sm font-medium text-[var(--text-primary)] capitalize mb-1">
-                  {day.condition}
-                </p>
-                <div className="flex items-center justify-center gap-2 text-xs">
-                  <span className="text-[var(--text-primary)] font-medium">
-                    {Math.round(day.tempMax)}°
-                  </span>
-                  <span className="text-[var(--text-muted)]">{Math.round(day.tempMin)}°</span>
-                </div>
-                {day.precipitation > 0 && (
-                  <p className="text-[10px] text-blue-500 mt-1">Rain: {day.precipitation}mm</p>
-                )}
-              </motion.div>
-            ))}
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl shadow-[var(--shadow-sm)] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-surface-hover)]/50">
+                    <th className="text-left px-4 py-3 text-xs text-[var(--text-muted)] font-medium">
+                      Day
+                    </th>
+                    <th className="text-center px-4 py-3 text-xs text-[var(--text-muted)] font-medium">
+                      Condition
+                    </th>
+                    <th className="text-right px-4 py-3 text-xs text-[var(--text-muted)] font-medium">
+                      High
+                    </th>
+                    <th className="text-right px-4 py-3 text-xs text-[var(--text-muted)] font-medium">
+                      Low
+                    </th>
+                    <th className="text-right px-4 py-3 text-xs text-[var(--text-muted)] font-medium hidden sm:table-cell">
+                      Rain
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {forecast.map((day, i) => (
+                    <tr
+                      key={day.date}
+                      className={`border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-surface-hover)]/30 ${i % 2 === 0 ? 'bg-transparent' : 'bg-[var(--bg-surface-hover)]/20'}`}
+                    >
+                      <td className="px-4 py-3">
+                        <span className="text-[var(--text-primary)] font-medium block">
+                          {day.dayName}
+                        </span>
+                        <span className="text-[var(--text-muted)] text-xs">
+                          {day.formattedDate}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <WeatherIcon condition={day.condition} className="text-lg" />
+                          <span className="text-[var(--text-secondary)] capitalize hidden sm:inline">
+                            {day.condition}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-right text-[var(--text-primary)] font-medium">
+                        {Math.round(day.tempMax)}°
+                      </td>
+                      <td className="px-4 py-3 text-right text-[var(--text-muted)]">
+                        {Math.round(day.tempMin)}°
+                      </td>
+                      <td className="px-4 py-3 text-right text-[var(--text-muted)] hidden sm:table-cell">
+                        {day.precipitation > 0 ? `${day.precipitation}mm` : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </motion.div>
 
@@ -305,7 +349,33 @@ export default function CityDetailPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
         >
-          <h2 className="font-display text-xl text-[var(--text-primary)] mb-4">Past Week</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-xl text-[var(--text-primary)]">Past Weather</h2>
+            {allHistory.length > 7 && (
+              <div className="flex gap-1">
+                <button
+                  onClick={() => setHistoryLimit(7)}
+                  className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
+                    historyLimit === 7
+                      ? 'bg-[var(--accent)] text-white'
+                      : 'bg-[var(--bg-surface-hover)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-hover)]/70'
+                  }`}
+                >
+                  7 Days
+                </button>
+                <button
+                  onClick={() => setHistoryLimit(14)}
+                  className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${
+                    historyLimit === 14
+                      ? 'bg-[var(--accent)] text-white'
+                      : 'bg-[var(--bg-surface-hover)] text-[var(--text-muted)] hover:bg-[var(--bg-surface-hover)]/70'
+                  }`}
+                >
+                  14 Days
+                </button>
+              </div>
+            )}
+          </div>
           {history.length === 0 ? (
             <p className="text-[var(--text-muted)] text-sm">No historical data available.</p>
           ) : (
@@ -337,8 +407,13 @@ export default function CityDetailPage() {
                         key={day.date}
                         className={`border-b border-[var(--border-subtle)] last:border-0 hover:bg-[var(--bg-surface-hover)]/30 transition-colors ${i % 2 === 0 ? 'bg-transparent' : 'bg-[var(--bg-surface-hover)]/20'}`}
                       >
-                        <td className="px-4 py-3 text-[var(--text-primary)] font-medium">
-                          {day.dayName}
+                        <td className="px-4 py-3">
+                          <span className="text-[var(--text-primary)] font-medium block">
+                            {day.dayName}
+                          </span>
+                          <span className="text-[var(--text-muted)] text-xs">
+                            {day.formattedDate}
+                          </span>
                         </td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-1.5">

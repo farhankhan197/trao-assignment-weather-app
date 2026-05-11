@@ -161,18 +161,16 @@ export default function HeroSection({ weatherData, ctaPrimary, ctaSecondary }: H
         <div className="flex gap-3 justify-center mt-6 sm:mt-8 flex-wrap">
           <a
             href={ctaPrimary.href}
-            className="px-5 sm:px-7 py-2 sm:py-2.5 rounded-full text-white text-xs sm:text-[13px] font-medium tracking-wide
-            border border-white/45 bg-white/[0.13] backdrop-blur-md
-            transition-all duration-300 hover:bg-white/[0.22] hover:-translate-y-0.5
+            className="px-5 sm:px-7 py-2 sm:py-2.5 rounded-full text-[var(--accent)] bg-white text-xs sm:text-[13px] font-medium tracking-wide
+            transition-all duration-300 hover:-translate-y-0.5
           "
           >
             {ctaPrimary.text}
           </a>
           <a
             href={ctaSecondary.href}
-            className="px-5 sm:px-7 py-2 sm:py-2.5 rounded-full text-white/65 text-xs sm:text-[13px] tracking-wide
-            border border-white/18
-            transition-all duration-300 hover:border-white/45 hover:text-white hover:-translate-y-0.5
+            className="px-5 sm:px-7 py-2 sm:py-2.5 rounded-full text-[var(--accent)] bg-white text-xs sm:text-[13px] font-medium tracking-wide
+            transition-all duration-300 hover:-translate-y-0.5
           "
           >
             {ctaSecondary.text}

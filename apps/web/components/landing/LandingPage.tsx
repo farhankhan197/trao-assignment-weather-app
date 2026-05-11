@@ -6,7 +6,7 @@ import api from '@/lib/api';
 import LandingHeader from './LandingHeader';
 import HeroSection from './HeroSection';
 import Footer from './Footer';
-import MausamLoader from '../weather/mausamLoader';
+import WeatherLoader from '../weather/weatherLoader';
 
 interface City {
   _id: string;
@@ -112,7 +112,8 @@ export default function LandingPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-white">
-        <MausamLoader variant="inline" hint="Mausam kaisa hai?" />
+        {/* <MausamLoader variant="inline" hint="Mausam kaisa hai?" /> */}
+        <WeatherLoader />
       </div>
     );
   }
