@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
-import { authenticate } from '../middleware/authenticate';
-import { runWeatherAgent } from '../agents/weatherAgent';
-import { City } from '../models/City';
+import { authenticate } from '../middleware/authenticate.js';
+import { runWeatherAgent } from '../agents/weatherAgent.js';
+import { City } from '../models/City.js';
 
 const router = Router();
 

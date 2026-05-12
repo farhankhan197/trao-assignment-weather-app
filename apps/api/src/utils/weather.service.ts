@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getCachedData, setCachedData } from './cache';
+import { getCachedData, setCachedData } from './cache.js';
 
 const OWM_KEY = process.env.OWM_API_KEY;
 

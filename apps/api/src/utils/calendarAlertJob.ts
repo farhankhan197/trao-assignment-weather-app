@@ -1,9 +1,9 @@
 import cron from 'node-cron';
-import { User } from '../models/User';
-import { CalendarAlert } from '../models/CalendarAlert';
-import { getValidAccessToken, fetchUpcomingEvents, geocodeLocation } from './calendar.service';
-import { fetchCurrentWeather } from './weather.service';
-import { checkWeatherForAlert } from './alertEngine';
+import { User } from '../models/User.js';
+import { CalendarAlert } from '../models/CalendarAlert.js';
+import { getValidAccessToken, fetchUpcomingEvents, geocodeLocation } from './calendar.service.js';
+import { fetchCurrentWeather } from './weather.service.js';
+import { checkWeatherForAlert } from './alertEngine.js';
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : '';

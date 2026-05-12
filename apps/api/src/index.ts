@@ -2,13 +2,13 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
-import { connectDB } from './config/db';
-import authRoutes from './routes/auth.routes';
-import cityRoutes from './routes/city.routes';
-import weatherRoutes from './routes/weather.routes';
-import aiRoutes from './routes/ai.routes';
-import calendarRoutes from './routes/calendar.routes';
-import { startCalendarAlertJob } from './utils/calendarAlertJob';
+import { connectDB } from './config/db.js';
+import authRoutes from './routes/auth.routes.js';
+import cityRoutes from './routes/city.routes.js';
+import weatherRoutes from './routes/weather.routes.js';
+import aiRoutes from './routes/ai.routes.js';
+import calendarRoutes from './routes/calendar.routes.js';
+import { startCalendarAlertJob } from './utils/calendarAlertJob.js';
 
 dotenv.config();
 

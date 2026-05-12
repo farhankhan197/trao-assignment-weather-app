@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { City } from '../models/City';
-import { calculateStreak } from '../utils/streak';
-import { fetchHistoricalWeather, getConditionFromCode } from '../utils/weather.service';
+import { City } from '../models/City.js';
+import { calculateStreak } from '../utils/streak.js';
+import { fetchHistoricalWeather, getConditionFromCode } from '../utils/weather.service.js';
 
 function isDuplicateKeyError(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'code' in error && error.code === 11000;

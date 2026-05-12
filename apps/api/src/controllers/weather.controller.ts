@@ -5,9 +5,9 @@ import {
   fetchCurrentWeather,
   fetchHistoricalWeather,
   getConditionFromCode,
-} from '../utils/weather.service';
-import { calculateStreak } from '../utils/streak';
-import type { WeatherDay } from '../utils/streak';
+} from '../utils/weather.service.js';
+import { calculateStreak } from '../utils/streak.js';
+import type { WeatherDay } from '../utils/streak.js';
 
 // GET /api/weather/search?q={city}
 export const searchCity = async (req: Request, res: Response): Promise<void> => {

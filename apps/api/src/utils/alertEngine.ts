@@ -1,4 +1,4 @@
-import { getConditionFromCode } from './weather.service';
+import { getConditionFromCode } from './weather.service.js';
 
 export interface AlertCheckResult {
   shouldAlert: boolean;

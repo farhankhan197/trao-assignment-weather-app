@@ -1,4 +1,4 @@
-import redis from './redis';
+import redis from './redis.js';
 
 export const getCachedData = async <T>(key: string): Promise<T | null> => {
   try {

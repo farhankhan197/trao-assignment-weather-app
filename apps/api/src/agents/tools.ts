@@ -4,10 +4,10 @@ import {
   fetchHistoricalWeather,
   geocodeCity,
   getConditionFromCode,
-} from '../utils/weather.service';
-import { City } from '../models/City';
-import { CalendarAlert } from '../models/CalendarAlert';
-import { calculateStreak } from '../utils/streak';
+} from '../utils/weather.service.js';
+import { City } from '../models/City.js';
+import { CalendarAlert } from '../models/CalendarAlert.js';
+import { calculateStreak } from '../utils/streak.js';
 
 type ToolInput = string | string[] | Record<string, unknown>;
 

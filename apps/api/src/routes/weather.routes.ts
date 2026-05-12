@@ -5,8 +5,8 @@ import {
   getWeatherHistory,
   getWeatherStreak,
   getCurrentWeather,
-} from '../controllers/weather.controller';
-import { authenticate } from '../middleware/authenticate';
+} from '../controllers/weather.controller.js';
+import { authenticate } from '../middleware/authenticate.js';
 
 const router = Router();
 

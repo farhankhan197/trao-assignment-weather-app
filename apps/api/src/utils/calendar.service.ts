@@ -1,7 +1,7 @@
 import { calendar_v3, google } from 'googleapis';
 import axios from 'axios';
-import { IUser } from '../models/User';
-import { getCachedData, setCachedData } from './cache';
+import { IUser } from '../models/User.js';
+import { getCachedData, setCachedData } from './cache.js';
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;

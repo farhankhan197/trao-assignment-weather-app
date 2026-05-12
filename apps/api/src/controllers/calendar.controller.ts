@@ -1,16 +1,16 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { User } from '../models/User';
-import { CalendarAlert } from '../models/CalendarAlert';
+import { User } from '../models/User.js';
+import { CalendarAlert } from '../models/CalendarAlert.js';
 import {
   generateAuthUrl,
   exchangeCodeForTokens,
   refreshAccessToken,
-} from '../utils/calendar.service';
+} from '../utils/calendar.service.js';
 import {
   runCalendarAlertScanForUser,
   runCalendarAlertScanForAllUsers,
-} from '../utils/calendarAlertJob';
+} from '../utils/calendarAlertJob.js';
 
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 

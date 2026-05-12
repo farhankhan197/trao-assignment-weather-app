@@ -7,8 +7,8 @@ import {
   getCityById,
   getCityStreak,
   getCityHistory,
-} from '../controllers/city.controller';
-import { authenticate } from '../middleware/authenticate';
+} from '../controllers/city.controller.js';
+import { authenticate } from '../middleware/authenticate.js';
 
 const router = Router();
 

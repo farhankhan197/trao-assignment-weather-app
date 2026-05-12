@@ -1,6 +1,6 @@
 import { ChatGroq } from '@langchain/groq';
 import { HumanMessage, ToolMessage, SystemMessage, BaseMessage } from '@langchain/core/messages';
-import { createWeatherTools } from './tools';
+import { createWeatherTools } from './tools.js';
 
 const MAX_ITERATIONS = 10;
 

@@ -8,8 +8,8 @@ import {
   markAlertRead,
   manualCheck,
   runCronScan,
-} from '../controllers/calendar.controller';
-import { authenticate } from '../middleware/authenticate';
+} from '../controllers/calendar.controller.js';
+import { authenticate } from '../middleware/authenticate.js';
 
 const router = Router();
 

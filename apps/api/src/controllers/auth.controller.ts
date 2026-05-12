@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import { User } from '../models/User';
-import { signToken } from '../utils/jwt';
+import { User } from '../models/User.js';
+import { signToken } from '../utils/jwt.js';
 
 const COOKIE_OPTIONS = {
   httpOnly: true,
