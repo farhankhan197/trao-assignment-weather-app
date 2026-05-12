@@ -11,9 +11,14 @@ const nextConfig = {
   },
   async rewrites() {
     const isDev = process.env.NODE_ENV === 'development';
+    const isPreview = process.env.VERCEL_ENV === 'preview';
     const apiBase =
       process.env.API_BASE_URL ||
-      (isDev ? 'http://localhost:4000' : 'https://api-mausam.farhankhan.site');
+      (isDev
+        ? 'http://localhost:4000'
+        : isPreview
+          ? 'https://preview-api-mausam.farhankhan.site'
+          : 'https://api-mausam.farhankhan.site');
     return [
       {
         source: '/api/:path*',
