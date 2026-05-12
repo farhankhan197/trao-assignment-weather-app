@@ -6,8 +6,8 @@ An assignment I built for the TRAO hiring process.
 **API**: [https://api-mausam.farhankhan.site](https://api-mausam.farhankhan.site)
 
 ### Post Submission Enhancements Preview links:
-**Enhanced Web App**: [https://mausam.farhankhan.site](https://preview-mausam.farhankhan.site)  
-**Enhanced API**: [https://api-mausam.farhankhan.site](https://preview-api-mausam.farhankhan.site)
+**Enhanced Web App**: [https://preview-mausam.farhankhan.site](https://preview-mausam.farhankhan.site)  
+**Enhanced API**: [https://preview-api-mausam.farhankhan.site](https://preview-api-mausam.farhankhan.site)
 
 A full-stack weather dashboard where users can track multiple cities, view live weather data, get AI-powered insights, and discover weather memory streaks. I also added a Google Calendar integration that scans upcoming events and warns you if the forecast looks unusual for the event day.
 
