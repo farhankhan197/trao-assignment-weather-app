@@ -1,4 +1,10 @@
 {
+  "builds": [
+    {
+      "src": "src/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
   "crons": [
     {
       "path": "/api/cron/scan-alerts?secret=@CRON_SECRET",
