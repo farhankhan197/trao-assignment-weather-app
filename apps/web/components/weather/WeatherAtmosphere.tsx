@@ -37,7 +37,7 @@ export default function WeatherAtmosphere({
 
   return (
     <div
-      className={`absolute inset-0 overflow-hidden rounded-2xl ${className}`}
+      className={`absolute inset-0 overflow-hidden rounded-2xl pointer-events-none ${className}`}
       style={{ background: style.bg }}
     >
       {condition === 'sunny' && <SunGlow intensity={intensity} />}

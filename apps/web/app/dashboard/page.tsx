@@ -6,6 +6,7 @@ import axios from 'axios';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { CitySearch } from '@/components/CitySearch';
 import { CityCard } from '@/components/CityCard';
+import { LocalWeatherSidebar } from '@/components/LocalWeatherSidebar';
 import api from '@/lib/api';
 
 interface City {
@@ -116,6 +117,10 @@ export default function DashboardPage() {
 
         <div className="relative mb-8">
           <CitySearch onAdd={handleAdd} />
+        </div>
+
+        <div className="mb-8">
+          <LocalWeatherSidebar />
         </div>
 
         {cities.length === 0 ? (

@@ -46,6 +46,32 @@ export const geocodeCity = async (query: string): Promise<CitySearchResult[]> =>
   return results;
 };
 
+// Reverse geocode coordinates to city name using OWM Geocoding API (cached 24h)
+export const reverseGeocode = async (
+  lat: number,
+  lon: number
+): Promise<{ name: string; country: string } | null> => {
+  const cacheKey = `geo:reverse:${lat}:${lon}`;
+  const cached = await getCachedData<{ name: string; country: string }>(cacheKey);
+  if (cached) {
+    console.log(`[reverseGeocode] Returning cached result for lat=${lat}, lon=${lon}`);
+    return cached;
+  }
+
+  const url = `https://api.openweathermap.org/geo/1.0/reverse`;
+  try {
+    const { data } = await axios.get<{ name: string; country: string }[]>(url, {
+      params: { lat, lon, limit: 1, appid: OWM_KEY },
+    });
+    if (!data || data.length === 0) return null;
+    const result = { name: data[0].name, country: data[0].country };
+    await setCachedData(cacheKey, result, 60 * 60 * 24);
+    return result;
+  } catch {
+    return null;
+  }
+};
+
 // Fetch current weather from Open-Meteo (no API key needed) — cached 15 min
 export const fetchCurrentWeather = async (lat: number, lon: number) => {
   const cacheKey = `weather:current:${lat}:${lon}`;
