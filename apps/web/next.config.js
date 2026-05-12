@@ -11,7 +11,9 @@ const nextConfig = {
   },
   async rewrites() {
     const isDev = process.env.NODE_ENV === 'development';
-    const apiBase = isDev ? 'http://localhost:4000' : 'https://api-mausam.farhankhan.site';
+    const apiBase =
+      process.env.API_BASE_URL ||
+      (isDev ? 'http://localhost:4000' : 'https://api-mausam.farhankhan.site');
     return [
       {
         source: '/api/:path*',

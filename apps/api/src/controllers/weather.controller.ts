@@ -33,11 +33,12 @@ export const getCurrentCity = async (req: Request, res: Response): Promise<void>
       res.status(400).json({ error: 'Valid lat and lon are required' });
       return;
     }
-    const city = await reverseGeocode(Number(lat), Number(lon));
-    if (!city) {
-      res.status(404).json({ error: 'No city found for the given coordinates' });
-      return;
-    }
+    const latitude = Number(lat);
+    const longitude = Number(lon);
+    const city = (await reverseGeocode(latitude, longitude)) ?? {
+      name: 'Current Location',
+      country: `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`,
+    };
     res.json({ city });
   } catch (err) {
     console.error('[Reverse Geocode Error]', err);

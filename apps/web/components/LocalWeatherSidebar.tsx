@@ -118,9 +118,18 @@ export function LocalWeatherSidebar() {
       try {
         let currentCity = city;
         if (!currentCity) {
-          const cRes = await api.get('/api/weather/reverse', {
-            params: { lat: location.lat, lon: location.lon },
-          });
+          const cRes = await api
+            .get('/api/weather/reverse', {
+              params: { lat: location.lat, lon: location.lon },
+            })
+            .catch(() => ({
+              data: {
+                city: {
+                  name: 'Current Location',
+                  country: `${location.lat.toFixed(2)}, ${location.lon.toFixed(2)}`,
+                },
+              },
+            }));
           if (cancelled) return;
           currentCity = cRes.data.city;
           setCity(currentCity);
