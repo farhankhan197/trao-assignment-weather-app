@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { useUnits } from '@/context/UnitContext';
 import { WeatherIcon } from '@/components/WeatherIcon';
 import WeatherAtmosphere from '@/components/weather/WeatherAtmosphere';
+import SunEventIcon from '@/components/weather/SunEventIcon';
+import { formatTempShort, formatSpeed, formatPrecip } from '@/lib/units';
 import api from '@/lib/api';
 
 interface City {
@@ -25,7 +28,29 @@ interface ForecastDay {
   tempMax: number;
   tempMin: number;
   precipitation: number;
+  sunrise: string | null;
+  sunset: string | null;
+  uvIndexMax: number | null;
 }
+
+interface HourlyPoint {
+  time: string;
+  temperature: number;
+  precipitationProbability: number;
+  condition: string;
+  windSpeed: number;
+  uvIndex: number;
+  sunEvent: SunEvent | null;
+}
+
+interface AirQuality {
+  europeanAqi: number | null;
+  usAqi: number | null;
+  pm25: number | null;
+  pm10: number | null;
+}
+
+type SunEvent = 'sunrise' | 'sunset';
 
 interface HistoryDay {
   date: string;
@@ -46,19 +71,41 @@ interface CurrentWeather {
   precipitation: number;
 }
 
+function getCondIcon(cond: string): string {
+  if (cond === 'sunny') return '☀️';
+  if (cond === 'cloudy') return '☁️';
+  if (cond === 'rainy') return '🌧️';
+  if (cond === 'snowy') return '❄️';
+  return '⛈️';
+}
+
+function formatHour(time: string): string {
+  const d = new Date(time);
+  return d.toLocaleTimeString('en', { hour: 'numeric', hour12: true });
+}
+
+function formatTime(time: string): string {
+  const d = new Date(time);
+  return d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
+}
+
 export default function CityDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const { loading: authLoading } = useRequireAuth();
+  const { units } = useUnits();
 
   const [city, setCity] = useState<City | null>(null);
   const [current, setCurrent] = useState<CurrentWeather | null>(null);
   const [forecast, setForecast] = useState<ForecastDay[]>([]);
+  const [hourly, setHourly] = useState<HourlyPoint[]>([]);
+  const [airQuality, setAirQuality] = useState<AirQuality | null>(null);
   const [history, setHistory] = useState<HistoryDay[]>([]);
   const [allHistory, setAllHistory] = useState<HistoryDay[]>([]);
   const [historyLimit, setHistoryLimit] = useState<number>(7);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showHourly, setShowHourly] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -71,6 +118,8 @@ export default function CityDetailPage() {
         setCity(data.city);
         setCurrent(data.currentWeather);
         setForecast(data.forecast);
+        setHourly(data.hourly || []);
+        setAirQuality(data.airQuality || null);
         const reversed = (data.history || [])
           .map((h: any) => ({
             ...h,
@@ -167,7 +216,7 @@ export default function CityDetailPage() {
                 <WeatherIcon condition={current.condition} className="text-4xl" />
                 <div>
                   <div className="text-4xl font-light text-[var(--text-primary)]">
-                    {Math.round(current.temperature)}°
+                    {formatTempShort(current.temperature, units)}
                   </div>
                   <div className="text-sm text-[var(--text-muted)] capitalize">
                     {current.condition}
@@ -178,32 +227,174 @@ export default function CityDetailPage() {
           </div>
 
           {current && (
-            <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-[var(--border-subtle)]">
-              <div className="text-center">
-                <p className="text-xs text-[var(--text-muted)] mb-1">Feels Like</p>
-                <p className="text-lg font-medium text-[var(--text-primary)]">
-                  {Math.round(current.feelsLike)}°
-                </p>
+            <>
+              <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-[var(--border-subtle)]">
+                <div className="text-center">
+                  <p className="text-xs text-[var(--text-muted)] mb-1">Feels Like</p>
+                  <p className="text-lg font-medium text-[var(--text-primary)]">
+                    {formatTempShort(current.feelsLike, units)}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-[var(--text-muted)] mb-1">Humidity</p>
+                  <p className="text-lg font-medium text-[var(--text-primary)]">
+                    {current.humidity}%
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-[var(--text-muted)] mb-1">Wind</p>
+                  <p className="text-lg font-medium text-[var(--text-primary)]">
+                    {formatSpeed(current.windSpeed, units)}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs text-[var(--text-muted)] mb-1">Precipitation</p>
+                  <p className="text-lg font-medium text-[var(--text-primary)]">
+                    {formatPrecip(current.precipitation, units)}
+                  </p>
+                </div>
               </div>
-              <div className="text-center">
-                <p className="text-xs text-[var(--text-muted)] mb-1">Humidity</p>
-                <p className="text-lg font-medium text-[var(--text-primary)]">
-                  {current.humidity}%
-                </p>
+
+              <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 pt-4 border-t border-[var(--border-subtle)]">
+                {forecast[0]?.sunrise && (
+                  <div className="text-center">
+                    <p className="text-xs text-[var(--text-muted)] mb-1">Sunrise</p>
+                    <p className="text-lg font-medium text-[var(--text-primary)]">
+                      {formatTime(forecast[0].sunrise)}
+                    </p>
+                  </div>
+                )}
+                {forecast[0]?.sunset && (
+                  <div className="text-center">
+                    <p className="text-xs text-[var(--text-muted)] mb-1">Sunset</p>
+                    <p className="text-lg font-medium text-[var(--text-primary)]">
+                      {formatTime(forecast[0].sunset)}
+                    </p>
+                  </div>
+                )}
+                {forecast[0]?.uvIndexMax !== null && forecast[0]?.uvIndexMax !== undefined && (
+                  <div className="text-center">
+                    <p className="text-xs text-[var(--text-muted)] mb-1">UV Index</p>
+                    <p className="text-lg font-medium text-[var(--text-primary)]">
+                      {forecast[0].uvIndexMax}
+                    </p>
+                  </div>
+                )}
+                {airQuality?.usAqi !== null && airQuality?.usAqi !== undefined && (
+                  <div className="text-center">
+                    <p className="text-xs text-[var(--text-muted)] mb-1">AQI (US)</p>
+                    <p className="text-lg font-medium text-[var(--text-primary)]">
+                      {airQuality.usAqi}
+                    </p>
+                  </div>
+                )}
+                {airQuality?.europeanAqi !== null && airQuality?.europeanAqi !== undefined && (
+                  <div className="text-center">
+                    <p className="text-xs text-[var(--text-muted)] mb-1">AQI (EU)</p>
+                    <p className="text-lg font-medium text-[var(--text-primary)]">
+                      {airQuality.europeanAqi}
+                    </p>
+                  </div>
+                )}
+                {airQuality?.pm25 !== null && airQuality?.pm25 !== undefined && (
+                  <div className="text-center">
+                    <p className="text-xs text-[var(--text-muted)] mb-1">PM2.5</p>
+                    <p className="text-lg font-medium text-[var(--text-primary)]">
+                      {airQuality.pm25.toFixed(1)} µg/m³
+                    </p>
+                  </div>
+                )}
+                {airQuality?.pm10 !== null && airQuality?.pm10 !== undefined && (
+                  <div className="text-center">
+                    <p className="text-xs text-[var(--text-muted)] mb-1">PM10</p>
+                    <p className="text-lg font-medium text-[var(--text-primary)]">
+                      {airQuality.pm10.toFixed(1)} µg/m³
+                    </p>
+                  </div>
+                )}
               </div>
-              <div className="text-center">
-                <p className="text-xs text-[var(--text-muted)] mb-1">Wind</p>
-                <p className="text-lg font-medium text-[var(--text-primary)]">
-                  {Math.round(current.windSpeed)} km/h
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-[var(--text-muted)] mb-1">Precipitation</p>
-                <p className="text-lg font-medium text-[var(--text-primary)]">
-                  {current.precipitation} mm
-                </p>
-              </div>
-            </div>
+
+              {/* Hourly Forecast merged into card */}
+              {hourly.length > 0 && (
+                <div className="relative z-10 mt-4 pt-4 border-t border-[var(--border-subtle)]">
+                  <button
+                    onClick={() => setShowHourly(!showHourly)}
+                    className="text-xs text-[var(--accent)] hover:text-[var(--accent-hover)] flex items-center gap-1"
+                  >
+                    Hourly Forecast
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className={`transition-transform ${showHourly ? 'rotate-180' : ''}`}
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </button>
+                  {showHourly && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="overflow-x-auto scrollbar-hide mt-3 py-1"
+                    >
+                      <div className="flex gap-3 min-w-max">
+                        {hourly.slice(0, 48).map((h, i) => {
+                          const sunEvent = h.sunEvent;
+
+                          return (
+                            <div
+                              key={h.time}
+                              className={`flex flex-col items-center gap-1.5 px-3 py-3 rounded-xl min-w-[72px] first:ml-0.5 ${
+                                i === 0
+                                  ? 'bg-[var(--accent-light)]/50 ring-1 ring-[var(--accent-muted)]'
+                                  : 'bg-[var(--bg-surface-hover)]/40'
+                              }`}
+                            >
+                              <span className="text-[10px] text-[var(--text-muted)] font-medium uppercase">
+                                {sunEvent
+                                  ? sunEvent === 'sunrise'
+                                    ? 'Sunrise'
+                                    : 'Sunset'
+                                  : i === 0
+                                    ? 'Now'
+                                    : formatHour(h.time)}
+                              </span>
+                              {sunEvent ? (
+                                <SunEventIcon
+                                  event={sunEvent}
+                                  className="h-6 w-6 text-[var(--text-primary)]"
+                                />
+                              ) : (
+                                <span className="text-lg">{getCondIcon(h.condition)}</span>
+                              )}
+                              <span className="text-sm font-medium text-[var(--text-primary)]">
+                                {formatTempShort(h.temperature, units)}
+                              </span>
+                              {h.precipitationProbability > 0 && (
+                                <span className="text-[10px] text-[var(--accent)]">
+                                  {h.precipitationProbability}%
+                                </span>
+                              )}
+                              {h.uvIndex > 0 && (
+                                <span className="text-[10px] text-[var(--text-muted)]">
+                                  UV {h.uvIndex}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </motion.div>
 
@@ -260,13 +451,13 @@ export default function CityDetailPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right text-[var(--text-primary)] font-medium">
-                        {Math.round(day.tempMax)}°
+                        {formatTempShort(day.tempMax, units)}
                       </td>
                       <td className="px-4 py-3 text-right text-[var(--text-muted)]">
-                        {Math.round(day.tempMin)}°
+                        {formatTempShort(day.tempMin, units)}
                       </td>
                       <td className="px-4 py-3 text-right text-[var(--text-muted)] hidden sm:table-cell">
-                        {day.precipitation > 0 ? `${day.precipitation}mm` : '-'}
+                        {day.precipitation > 0 ? formatPrecip(day.precipitation, units) : '-'}
                       </td>
                     </tr>
                   ))}
@@ -276,7 +467,7 @@ export default function CityDetailPage() {
           </div>
         </motion.div>
 
-        {/* Past Week */}
+        {/* Past Weather */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -357,13 +548,13 @@ export default function CityDetailPage() {
                           </div>
                         </td>
                         <td className="px-4 py-3 text-right text-[var(--text-primary)] font-medium">
-                          {Math.round(day.tempMax)}°
+                          {formatTempShort(day.tempMax, units)}
                         </td>
                         <td className="px-4 py-3 text-right text-[var(--text-muted)]">
-                          {Math.round(day.tempMin)}°
+                          {formatTempShort(day.tempMin, units)}
                         </td>
                         <td className="px-4 py-3 text-right text-[var(--text-muted)] hidden sm:table-cell">
-                          {day.precipitation}mm
+                          {formatPrecip(day.precipitation, units)}
                         </td>
                       </tr>
                     ))}

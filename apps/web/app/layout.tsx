@@ -3,6 +3,7 @@ import { Space_Grotesk, DM_Sans } from 'next/font/google';
 import './globals.css';
 import { SessionProvider } from '@/context/SessionContext';
 import { AIChatProvider } from '@/context/AIChatContext';
+import { UnitProvider } from '@/context/UnitContext';
 import { Navbar } from '@/components/Navbar';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import AppSkyBackground from '@/components/weather/AppSkyBackground';
@@ -32,13 +33,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       >
         <AppSkyBackground />
         <SessionProvider>
-          <AIChatProvider>
-            <Navbar />
-            <main>
-              <ErrorBoundary>{children}</ErrorBoundary>
-            </main>
-            <AIChatSidebar />
-          </AIChatProvider>
+          <UnitProvider>
+            <AIChatProvider>
+              <Navbar />
+              <main>
+                <ErrorBoundary>{children}</ErrorBoundary>
+              </main>
+              <AIChatSidebar />
+            </AIChatProvider>
+          </UnitProvider>
         </SessionProvider>
       </body>
     </html>

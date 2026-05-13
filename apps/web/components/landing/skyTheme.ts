@@ -132,6 +132,7 @@ export function useTimeOfDay(): number {
 
   useEffect(() => {
     const sync = () => setHour(new Date().getHours());
+    sync();
     const id = setInterval(sync, 60000);
     return () => clearInterval(id);
   }, []);

@@ -94,9 +94,22 @@ export const fetchCurrentWeather = async (lat: number, lon: number) => {
         'wind_speed_10m',
         'precipitation',
       ].join(','),
-      daily: ['temperature_2m_max', 'temperature_2m_min', 'precipitation_sum', 'weather_code'].join(
-        ','
-      ),
+      hourly: [
+        'temperature_2m',
+        'precipitation_probability',
+        'weather_code',
+        'wind_speed_10m',
+        'uv_index',
+      ].join(','),
+      daily: [
+        'temperature_2m_max',
+        'temperature_2m_min',
+        'precipitation_sum',
+        'weather_code',
+        'sunrise',
+        'sunset',
+        'uv_index_max',
+      ].join(','),
       forecast_days: 7,
       timezone: 'auto',
     },
@@ -133,6 +146,32 @@ export const fetchHistoricalWeather = async (lat: number, lon: number, pastDays:
 
   await setCachedData(cacheKey, data, 6 * 60 * 60);
   return data;
+};
+
+// Fetch air quality data from Open-Meteo Air Quality API — cached 1h
+export const fetchAirQuality = async (lat: number, lon: number) => {
+  const cacheKey = `aq:${lat}:${lon}`;
+  const cached = await getCachedData<unknown>(cacheKey);
+  if (cached) {
+    console.log(`[fetchAirQuality] Returning cached result for lat=${lat}, lon=${lon}`);
+    return cached;
+  }
+
+  const url = `https://air-quality-api.open-meteo.com/v1/air-quality`;
+  try {
+    const { data } = await axios.get(url, {
+      params: {
+        latitude: lat,
+        longitude: lon,
+        current: ['european_aqi', 'us_aqi', 'pm2_5', 'pm10'].join(','),
+        forecast_days: 1,
+      },
+    });
+    await setCachedData(cacheKey, data, 60 * 60);
+    return data;
+  } catch {
+    return null;
+  }
 };
 
 // Map WMO weather code to human-readable condition

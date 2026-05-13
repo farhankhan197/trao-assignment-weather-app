@@ -4,8 +4,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
+import { useUnits } from '@/context/UnitContext';
+import { formatTempShort, formatSpeed, formatPrecip } from '@/lib/units';
 import { WeatherIcon } from '@/components/WeatherIcon';
 import WeatherAtmosphere from '@/components/weather/WeatherAtmosphere';
+import SunEventIcon from '@/components/weather/SunEventIcon';
 import api from '@/lib/api';
 import { getCondition } from '@/lib/weather';
 import dynamic from 'next/dynamic';
@@ -43,8 +46,48 @@ interface CurrentWeather {
   precipitation: number;
 }
 
+interface HourlyPoint {
+  time: string;
+  temperature: number;
+  precipitationProbability: number;
+  condition: string;
+  sunEvent: SunEvent | null;
+}
+
+interface AirQuality {
+  usAqi: number | null;
+  europeanAqi: number | null;
+}
+
+interface ForecastDay {
+  sunrise: string | null;
+  sunset: string | null;
+  uvIndexMax: number | null;
+}
+
+type SunEvent = 'sunrise' | 'sunset';
+
+function getCondIcon(cond: string): string {
+  if (cond === 'sunny') return '☀️';
+  if (cond === 'cloudy') return '☁️';
+  if (cond === 'rainy') return '🌧️';
+  if (cond === 'snowy') return '❄️';
+  return '⛈️';
+}
+
+function formatHour(time: string): string {
+  const d = new Date(time);
+  return d.toLocaleTimeString('en', { hour: 'numeric', hour12: true });
+}
+
+function formatTime(time: string): string {
+  const d = new Date(time);
+  return d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
+}
+
 export default function FavoritesPage() {
   const { loading: authLoading } = useRequireAuth();
+  const { units } = useUnits();
   const router = useRouter();
   const [favorites, setFavorites] = useState<City[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(() =>
@@ -53,8 +96,12 @@ export default function FavoritesPage() {
   const [current, setCurrent] = useState<CurrentWeather | null>(null);
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   const [streak, setStreak] = useState<string | null>(null);
+  const [hourly, setHourly] = useState<HourlyPoint[]>([]);
+  const [airQuality, setAirQuality] = useState<AirQuality | null>(null);
+  const [forecastToday, setForecastToday] = useState<ForecastDay | null>(null);
   const [initialLoad, setInitialLoad] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [showHourly, setShowHourly] = useState(false);
   const [sidebarWeather, setSidebarWeather] = useState<
     Record<string, { temperature: number; condition: string }>
   >({});
@@ -72,7 +119,6 @@ export default function FavoritesPage() {
         setSelectedId(match?._id ?? favs[0]._id);
       }
 
-      // Batch fetch weather for all sidebar items
       const entries = await Promise.all(
         favs.map(async (city: City) => {
           try {
@@ -119,6 +165,9 @@ export default function FavoritesPage() {
         if (cancelled) return;
         const data = res.data;
         setCurrent(data.currentWeather);
+        setHourly(data.hourly || []);
+        setAirQuality(data.airQuality || null);
+        setForecastToday(data.forecast?.[0] || null);
         setHistory(
           (data.history || []).map((h: any) => {
             const d = new Date(h.date + 'T00:00:00');
@@ -284,25 +333,124 @@ export default function FavoritesPage() {
                         <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6">
                           <div>
                             <span className="text-4xl lg:text-5xl font-light text-[var(--text-primary)]">
-                              {Math.round(current.temperature)}°
+                              {formatTempShort(current.temperature, units)}
                             </span>
                             <span className="text-[var(--text-muted)] text-base ml-2 capitalize">
                               {current.condition}
                             </span>
                           </div>
                           <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-[var(--text-muted)]">
-                            <span>H {Math.round(current.tempMax)}°</span>
-                            <span>L {Math.round(current.tempMin)}°</span>
+                            <span>H {formatTempShort(current.tempMax, units)}</span>
+                            <span>L {formatTempShort(current.tempMin, units)}</span>
                             <span>Humidity {current.humidity}%</span>
-                            <span>Wind {Math.round(current.windSpeed)} km/h</span>
-                            <span>Precip {current.precipitation} mm</span>
+                            <span>Wind {formatSpeed(current.windSpeed, units)}</span>
+                            <span>Precip {formatPrecip(current.precipitation, units)}</span>
                           </div>
+                        </div>
+                      )}
+
+                      {/* Extra data row */}
+                      {current && (
+                        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-[var(--text-muted)] mt-3 pt-3 border-t border-[var(--border-subtle)]">
+                          {forecastToday?.sunrise && (
+                            <span className="shrink-0">
+                              Sunrise {formatTime(forecastToday.sunrise)}
+                            </span>
+                          )}
+                          {forecastToday?.sunset && (
+                            <span className="shrink-0">
+                              Sunset {formatTime(forecastToday.sunset)}
+                            </span>
+                          )}
+                          {forecastToday?.uvIndexMax !== null &&
+                            forecastToday?.uvIndexMax !== undefined && (
+                              <span className="shrink-0">UV {forecastToday.uvIndexMax}</span>
+                            )}
+                          {airQuality?.usAqi !== null && airQuality?.usAqi !== undefined && (
+                            <span className="shrink-0">AQI {airQuality.usAqi}</span>
+                          )}
                         </div>
                       )}
 
                       {streak && (
                         <div className="mt-4 text-sm text-[var(--text-inverse)] bg-white/90 rounded-lg px-3 py-2 inline-block">
                           {streak}
+                        </div>
+                      )}
+
+                      {/* Hourly Forecast merged into card */}
+                      {hourly.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-[var(--border-subtle)]">
+                          <button
+                            onClick={() => setShowHourly(!showHourly)}
+                            className="text-xs text-[var(--accent)] hover:text-[var(--accent-hover)] flex items-center gap-1"
+                          >
+                            Hourly Forecast
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className={`transition-transform ${showHourly ? 'rotate-180' : ''}`}
+                            >
+                              <path d="m6 9 6 6 6-6" />
+                            </svg>
+                          </button>
+                          {showHourly && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: 'auto' }}
+                              className="overflow-x-auto scrollbar-hide mt-3 py-1"
+                            >
+                              <div className="flex gap-3">
+                                {hourly.slice(0, 48).map((h, i) => {
+                                  const sunEvent = h.sunEvent;
+
+                                  return (
+                                    <div
+                                      key={h.time}
+                                      className={`shrink-0 flex flex-col items-center gap-1 px-3 py-3 rounded-xl min-w-[64px] first:ml-0.5 ${
+                                        i === 0
+                                          ? 'bg-[var(--accent-light)]/50 ring-1 ring-[var(--accent-muted)]'
+                                          : 'bg-[var(--bg-surface-hover)]/40'
+                                      }`}
+                                    >
+                                      <span className="text-[10px] text-[var(--text-muted)] font-medium">
+                                        {sunEvent
+                                          ? sunEvent === 'sunrise'
+                                            ? 'Sunrise'
+                                            : 'Sunset'
+                                          : i === 0
+                                            ? 'Now'
+                                            : formatHour(h.time)}
+                                      </span>
+                                      {sunEvent ? (
+                                        <SunEventIcon
+                                          event={sunEvent}
+                                          className="h-6 w-6 text-[var(--text-primary)]"
+                                        />
+                                      ) : (
+                                        <span className="text-lg">{getCondIcon(h.condition)}</span>
+                                      )}
+                                      <span className="text-sm font-medium text-[var(--text-primary)]">
+                                        {formatTempShort(h.temperature, units)}
+                                      </span>
+                                      {h.precipitationProbability > 0 && (
+                                        <span className="text-[10px] text-[var(--accent)]">
+                                          {h.precipitationProbability}%
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </motion.div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -325,7 +473,6 @@ export default function FavoritesPage() {
                       </div>
                     )}
 
-                    {/* Day-by-day row */}
                     {history.length > 0 && (
                       <div className="flex gap-3 mt-6 overflow-x-auto pb-2 scrollbar-hide">
                         {history.map((h, i) => (
@@ -339,10 +486,10 @@ export default function FavoritesPage() {
                             </span>
                             <WeatherIcon condition={h.condition} className="text-xl" />
                             <span className="text-sm font-medium text-[var(--text-primary)]">
-                              {Math.round(h.tempMax)}°
+                              {formatTempShort(h.tempMax, units)}
                             </span>
                             <span className="text-xs text-[var(--text-muted)]">
-                              {Math.round(h.tempMin)}°
+                              {formatTempShort(h.tempMin, units)}
                             </span>
                           </div>
                         ))}

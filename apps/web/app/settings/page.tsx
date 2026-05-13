@@ -3,11 +3,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { useSession } from '@/context/SessionContext';
+import { useUnits } from '@/context/UnitContext';
 import api from '@/lib/api';
 
 export default function SettingsPage() {
   const { loading: authLoading } = useRequireAuth();
   const { refreshAlertCount } = useSession();
+  const { units, toggleUnits } = useUnits();
 
   const [calendarConnected, setCalendarConnected] = useState<boolean | null>(null);
   const [googleEmail, setGoogleEmail] = useState<string | null>(null);
@@ -91,7 +93,7 @@ export default function SettingsPage() {
           <p className="text-sm text-[var(--text-muted)]">Manage your account and integrations</p>
         </div>
 
-        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-[var(--shadow-sm)]">
+        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-[var(--shadow-sm)] mb-6">
           <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6">
             <div>
               <h2 className="font-display text-xl mb-2">Google Calendar</h2>
@@ -133,6 +135,28 @@ export default function SettingsPage() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Units */}
+        <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-[var(--shadow-sm)]">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6">
+            <div>
+              <h2 className="font-display text-xl mb-2">Units</h2>
+              <p className="text-[var(--text-muted)] text-sm max-w-md">
+                Choose between metric (°C, km/h, mm) and imperial (°F, mph, in) measurements.
+              </p>
+              <p className="text-[var(--text-secondary)] text-sm mt-2">
+                Currently using:{' '}
+                <span className="font-medium">{units === 'metric' ? 'Metric' : 'Imperial'}</span>
+              </p>
+            </div>
+            <button
+              onClick={toggleUnits}
+              className="w-full sm:w-auto bg-[var(--bg-surface-hover)] hover:bg-[var(--bg-input-hover)] text-[var(--text-secondary)] px-6 py-3 rounded-lg font-medium transition-all text-sm"
+            >
+              Switch to {units === 'metric' ? 'Imperial' : 'Metric'}
+            </button>
           </div>
         </div>
       </div>

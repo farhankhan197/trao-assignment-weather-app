@@ -2,9 +2,12 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
+import { useUnits } from '@/context/UnitContext';
+import { formatTempShort, formatSpeed, formatPrecip } from '@/lib/units';
 import api from '@/lib/api';
 import { WeatherIcon } from './WeatherIcon';
 import WeatherAtmosphere from './weather/WeatherAtmosphere';
+import SunEventIcon from './weather/SunEventIcon';
 
 interface LocationCity {
   name: string;
@@ -19,7 +22,29 @@ interface CurrentWeather {
   humidity: number;
   windSpeed: number;
   precipitation: number;
+  sunrise: string | null;
+  sunset: string | null;
+  uvIndexMax: number | null;
 }
+
+interface HourlyPoint {
+  time: string;
+  temperature: number;
+  precipitationProbability: number;
+  condition: string;
+  windSpeed: number;
+  uvIndex: number;
+  sunEvent?: SunEvent | null;
+}
+
+interface AirQuality {
+  europeanAqi: number | null;
+  usAqi: number | null;
+  pm25: number | null;
+  pm10: number | null;
+}
+
+type SunEvent = 'sunrise' | 'sunset';
 
 interface HistoryPoint {
   date: string;
@@ -34,6 +59,8 @@ interface LocalCache {
   lat: number;
   lon: number;
   weather: CurrentWeather;
+  hourly: HourlyPoint[];
+  airQuality: AirQuality | null;
   history: HistoryPoint[];
   streak: string | null;
   timestamp: number;
@@ -79,14 +106,53 @@ function saveCache(data: LocalCache) {
   }
 }
 
+function getCondIcon(cond: string): string {
+  if (cond === 'sunny') return '☀️';
+  if (cond === 'cloudy') return '☁️';
+  if (cond === 'rainy') return '🌧️';
+  if (cond === 'snowy') return '❄️';
+  return '⛈️';
+}
+
+function formatHour(time: string): string {
+  const d = new Date(time);
+  return d.toLocaleTimeString('en', { hour: 'numeric', hour12: true });
+}
+
+function formatTime(time: string): string {
+  const d = new Date(time);
+  return d.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit' });
+}
+
+function getCurrentHourKey(): string {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}`;
+}
+
+function getSunEventForHour(
+  time: string,
+  sunrise?: string | null,
+  sunset?: string | null
+): SunEvent | null {
+  const hourKey = time.slice(0, 13);
+  if (sunrise?.slice(0, 13) === hourKey) return 'sunrise';
+  if (sunset?.slice(0, 13) === hourKey) return 'sunset';
+  return null;
+}
+
 export function LocalWeatherSidebar() {
+  const { units } = useUnits();
   const [permission, setPermission] = useState<PermissionState>('prompt');
   const [city, setCity] = useState<LocationCity | null>(null);
   const [weather, setWeather] = useState<CurrentWeather | null>(null);
+  const [hourly, setHourly] = useState<HourlyPoint[]>([]);
+  const [airQuality, setAirQuality] = useState<AirQuality | null>(null);
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   const [streak, setStreak] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [showHourly, setShowHourly] = useState(false);
   const [locationOff, setLocationOff] = useState(false);
   const [locationChecking, setLocationChecking] = useState(false);
   const [liveCoords, setLiveCoords] = useState<{ lat: number; lon: number } | null>(null);
@@ -110,16 +176,17 @@ export function LocalWeatherSidebar() {
       const c = cached.current;
       setCity(c.city);
       setWeather(c.weather);
+      setHourly(c.hourly || []);
+      setAirQuality(c.airQuality || null);
       setHistory(c.history);
       setStreak(c.streak);
       setLiveCoords({ lat: c.lat, lon: c.lon });
       setLoading(false);
       setLocationOff(false);
-      setLocationChecking(true); // pulsing green while we check
-      setPermission('granted'); // treat as granted so we can try background geolocation
+      setLocationChecking(true);
+      setPermission('granted');
     }
 
-    // Try geolocation in background
     if (!navigator.geolocation) {
       if (!cached.current) {
         setPermission('unavailable');
@@ -137,16 +204,13 @@ export function LocalWeatherSidebar() {
         setLocationChecking(false);
         setGpsOff(false);
 
-        // If we have cached data, check if location changed significantly
         if (cached.current) {
           const dist = haversineKm(cached.current.lat, cached.current.lon, lat, lon);
           if (dist < DISTANCE_THRESHOLD_KM) {
-            // Same area — keep cached data, just update timestamp
             saveCache({ ...cached.current, timestamp: Date.now() });
             return;
           }
         }
-        // Location changed or no cache — fetch fresh data
         setCity(null);
         setWeather(null);
         setLoading(true);
@@ -170,7 +234,6 @@ export function LocalWeatherSidebar() {
     );
   }, []);
 
-  // When liveCoords updates to a new location, fetch fresh data
   useEffect(() => {
     if (!liveCoords) return;
     if (cached.current) {
@@ -180,7 +243,7 @@ export function LocalWeatherSidebar() {
         liveCoords.lat,
         liveCoords.lon
       );
-      if (dist < DISTANCE_THRESHOLD_KM) return; // same area
+      if (dist < DISTANCE_THRESHOLD_KM) return;
     }
 
     fetchLocal(liveCoords.lat, liveCoords.lon);
@@ -193,6 +256,8 @@ export function LocalWeatherSidebar() {
       const data = res.data;
       setCity(data.city);
       setWeather(data.currentWeather);
+      setHourly(data.hourly || []);
+      setAirQuality(data.airQuality || null);
       setHistory(data.history || []);
       setStreak(data.streak?.label || null);
 
@@ -201,6 +266,8 @@ export function LocalWeatherSidebar() {
         lat,
         lon,
         weather: data.currentWeather,
+        hourly: data.hourly || [],
+        airQuality: data.airQuality || null,
         history: data.history || [],
         streak: data.streak?.label || null,
         timestamp: Date.now(),
@@ -233,7 +300,7 @@ export function LocalWeatherSidebar() {
     );
   }, []);
 
-  // Permission prompt — no cache yet
+  // Permission states ...
   if (permission === 'prompt' && !cached.current) {
     return (
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 shadow-[var(--shadow-sm)]">
@@ -254,7 +321,6 @@ export function LocalWeatherSidebar() {
     );
   }
 
-  // Denied/no cache
   if (permission === 'denied' && !cached.current) {
     return (
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 shadow-[var(--shadow-sm)]">
@@ -268,7 +334,6 @@ export function LocalWeatherSidebar() {
     );
   }
 
-  // Unavailable/no cache
   if (permission === 'unavailable' && !cached.current) {
     return (
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 shadow-[var(--shadow-sm)]">
@@ -280,7 +345,6 @@ export function LocalWeatherSidebar() {
     );
   }
 
-  // Still loading fresh data
   if (loading || !weather) {
     return (
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 shadow-[var(--shadow-sm)]">
@@ -298,6 +362,9 @@ export function LocalWeatherSidebar() {
       </div>
     );
   }
+
+  const currentHourKey = getCurrentHourKey();
+  const visibleHourly = hourly.filter((h) => h.time.slice(0, 13) >= currentHourKey);
 
   return (
     <motion.div
@@ -343,7 +410,7 @@ export function LocalWeatherSidebar() {
                 <>
                   <span className="text-xs text-[var(--text-muted)]">·</span>
                   <span className="text-lg font-light text-[var(--text-primary)] shrink-0">
-                    {Math.round(weather.temperature)}°
+                    {formatTempShort(weather.temperature, units)}
                   </span>
                   <span className="text-sm text-[var(--text-muted)] capitalize">
                     {weather.condition}
@@ -356,12 +423,98 @@ export function LocalWeatherSidebar() {
         </div>
 
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-[var(--text-muted)] mt-4">
-          <span className="shrink-0">H {Math.round(weather.tempMax)}°</span>
-          <span className="shrink-0">L {Math.round(weather.tempMin)}°</span>
+          <span className="shrink-0">H {formatTempShort(weather.tempMax, units)}</span>
+          <span className="shrink-0">L {formatTempShort(weather.tempMin, units)}</span>
           <span className="shrink-0">Humidity {weather.humidity}%</span>
-          <span className="shrink-0">Wind {Math.round(weather.windSpeed)} km/h</span>
-          <span className="shrink-0">Precip {weather.precipitation} mm</span>
+          <span className="shrink-0">Wind {formatSpeed(weather.windSpeed, units)}</span>
+          <span className="shrink-0">Precip {formatPrecip(weather.precipitation, units)}</span>
         </div>
+
+        {/* Extra data row */}
+        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-[var(--text-muted)] mt-2">
+          {weather.sunrise && (
+            <span className="shrink-0">Sunrise {formatTime(weather.sunrise)}</span>
+          )}
+          {weather.sunset && <span className="shrink-0">Sunset {formatTime(weather.sunset)}</span>}
+          {weather.uvIndexMax !== null && weather.uvIndexMax !== undefined && (
+            <span className="shrink-0">UV {weather.uvIndexMax}</span>
+          )}
+          {airQuality?.usAqi !== null && airQuality?.usAqi !== undefined && (
+            <span className="shrink-0">AQI {airQuality.usAqi}</span>
+          )}
+        </div>
+
+        {/* Hourly forecast */}
+        {hourly.length > 0 && (
+          <div className="mt-4">
+            <button
+              onClick={() => setShowHourly(!showHourly)}
+              className="text-xs text-[var(--accent)] hover:text-[var(--accent-hover)] flex items-center gap-1"
+            >
+              Hourly forecast
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className={`transition-transform ${showHourly ? 'rotate-180' : ''}`}
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
+            {showHourly && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="overflow-x-auto scrollbar-hide mt-3 py-1"
+              >
+                <div className="flex gap-2">
+                  {visibleHourly.slice(0, 24).map((h, i) => {
+                    const sunEvent =
+                      h.sunEvent ?? getSunEventForHour(h.time, weather.sunrise, weather.sunset);
+
+                    return (
+                      <div
+                        key={h.time}
+                        className={`shrink-0 flex flex-col items-center gap-1 px-2 py-2 rounded-xl min-w-[56px] first:ml-0.5 ${
+                          i === 0
+                            ? 'bg-[var(--accent-light)]/50 ring-1 ring-[var(--accent-muted)]'
+                            : 'bg-[var(--bg-surface-hover)]/40'
+                        }`}
+                      >
+                        <span className="text-[10px] text-[var(--text-muted)] font-medium">
+                          {sunEvent
+                            ? sunEvent === 'sunrise'
+                              ? 'Sunrise'
+                              : 'Sunset'
+                            : i === 0
+                              ? 'Now'
+                              : formatHour(h.time)}
+                        </span>
+                        {sunEvent ? (
+                          <SunEventIcon
+                            event={sunEvent}
+                            className="h-6 w-6 text-[var(--text-primary)]"
+                          />
+                        ) : (
+                          <span className="text-base">{getCondIcon(h.condition)}</span>
+                        )}
+                        <span className="text-xs font-medium text-[var(--text-primary)]">
+                          {formatTempShort(h.temperature, units)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </div>
+        )}
 
         {locationOff && (
           <div className="mt-4 text-xs text-[var(--text-muted)] bg-[var(--bg-surface-hover)]/50 rounded-lg px-3 py-2">
@@ -426,10 +579,10 @@ export function LocalWeatherSidebar() {
                     <span className="text-[10px] text-[var(--text-muted)]">{h.formattedDate}</span>
                     <WeatherIcon condition={h.condition} className="text-xl" />
                     <span className="text-sm font-medium text-[var(--text-primary)]">
-                      {Math.round(h.tempMax)}°
+                      {formatTempShort(h.tempMax, units)}
                     </span>
                     <span className="text-xs text-[var(--text-muted)]">
-                      {Math.round(h.tempMin)}°
+                      {formatTempShort(h.tempMin, units)}
                     </span>
                   </div>
                 ))}

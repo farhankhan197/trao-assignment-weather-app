@@ -4,6 +4,7 @@ import { calculateStreak } from '../utils/streak.js';
 import {
   fetchCurrentWeather,
   fetchHistoricalWeather,
+  fetchAirQuality,
   getConditionFromCode,
 } from '../utils/weather.service.js';
 
@@ -156,13 +157,15 @@ export const getCityDetails = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const [weatherData, histData] = await Promise.all([
+    const [weatherData, histData, airQuality] = await Promise.all([
       fetchCurrentWeather(city.lat, city.lon),
       fetchHistoricalWeather(city.lat, city.lon, 14),
+      fetchAirQuality(city.lat, city.lon),
     ]);
 
     const current = weatherData.current;
     const daily = weatherData.daily;
+    const hourly = weatherData.hourly;
 
     const forecast = (daily?.time || []).slice(0, 7).map((date: string, i: number) => {
       const d = new Date(date + 'T00:00:00');
@@ -174,8 +177,28 @@ export const getCityDetails = async (req: Request, res: Response): Promise<void>
         tempMin: daily.temperature_2m_min[i],
         condition: getConditionFromCode(daily.weather_code[i]),
         precipitation: daily.precipitation_sum[i],
+        sunrise: daily.sunrise?.[i] ?? null,
+        sunset: daily.sunset?.[i] ?? null,
+        uvIndexMax: daily.uv_index_max?.[i] ?? null,
       };
     });
+
+    const sunEvents = new Map<string, 'sunrise' | 'sunset'>();
+    (daily?.sunrise || []).forEach((time: string) => sunEvents.set(time.slice(0, 13), 'sunrise'));
+    (daily?.sunset || []).forEach((time: string) => sunEvents.set(time.slice(0, 13), 'sunset'));
+
+    const currentHour = typeof current?.time === 'string' ? current.time.slice(0, 13) : null;
+    const hourlyForecast = (hourly?.time || [])
+      .map((time: string, i: number) => ({
+        time,
+        temperature: hourly.temperature_2m[i],
+        precipitationProbability: hourly.precipitation_probability?.[i] ?? 0,
+        condition: getConditionFromCode(hourly.weather_code[i]),
+        windSpeed: hourly.wind_speed_10m?.[i] ?? 0,
+        uvIndex: hourly.uv_index?.[i] ?? 0,
+        sunEvent: sunEvents.get(time.slice(0, 13)) ?? null,
+      }))
+      .filter((point: { time: string }) => !currentHour || point.time.slice(0, 13) >= currentHour);
 
     const historyDays = histData.daily.time.map((date: string, i: number) => {
       const d = new Date(date + 'T00:00:00');
@@ -194,6 +217,8 @@ export const getCityDetails = async (req: Request, res: Response): Promise<void>
       condition: getConditionFromCode(histData.daily.weather_code[i]),
     }));
     const streak = calculateStreak(days);
+
+    const aqCurrent = airQuality?.current;
 
     res.json({
       city: {
@@ -215,6 +240,15 @@ export const getCityDetails = async (req: Request, res: Response): Promise<void>
         precipitation: current.precipitation,
       },
       forecast,
+      hourly: hourlyForecast,
+      airQuality: aqCurrent
+        ? {
+            europeanAqi: aqCurrent.european_aqi ?? null,
+            usAqi: aqCurrent.us_aqi ?? null,
+            pm25: aqCurrent.pm2_5 ?? null,
+            pm10: aqCurrent.pm10 ?? null,
+          }
+        : null,
       history: historyDays,
       streak: streak ? { label: streak.label } : null,
     });
