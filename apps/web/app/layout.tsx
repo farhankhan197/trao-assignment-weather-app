@@ -14,7 +14,7 @@ const AIChatSidebar = dynamic(() => import('@/components/AIChatSidebar'), {
 
 const display = Space_Grotesk({
   subsets: ['latin'],
-  weight: ['400', '700', '900'],
+  weight: ['400', '700'],
   variable: '--font-display',
 });
 const body = DM_Sans({ subsets: ['latin'], variable: '--font-body' });
