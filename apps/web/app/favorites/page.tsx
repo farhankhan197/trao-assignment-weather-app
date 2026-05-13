@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
@@ -49,18 +49,20 @@ export default function FavoritesPage() {
   const [current, setCurrent] = useState<CurrentWeather | null>(null);
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   const [streak, setStreak] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
   const [sidebarWeather, setSidebarWeather] = useState<
     Record<string, { temperature: number; condition: string }>
   >({});
+  const autoSelected = useRef(false);
 
   const fetchCities = useCallback(async () => {
     try {
       const res = await api.get('/api/cities', { params: { favoritesOnly: true } } as any);
       const favs = res.data.cities || [];
       setFavorites(favs);
-      if (favs.length > 0 && !selectedId) {
+      if (favs.length > 0 && !autoSelected.current) {
+        autoSelected.current = true;
         setSelectedId(favs[0]._id);
       }
 
@@ -89,9 +91,9 @@ export default function FavoritesPage() {
     } catch {
       // ignore
     } finally {
-      setLoading(false);
+      setInitialLoad(false);
     }
-  }, [selectedId]);
+  }, []);
 
   useEffect(() => {
     fetchCities();
@@ -131,7 +133,7 @@ export default function FavoritesPage() {
     };
   }, [selectedId]);
 
-  if (authLoading || loading) {
+  if (authLoading || initialLoad) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <p className="text-[var(--text-muted)]">Loading favorites...</p>

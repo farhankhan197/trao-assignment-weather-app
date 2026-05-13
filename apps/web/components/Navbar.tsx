@@ -225,7 +225,7 @@ export function Navbar() {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -4, scale: 0.96 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-[var(--border)] overflow-hidden"
+                      className="absolute right-0 mt-2 w-52 bg-[var(--bg-surface)] rounded-xl shadow-lg border border-[var(--border)] overflow-hidden"
                     >
                       <div className="px-4 py-3 border-b border-[var(--border)]">
                         <p className="text-sm font-medium text-[var(--text-primary)]">
@@ -240,7 +240,7 @@ export function Navbar() {
                           setProfileOpen(false);
                           logout();
                         }}
-                        className="w-full text-left px-4 py-2.5 text-sm text-[var(--danger)] hover:bg-[var(--danger-light)] transition-colors"
+                        className="w-full text-left px-4 py-2.5 text-sm text-[var(--danger)] hover:bg-red-900/30 transition-colors"
                       >
                         Logout
                       </button>
