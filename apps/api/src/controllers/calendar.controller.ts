@@ -161,13 +161,16 @@ export const disconnectCalendar = async (req: Request, res: Response): Promise<v
 };
 
 // GET /api/calendar/alerts
-// Returns all weather alerts for the user's calendar events
+// Runs a live scan of upcoming calendar events and returns current alerts
 export const getCalendarAlerts = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
       res.status(401).json({ error: 'Authentication required' });
       return;
     }
+
+    // Run live scan: fetches events, checks weather, upserts alerts, cleans up passed
+    await runCalendarAlertScanForUser(req.user.id);
 
     const alerts = await CalendarAlert.find({ userId: req.user.id }).sort({
       read: 1,

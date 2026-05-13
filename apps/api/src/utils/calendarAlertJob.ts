@@ -1,4 +1,3 @@
-import cron from 'node-cron';
 import { User } from '../models/User.js';
 import { CalendarAlert } from '../models/CalendarAlert.js';
 import { getValidAccessToken, fetchUpcomingEvents, geocodeLocation } from './calendar.service.js';
@@ -111,11 +110,4 @@ export async function runCalendarAlertScanForAllUsers() {
   for (const user of users) {
     await runCalendarAlertScanForUser(user._id.toString());
   }
-}
-
-export function startCalendarAlertJob() {
-  // Run daily at 6:00 AM UTC
-  cron.schedule('0 6 * * *', async () => {
-    await runCalendarAlertScanForAllUsers();
-  });
 }

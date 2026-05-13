@@ -9,7 +9,6 @@ import weatherRoutes from './routes/weather.routes.js';
 import aiRoutes from './routes/ai.routes.js';
 import calendarRoutes from './routes/calendar.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
-import { startCalendarAlertJob } from './utils/calendarAlertJob.js';
 
 dotenv.config();
 
@@ -70,7 +69,6 @@ app.use((err: Error, _req: express.Request, res: express.Response, _next: expres
 // ─── Start (local only) ────────────────────────────────────────────────────────
 if (!isServerless) {
   connectDB().then(() => {
-    startCalendarAlertJob();
     app.listen(PORT, () => console.log(`API running on http://localhost:${PORT}`));
   });
 }
