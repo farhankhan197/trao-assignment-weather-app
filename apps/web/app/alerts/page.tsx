@@ -36,8 +36,8 @@ export default function AlertsPage() {
   const fetchAlerts = useCallback(async () => {
     try {
       const [alertsRes, statusRes] = await Promise.all([
-        api.get('/api/calendar/alerts', { skipCache: true } as any),
-        api.get('/auth/calendar/status', { skipCache: true } as any),
+        api.get('/api/calendar/alerts', { cacheTTL: 900000 } as any),
+        api.get('/auth/calendar/status', { cacheTTL: 900000 } as any),
       ]);
       setAlerts(alertsRes.data.alerts);
       setCalendarConnected(statusRes.data.connected);
