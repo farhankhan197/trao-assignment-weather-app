@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useEffect, useRef, useState } from 'react';
-import { useTimeOfDay, getTheme } from './timeSky';
+import { useTimeOfDay, getTheme } from './skyTheme';
 import Rain from '@/components/weather/Rain';
 import Snow from '@/components/weather/Snow';
 

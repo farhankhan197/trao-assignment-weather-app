@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSession } from '@/context/SessionContext';
 import api from '@/lib/api';
 import TimeSky from './TimeSky';
-import { getTheme, useTimeOfDay } from './timeSky';
+import { getTheme, useTimeOfDay } from './skyTheme';
 
 interface GeoData {
   temp: number;
