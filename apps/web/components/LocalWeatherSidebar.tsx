@@ -285,7 +285,10 @@ export function LocalWeatherSidebar() {
             <span className="w-2 h-2 rounded-full bg-[var(--success)]" title="Live location" />
           )}
           {locationOff && (
-            <span className="text-[10px] text-[var(--text-muted)] italic">(cached)</span>
+            <span
+              className="w-2 h-2 rounded-full bg-[var(--danger)]"
+              title="Location unavailable"
+            />
           )}
         </div>
 
