@@ -29,6 +29,7 @@ interface ForecastDay {
 
 interface HistoryDay {
   date: string;
+  dayName: string;
   formattedDate: string;
   condition: string;
   tempMax: number;
@@ -69,7 +70,12 @@ export default function CityDetailPage() {
         setCity(data.city);
         setCurrent(data.currentWeather);
         setForecast(data.forecast);
-        const reversed = (data.history || []).slice().reverse();
+        const reversed = (data.history || [])
+          .map((h: any) => ({
+            ...h,
+            dayName: new Date(h.date + 'T00:00:00').toLocaleDateString('en', { weekday: 'short' }),
+          }))
+          .reverse();
         setAllHistory(reversed);
         setHistory(reversed.slice(0, 7));
       } catch {
