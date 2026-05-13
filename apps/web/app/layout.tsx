@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import dynamic from 'next/dynamic';
 import { Space_Grotesk, DM_Sans } from 'next/font/google';
 import './globals.css';
 import { SessionProvider } from '@/context/SessionContext';
@@ -7,10 +6,7 @@ import { AIChatProvider } from '@/context/AIChatContext';
 import { Navbar } from '@/components/Navbar';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import AppSkyBackground from '@/components/weather/AppSkyBackground';
-
-const AIChatSidebar = dynamic(() => import('@/components/AIChatSidebar'), {
-  ssr: false,
-});
+import AIChatSidebar from '@/components/AIChatSidebarDynamic';
 
 const display = Space_Grotesk({
   subsets: ['latin'],
