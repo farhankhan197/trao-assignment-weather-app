@@ -79,12 +79,6 @@ export default function AlertsPage() {
 
   return (
     <div className="relative min-h-screen">
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'linear-gradient(180deg, rgba(37,99,235,0.03) 0%, transparent 60%)',
-        }}
-      />
       <div className="relative max-w-4xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>

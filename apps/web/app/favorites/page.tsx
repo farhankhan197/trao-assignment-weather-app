@@ -168,12 +168,6 @@ export default function FavoritesPage() {
 
   return (
     <div className="relative min-h-screen">
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'linear-gradient(180deg, rgba(37,99,235,0.03) 0%, transparent 60%)',
-        }}
-      />
       <div className="relative max-w-7xl mx-auto px-4 py-6 lg:py-8">
         <div className="mb-4">
           <h1
@@ -258,7 +252,7 @@ export default function FavoritesPage() {
                   {/* Current weather header */}
                   <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl shadow-[var(--shadow-sm)] relative overflow-hidden">
                     {current && (
-                      <WeatherAtmosphere condition={current.condition} intensity="dramatic" />
+                      <WeatherAtmosphere condition={current.condition} intensity="card" />
                     )}
                     <div className="relative z-10 p-4 lg:p-6">
                       <div className="flex items-start justify-between mb-4">
@@ -299,7 +293,7 @@ export default function FavoritesPage() {
                       )}
 
                       {streak && (
-                        <div className="mt-4 text-sm text-[var(--warning)]/80 bg-[var(--warning-light)] rounded-lg px-3 py-2 inline-block">
+                        <div className="mt-4 text-sm text-[var(--text-inverse)] bg-white/90 rounded-lg px-3 py-2 inline-block">
                           {streak}
                         </div>
                       )}
@@ -455,7 +449,7 @@ function SidebarItem({
       className={`w-full shrink-0 lg:shrink text-left flex items-center gap-3 p-3 rounded-xl transition-colors ${
         isSelected
           ? 'bg-[var(--accent-light)] border border-[var(--accent-muted)]'
-          : 'hover:bg-[var(--bg-surface-hover)]'
+          : 'bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-hover)]'
       }`}
     >
       <div className="shrink-0">

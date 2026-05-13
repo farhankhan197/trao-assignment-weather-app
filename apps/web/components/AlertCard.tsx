@@ -22,14 +22,14 @@ interface Props {
 }
 
 const SEVERITY_STYLES = {
-  high: 'border-[var(--danger)]/40 bg-[var(--danger-light)]/50',
-  medium: 'border-[var(--warning)]/40 bg-[var(--warning-light)]/50',
+  high: 'border-[var(--danger)]/40 bg-[#0f172a]',
+  medium: 'border-[var(--warning)]/40 bg-[#0f172a]',
   low: 'border-[var(--border)] bg-[var(--bg-surface)]',
 };
 
 const SEVERITY_BADGE = {
-  high: 'bg-[var(--danger)]/10 text-[var(--danger)] border-[var(--danger)]/20',
-  medium: 'bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20',
+  high: 'bg-[var(--danger)] text-white border-[var(--danger)]',
+  medium: 'bg-[var(--warning)] text-white border-[var(--warning)]',
   low: 'bg-[var(--bg-surface-hover)] text-[var(--text-muted)] border-[var(--border)]',
 };
 
@@ -112,7 +112,7 @@ export function AlertCard({ alert, onMarkRead }: Props) {
       </div>
 
       {/* Divider */}
-      <div className="h-px bg-[var(--border-subtle)]/60 mx-5" />
+      <div className="h-px bg-[var(--border)]/30 mx-5" />
 
       {/* Bottom: Message with Markdown */}
       <div className="px-5 py-4">
@@ -125,7 +125,7 @@ export function AlertCard({ alert, onMarkRead }: Props) {
           <div className="flex justify-end mt-3">
             <button
               onClick={() => onMarkRead(alert._id)}
-              className="text-xs bg-[var(--bg-surface-hover)] hover:bg-[var(--bg-input-hover)] text-[var(--text-secondary)] px-3 py-1.5 rounded-lg transition-colors"
+              className="text-xs bg-[var(--bg-surface-hover)] hover:bg-[var(--accent)] hover:text-white text-[var(--text-primary)] px-3 py-1.5 rounded-lg transition-colors"
             >
               Mark as read
             </button>

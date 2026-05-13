@@ -133,7 +133,7 @@ export function AIChatSidebar() {
         initial={{ x: '100%' }}
         animate={{ x: isOpen ? '0%' : '100%' }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed top-0 right-0 h-full w-full sm:w-[420px] max-w-full bg-[var(--bg-primary)] border-l border-[var(--border)] shadow-[var(--shadow-md)] z-[70] flex flex-col"
+        className="fixed top-0 right-0 h-full w-full sm:w-[420px] max-w-full bg-[var(--bg-surface)] border-l border-[var(--border)] shadow-[var(--shadow-md)] z-[70] flex flex-col"
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 h-14 border-b border-[var(--border)] shrink-0">

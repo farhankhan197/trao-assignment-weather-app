@@ -7,26 +7,26 @@ html {
 }
 
 :root {
-  --bg-primary: #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-surface-hover: #f1f5f9;
-  --bg-input: #ffffff;
-  --bg-input-hover: #f8fafc;
-  --bg-glass: rgba(255, 255, 255, 0.75);
+  --bg-primary: linear-gradient(180deg, #0a1628 0%, #1a3a5c 30%, #2563eb 55%, #1e3a5f 100%);
+  --bg-surface: #0f172a;
+  --bg-surface-hover: #1e293b;
+  --bg-input: #0f172a;
+  --bg-input-hover: #1e293b;
+  --bg-glass: rgba(30, 41, 59, 0.85);
 
-  --text-primary: #0f172a;
-  --text-secondary: #334155;
-  --text-muted: #64748b;
-  --text-inverse: #ffffff;
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.85);
+  --text-muted: rgba(255, 255, 255, 0.55);
+  --text-inverse: #0f172a;
 
-  --border: #cbd5e1;
-  --border-subtle: #e2e8f0;
-  --border-focus: #94a3b8;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(255, 255, 255, 0.25);
 
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
-  --accent-light: #eff6ff;
-  --accent-muted: #bfdbfe;
+  --accent: #60a5fa;
+  --accent-hover: #3b82f6;
+  --accent-light: #1e3a5f;
+  --accent-muted: rgba(96, 165, 250, 0.3);
 
   --danger: #ef4444;
   --danger-hover: #dc2626;
@@ -41,8 +41,8 @@ html {
   --success: #10b981;
   --success-light: #ecfdf5;
 
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04), 0 1px 3px 0 rgba(0, 0, 0, 0.02);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -2px rgba(0, 0, 0, 0.02);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.15);
 }
 
 /* Landing page animations */
@@ -80,6 +80,54 @@ html {
   }
 }
 
+@keyframes rainFallFast {
+  from {
+    transform: translateY(-30px);
+  }
+  to {
+    transform: translateY(120vh);
+  }
+}
+
+@keyframes snowFallHeavy {
+  from {
+    transform: translateY(-30px) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(120%) translateX(40px);
+    opacity: 0.3;
+  }
+}
+
+@keyframes sunDrift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(6px, -4px);
+  }
+  50% {
+    transform: translate(-3px, -6px);
+  }
+  75% {
+    transform: translate(-6px, 2px);
+  }
+}
+
+@keyframes cloudFloatBg {
+  from {
+    transform: translateX(-20%);
+  }
+  to {
+    transform: translateX(110vw);
+  }
+}
+
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -114,6 +162,14 @@ html {
   border-radius: 2px;
   background: linear-gradient(180deg, transparent, rgba(147, 197, 253, 0.5));
   animation: rainFall linear infinite;
+}
+
+.rain-drop-fg {
+  position: absolute;
+  width: 2px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, transparent, rgba(147, 197, 253, 0.7));
+  animation: rainFallFast linear infinite;
 }
 
 /* Snow for cards and hero */

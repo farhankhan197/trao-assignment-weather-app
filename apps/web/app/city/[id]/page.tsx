@@ -178,13 +178,6 @@ export default function CityDetailPage() {
 
   return (
     <div className="relative min-h-screen">
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'linear-gradient(180deg, rgba(37,99,235,0.08) 0%, transparent 60%)',
-        }}
-      />
-
       <div className="relative max-w-5xl mx-auto px-4 py-8">
         {/* Back button */}
         <button
@@ -215,11 +208,7 @@ export default function CityDetailPage() {
           transition={{ duration: 0.4 }}
           className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-6 sm:p-8 shadow-[var(--shadow-sm)] relative overflow-hidden mb-8"
         >
-          {current && (
-            <div className="absolute inset-0 pointer-events-none opacity-30">
-              <WeatherAtmosphere condition={current.condition} intensity="subtle" />
-            </div>
-          )}
+          {current && <WeatherAtmosphere condition={current.condition} intensity="card" />}
 
           <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>

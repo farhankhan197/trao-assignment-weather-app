@@ -48,10 +48,10 @@ export default function RegisterPage() {
         }}
       />
       <div className="w-full max-w-md">
-        <h1 className="font-display text-3xl text-center text-[var(--text-primary)] mb-1">
+        <h1 className="font-display text-3xl text-[var(--text-primary)] mb-1">
           Create your account
         </h1>
-        <p className="text-sm text-[var(--text-muted)] text-center mb-6">
+        <p className="text-sm text-[var(--text-muted)] mb-6">
           Join Mausam and track weather across the world
         </p>
 
@@ -121,7 +121,7 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="text-center text-[var(--text-muted)] text-sm mt-4">
+        <p className="text-[var(--text-muted)] text-sm mt-4">
           Already have an account?{' '}
           <Link href="/login" className="text-[var(--accent)] hover:text-[var(--accent-hover)]">
             Sign in

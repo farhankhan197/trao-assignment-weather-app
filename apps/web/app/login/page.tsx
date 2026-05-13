@@ -47,12 +47,8 @@ export default function LoginPage() {
         }}
       />
       <div className="w-full max-w-md">
-        <h1 className="font-display text-3xl text-center text-[var(--text-primary)] mb-1">
-          Welcome back
-        </h1>
-        <p className="text-sm text-[var(--text-muted)] text-center mb-6">
-          Sign in to your Mausam account
-        </p>
+        <h1 className="font-display text-3xl text-[var(--text-primary)] mb-1">Welcome back</h1>
+        <p className="text-sm text-[var(--text-muted)] mb-6">Sign in to your Mausam account</p>
 
         <form
           onSubmit={handleSubmit}
@@ -103,14 +99,14 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center text-[var(--text-muted)] text-sm mt-4">
+        <p className="text-[var(--text-muted)] text-sm mt-4">
           Don&apos;t have an account?{' '}
           <Link href="/register" className="text-[var(--accent)] hover:text-[var(--accent-hover)]">
             Register free
           </Link>
         </p>
 
-        <div className="mt-6 bg-[var(--bg-input)]/50 border border-[var(--border)] rounded-xl p-4 text-center shadow-[var(--shadow-sm)]">
+        <div className="mt-6 bg-[var(--bg-input)]/50 border border-[var(--border)] rounded-xl p-4 shadow-[var(--shadow-sm)]">
           <p className="text-[var(--accent)] text-sm font-medium mb-2">Try the Demo</p>
           <p className="text-[var(--text-muted)] text-xs mb-1">
             Email: <span className="text-[var(--text-secondary)]">test@mausam.me</span>

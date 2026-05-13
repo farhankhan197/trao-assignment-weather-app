@@ -262,28 +262,32 @@ export function LocalWeatherSidebar() {
       transition={{ duration: 0.4, ease: 'easeOut' }}
       className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl shadow-[var(--shadow-sm)] relative overflow-hidden"
     >
-      <WeatherAtmosphere condition={weather.condition} intensity="dramatic" />
+      <WeatherAtmosphere condition={weather.condition} intensity="card" />
       <div className="relative z-10 p-5 lg:p-6">
         <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-4">
           Your Location
         </p>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="min-w-0">
-              <h2 className="font-display text-2xl text-[var(--text-primary)] truncate">
-                {city?.name || 'Unknown'}
-              </h2>
-              <p className="text-sm text-[var(--text-muted)]">{city?.country || ''}</p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="font-display text-2xl text-[var(--text-primary)] truncate">
+              {city?.name || 'Unknown'}
+            </h2>
+            <div className="flex items-baseline gap-2 mt-1">
+              <p className="text-sm text-[var(--text-muted)] shrink-0">{city?.country || ''}</p>
+              {weather && (
+                <>
+                  <span className="text-xs text-[var(--text-muted)]">·</span>
+                  <span className="text-lg font-light text-[var(--text-primary)] shrink-0">
+                    {Math.round(weather.temperature)}°
+                  </span>
+                  <span className="text-sm text-[var(--text-muted)] capitalize">
+                    {weather.condition}
+                  </span>
+                </>
+              )}
             </div>
-            <span className="hidden sm:inline text-[var(--border)]">|</span>
-            <span className="text-4xl font-light text-[var(--text-primary)] shrink-0">
-              {Math.round(weather.temperature)}°
-            </span>
-            <span className="text-base text-[var(--text-muted)] capitalize shrink-0">
-              {weather.condition}
-            </span>
           </div>
-          <WeatherIcon condition={weather.condition} className="text-4xl shrink-0" />
+          <WeatherIcon condition={weather.condition} className="text-3xl shrink-0 mt-1" />
         </div>
 
         <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-[var(--text-muted)] mt-4">
@@ -304,7 +308,7 @@ export function LocalWeatherSidebar() {
             <h3 className="font-display text-base text-[var(--text-primary)]">Past 15 Days</h3>
             <div className="flex items-center gap-2 shrink-0">
               {streak && (
-                <span className="text-xs text-[var(--warning)]/80 bg-[var(--warning-light)] rounded-lg px-2 py-1">
+                <span className="text-xs text-[var(--text-inverse)] bg-white/90 rounded-lg px-2 py-1">
                   {streak}
                 </span>
               )}

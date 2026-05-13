@@ -96,7 +96,7 @@ function CityCardComponent({ city, onToggleFavorite, onDelete }: Props) {
       onClick={() => router.push(`/city/${city._id}`)}
       className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl relative group shadow-[var(--shadow-sm)] cursor-pointer h-full flex flex-col justify-between overflow-hidden"
     >
-      {weather && <WeatherAtmosphere condition={weather.condition} intensity="subtle" />}
+      {weather && <WeatherAtmosphere condition={weather.condition} intensity="card" />}
       <div className="relative z-10 p-4 flex flex-col justify-between h-full">
         <div className="flex items-start justify-between mb-2">
           <div>
@@ -175,7 +175,7 @@ function CityCardComponent({ city, onToggleFavorite, onDelete }: Props) {
 
         <div className="mt-2 h-6">
           {streak ? (
-            <span className="text-xs text-[var(--warning)]/80 bg-[var(--warning-light)] rounded-lg px-2 py-1 inline-block">
+            <span className="text-xs text-[var(--text-inverse)] bg-white/90 rounded-lg px-2 py-1 inline-block">
               {streak}
             </span>
           ) : (

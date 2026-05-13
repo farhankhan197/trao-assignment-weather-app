@@ -97,13 +97,6 @@ export default function DashboardPage() {
 
   return (
     <div className="relative min-h-screen">
-      {/* Full-width gradient background */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'linear-gradient(180deg, rgba(37,99,235,0.08) 0%, transparent 60%)',
-        }}
-      />
       <div className="relative max-w-7xl mx-auto px-4 py-8">
         <div className="mb-6 text-center">
           <h1

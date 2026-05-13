@@ -66,7 +66,7 @@ export function CitySearch({ onAdd }: Props) {
             if (results.length) setOpen(true);
           }}
           placeholder="Search for a city..."
-          className="w-full bg-white/80 backdrop-blur-sm border border-white/60 rounded-xl px-4 py-3 pl-11 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] focus:bg-white transition-all shadow-sm"
+          className="w-full bg-[var(--bg-surface)] backdrop-blur-sm border border-[var(--border)] rounded-xl px-4 py-3 pl-11 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] focus:bg-[var(--bg-surface-hover)] transition-all shadow-sm"
         />
         <svg
           className="absolute left-3.5 top-3.5 text-[var(--text-muted)]"

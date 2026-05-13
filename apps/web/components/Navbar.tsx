@@ -75,12 +75,12 @@ function NavLink({
       {isActive && (
         <motion.div
           layoutId="activeNav"
-          className="absolute inset-0 bg-[var(--accent-light)] rounded-lg"
+          className="absolute inset-0 bg-white/20 rounded-lg"
           transition={{ type: 'spring', stiffness: 380, damping: 30 }}
         />
       )}
       <span
-        className={`relative z-10 flex items-center gap-1.5 ${isActive ? 'text-[var(--accent)] font-medium' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
+        className={`relative z-10 flex items-center gap-1.5 ${isActive ? 'text-white font-medium' : 'text-white/70 hover:text-white'}`}
       >
         {icon}
         {label}
@@ -111,8 +111,8 @@ function MobileLink({
       href={href}
       className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
         isActive
-          ? 'bg-[var(--accent-light)] text-[var(--accent)] font-medium'
-          : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)]'
+          ? 'bg-white/20 text-white font-medium'
+          : 'text-white/70 hover:text-white hover:bg-white/20'
       }`}
     >
       <span>{label}</span>
@@ -163,14 +163,14 @@ export function Navbar() {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4, ease: 'easeOut' }}
-      className={`sticky top-0 z-50 transition-shadow ${scrolled ? 'shadow-md' : 'shadow-[0_1px_3px_rgba(0,0,0,0.04)]'}`}
+      className={`sticky top-0 z-50 transition-shadow ${scrolled ? 'shadow-lg' : 'shadow-sm'}`}
     >
-      <div className="absolute inset-0 bg-white/70 backdrop-blur-md border-b border-white/30" />
+      <div className="absolute inset-0 bg-[#0a1628] border-b border-[#1a3a5c]" />
 
       <div className="relative max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/">
-          <Logo variant="dark" />
+          <Logo variant="light" />
         </Link>
 
         {/* Desktop nav */}
@@ -188,11 +188,11 @@ export function Navbar() {
               />
               <NavLink href="/settings" label="Settings" pathname={pathname} />
 
-              <div className="w-px h-5 bg-[var(--border)] mx-1" />
+              <div className="w-px h-5 bg-white/20 mx-1" />
 
               <button
                 onClick={toggleChat}
-                className="px-3 py-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-all text-sm"
+                className="px-3 py-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/20 transition-all text-sm"
               >
                 AI Assistant
               </button>
@@ -201,7 +201,7 @@ export function Navbar() {
               <div className="relative profile-dropdown ml-1">
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}
-                  className="flex items-center gap-2 px-2 py-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-all"
+                  className="flex items-center gap-2 px-2 py-1 rounded-lg text-white/70 hover:text-white hover:bg-white/20 transition-all"
                 >
                   <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[var(--accent)] to-sky-400 flex items-center justify-center text-white text-xs font-medium">
                     {user.name?.charAt(0)?.toUpperCase() || 'U'}
@@ -245,7 +245,7 @@ export function Navbar() {
               <NavLink href="/login" label="Sign In" pathname={pathname} />
               <Link
                 href="/register"
-                className="bg-gradient-to-r from-[var(--accent)] to-sky-400 hover:from-[var(--accent-hover)] hover:to-sky-300 text-white px-4 py-2 rounded-lg transition-all shadow-sm hover:shadow-md text-sm font-medium"
+                className="bg-white text-[var(--accent)] hover:bg-[var(--accent-light)] px-4 py-2 rounded-lg transition-all shadow-sm hover:shadow-md text-sm font-medium"
               >
                 Get Started
               </Link>
@@ -256,7 +256,7 @@ export function Navbar() {
         {/* Mobile hamburger */}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
-          className="lg:hidden p-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-colors"
+          className="lg:hidden p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/20 transition-colors"
         >
           <MenuIcon open={mobileOpen} />
         </button>
@@ -270,7 +270,7 @@ export function Navbar() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="lg:hidden relative overflow-hidden bg-white/90 backdrop-blur-md border-b border-[var(--border)]"
+            className="lg:hidden relative overflow-hidden bg-[#0a1628] border-b border-[#1a3a5c]"
           >
             <div className="px-4 py-4 space-y-1">
               {user ? (
@@ -284,20 +284,20 @@ export function Navbar() {
                     badge={unreadAlertCount}
                   />
                   <MobileLink href="/settings" label="Settings" pathname={pathname} />
-                  <div className="pt-2 border-t border-[var(--border)] mt-2">
+                  <div className="pt-2 border-t border-white/20 mt-2">
                     <button
                       onClick={toggleChat}
-                      className="w-full text-left px-3 py-2 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface-hover)] transition-colors text-sm"
+                      className="w-full text-left px-3 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/20 transition-colors text-sm"
                     >
                       AI Assistant
                     </button>
                   </div>
-                  <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between px-3 py-2">
+                  <div className="pt-2 border-t border-white/20 flex items-center justify-between px-3 py-2">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[var(--accent)] to-sky-400 flex items-center justify-center text-white text-sm font-medium">
                         {user.name?.charAt(0)?.toUpperCase() || 'U'}
                       </div>
-                      <p className="text-sm font-medium text-[var(--text-primary)]">{user.name}</p>
+                      <p className="text-sm font-medium text-white">{user.name}</p>
                     </div>
                     <button
                       onClick={() => {
@@ -315,7 +315,7 @@ export function Navbar() {
                   <MobileLink href="/login" label="Sign In" pathname={pathname} />
                   <Link
                     href="/register"
-                    className="block text-center bg-gradient-to-r from-[var(--accent)] to-sky-400 text-white px-4 py-2.5 rounded-lg font-medium text-sm mt-2"
+                    className="block text-center bg-white text-[var(--accent)] px-4 py-2.5 rounded-lg font-medium text-sm mt-2"
                   >
                     Get Started
                   </Link>
