@@ -150,8 +150,8 @@ export function LocalWeatherSidebar() {
       },
       (err) => {
         if (cached.current) {
-          // Have cache, no live location — keep showing cached
-          setLocationOff(true);
+          // Only red dot if permission actually denied (vs timeout / unavailable)
+          if (err.code === err.PERMISSION_DENIED) setLocationOff(true);
           setLocationChecking(false);
           setLoading(false);
           return;
