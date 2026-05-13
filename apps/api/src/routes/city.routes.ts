@@ -7,6 +7,7 @@ import {
   getCityById,
   getCityStreak,
   getCityHistory,
+  getCityDetails,
 } from '../controllers/city.controller.js';
 import { authenticate } from '../middleware/authenticate.js';
 
@@ -20,6 +21,7 @@ router.get('/:id', getCityById);
 router.post('/', addCity);
 router.patch('/:id', toggleFavorite);
 router.delete('/:id', deleteCity);
+router.get('/:id/details', getCityDetails);
 router.get('/:id/streak', getCityStreak);
 router.get('/:id/history', getCityHistory);
 

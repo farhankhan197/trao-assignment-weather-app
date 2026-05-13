@@ -17,24 +17,39 @@ interface City {
   isFavorite: boolean;
 }
 
+interface WeatherData {
+  temperature: number;
+  condition: string;
+  tempMax: number;
+  tempMin: number;
+}
+
 interface Props {
   city: City;
+  weatherData?: WeatherData | null;
+  streak?: string | null;
   onToggleFavorite: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
-function CityCardComponent({ city, onToggleFavorite, onDelete }: Props) {
+function CityCardComponent({ city, weatherData, streak, onToggleFavorite, onDelete }: Props) {
   const router = useRouter();
-  const [weather, setWeather] = useState<{
-    temperature: number;
-    condition: string;
-    tempMax: number;
-    tempMin: number;
-  } | null>(null);
-  const [streak, setStreak] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [weather, setWeather] = useState<WeatherData | null>(null);
+  const [streakState, setStreakState] = useState<string | null>(null);
+  const [loading, setLoading] = useState(!weatherData);
 
+  // If weatherData is provided from parent, use it directly
   useEffect(() => {
+    if (weatherData) {
+      setWeather(weatherData);
+      setStreakState(streak ?? null);
+      setLoading(false);
+    }
+  }, [weatherData, streak]);
+
+  // Fallback: fetch internally if no weatherData prop
+  useEffect(() => {
+    if (weatherData) return;
     let cancelled = false;
     (async () => {
       try {
@@ -54,7 +69,7 @@ function CityCardComponent({ city, onToggleFavorite, onDelete }: Props) {
           tempMin: daily?.temperature_2m_min?.[0] ?? current.temperature_2m,
         });
         if (sRes?.data?.streak) {
-          setStreak(sRes.data.streak.label);
+          setStreakState(sRes.data.streak.label);
         }
       } catch {
         // ignore
@@ -65,7 +80,7 @@ function CityCardComponent({ city, onToggleFavorite, onDelete }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [city.lat, city.lon, city._id]);
+  }, [city.lat, city.lon, city._id, weatherData]);
 
   if (loading) {
     return (
@@ -79,15 +94,19 @@ function CityCardComponent({ city, onToggleFavorite, onDelete }: Props) {
     );
   }
 
-  const glowColor = weather
+  const activeWeather = weather || weatherData;
+
+  const glowColor = activeWeather
     ? {
         sunny: '0 8px 24px rgba(251,191,36,0.12)',
         cloudy: '0 8px 24px rgba(148,163,184,0.1)',
         rainy: '0 8px 24px rgba(59,130,246,0.12)',
         snowy: '0 8px 24px rgba(186,230,253,0.12)',
         stormy: '0 8px 24px rgba(71,85,105,0.12)',
-      }[weather.condition] || '0 8px 24px rgba(37,99,235,0.08)'
+      }[activeWeather.condition] || '0 8px 24px rgba(37,99,235,0.08)'
     : '0 8px 24px rgba(37,99,235,0.08)';
+
+  const displayStreak = streakState || streak || null;
 
   return (
     <motion.div
@@ -96,7 +115,7 @@ function CityCardComponent({ city, onToggleFavorite, onDelete }: Props) {
       onClick={() => router.push(`/city/${city._id}`)}
       className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl relative group shadow-[var(--shadow-sm)] cursor-pointer h-full flex flex-col justify-between overflow-hidden"
     >
-      {weather && <WeatherAtmosphere condition={weather.condition} intensity="card" />}
+      {activeWeather && <WeatherAtmosphere condition={activeWeather.condition} intensity="card" />}
       <div className="relative z-10 p-4 flex flex-col justify-between h-full">
         <div className="flex items-start justify-between mb-2">
           <div>
@@ -152,31 +171,31 @@ function CityCardComponent({ city, onToggleFavorite, onDelete }: Props) {
           </div>
         </div>
 
-        {weather && (
+        {activeWeather && (
           <div className="flex items-center gap-2.5 mb-2">
-            <WeatherIcon condition={weather.condition} className="text-xl" />
+            <WeatherIcon condition={activeWeather.condition} className="text-xl" />
             <div>
               <span className="text-2xl font-light text-[var(--text-primary)]">
-                {Math.round(weather.temperature)}°
+                {Math.round(activeWeather.temperature)}°
               </span>
               <span className="text-xs text-[var(--text-muted)] ml-1.5 capitalize">
-                {weather.condition}
+                {activeWeather.condition}
               </span>
             </div>
           </div>
         )}
 
-        {weather && (
+        {activeWeather && (
           <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
-            <span>H {Math.round(weather.tempMax)}°</span>
-            <span>L {Math.round(weather.tempMin)}°</span>
+            <span>H {Math.round(activeWeather.tempMax)}°</span>
+            <span>L {Math.round(activeWeather.tempMin)}°</span>
           </div>
         )}
 
         <div className="mt-2 h-6">
-          {streak ? (
+          {displayStreak ? (
             <span className="text-xs text-[var(--text-inverse)] bg-white/90 rounded-lg px-2 py-1 inline-block">
-              {streak}
+              {displayStreak}
             </span>
           ) : (
             <span className="inline-block" />

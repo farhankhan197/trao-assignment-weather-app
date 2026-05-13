@@ -8,6 +8,7 @@ import cityRoutes from './routes/city.routes.js';
 import weatherRoutes from './routes/weather.routes.js';
 import aiRoutes from './routes/ai.routes.js';
 import calendarRoutes from './routes/calendar.routes.js';
+import dashboardRoutes from './routes/dashboard.routes.js';
 import { startCalendarAlertJob } from './utils/calendarAlertJob.js';
 
 dotenv.config();
@@ -51,6 +52,7 @@ app.use('/auth', authRoutes);
 app.use('/api/cities', cityRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/', calendarRoutes);
 
 // ─── Health check ─────────────────────────────────────────────────────────────

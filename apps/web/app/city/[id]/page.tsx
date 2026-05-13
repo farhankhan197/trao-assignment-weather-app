@@ -1,14 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { WeatherIcon } from '@/components/WeatherIcon';
 import WeatherAtmosphere from '@/components/weather/WeatherAtmosphere';
 import api from '@/lib/api';
-import { getCondition } from '@/lib/weather';
 
 interface City {
   _id: string;
@@ -31,20 +29,10 @@ interface ForecastDay {
 
 interface HistoryDay {
   date: string;
-  dayName: string;
   formattedDate: string;
   condition: string;
   tempMax: number;
   tempMin: number;
-  precipitation: number;
-}
-
-interface ApiHistoryDay {
-  date: string;
-  condition: string;
-  tempMax: number;
-  tempMin: number;
-  precipitation: number;
 }
 
 interface CurrentWeather {
@@ -70,81 +58,30 @@ export default function CityDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchData = useCallback(async () => {
-    if (!id) return;
-    try {
-      const [cityRes, historyRes] = await Promise.all([
-        api.get(`/api/cities/${id}`),
-        api.get(`/api/cities/${id}/history`),
-      ]);
-
-      const cityData = cityRes.data.city;
-      setCity(cityData);
-
-      // Fetch weather with correct city coords
-      const wRes = await api.get('/api/weather/current', {
-        params: { lat: cityData.lat, lon: cityData.lon },
-      });
-
-      const wCurrent = wRes.data.current;
-      const wDaily = wRes.data.daily;
-
-      setCurrent({
-        temperature: wCurrent.temperature_2m,
-        feelsLike: wCurrent.apparent_temperature,
-        condition: getCondition(wCurrent.weather_code),
-        humidity: wCurrent.relative_humidity_2m,
-        windSpeed: wCurrent.wind_speed_10m,
-        precipitation: wCurrent.precipitation,
-      });
-
-      const forecastDays: ForecastDay[] = [];
-      for (let i = 0; i < wDaily.time.length; i++) {
-        const d = new Date(wDaily.time[i]);
-        forecastDays.push({
-          date: wDaily.time[i],
-          dayName: d.toLocaleDateString('en', { weekday: 'short' }),
-          formattedDate: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }),
-          condition: getCondition(wDaily.weather_code[i]),
-          tempMax: wDaily.temperature_2m_max[i],
-          tempMin: wDaily.temperature_2m_min[i],
-          precipitation: wDaily.precipitation_sum?.[i] ?? 0,
-        });
-      }
-      setForecast(forecastDays);
-
-      // History - all 15 days of historical data, reversed to show latest first
-      const histData = historyRes.data.history;
-      const allHistoryData = histData
-        .map((h: ApiHistoryDay) => {
-          const d = new Date(h.date);
-          return {
-            date: h.date,
-            dayName: d.toLocaleDateString('en', { weekday: 'short' }),
-            formattedDate: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }),
-            condition: h.condition,
-            tempMax: h.tempMax,
-            tempMin: h.tempMin,
-            precipitation: h.precipitation,
-          };
-        })
-        .reverse(); // Reverse to show latest (most recent) first
-      setAllHistory(allHistoryData);
-      setHistory(allHistoryData.slice(0, historyLimit));
-    } catch (err: unknown) {
-      const errorMessage =
-        axios.isAxiosError<{ error?: string }>(err) && err.response?.data?.error
-          ? err.response.data.error
-          : 'Failed to load city data';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (!id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await api.get(`/api/cities/${id}/details`);
+        if (cancelled) return;
+        const data = res.data;
+        setCity(data.city);
+        setCurrent(data.currentWeather);
+        setForecast(data.forecast);
+        const reversed = (data.history || []).slice().reverse();
+        setAllHistory(reversed);
+        setHistory(reversed.slice(0, 7));
+      } catch {
+        setError('Failed to load city data');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   useEffect(() => {
     if (allHistory.length > 0) {

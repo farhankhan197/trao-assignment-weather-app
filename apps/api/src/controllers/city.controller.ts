@@ -1,7 +1,11 @@
 import { Request, Response } from 'express';
 import { City } from '../models/City.js';
 import { calculateStreak } from '../utils/streak.js';
-import { fetchHistoricalWeather, getConditionFromCode } from '../utils/weather.service.js';
+import {
+  fetchCurrentWeather,
+  fetchHistoricalWeather,
+  getConditionFromCode,
+} from '../utils/weather.service.js';
 
 function isDuplicateKeyError(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'code' in error && error.code === 11000;
@@ -135,6 +139,85 @@ export const getCityStreak = async (req: Request, res: Response): Promise<void> 
   } catch (err) {
     console.error('[City Streak Error]', err);
     res.status(500).json({ error: 'Failed to fetch weather data' });
+  }
+};
+
+// GET /api/cities/:id/details — aggregated city detail
+export const getCityDetails = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const city = await City.findOne({
+      _id: req.params.id,
+      userId: req.user!.id,
+    });
+    if (!city) {
+      res.status(404).json({ error: 'City not found' });
+      return;
+    }
+
+    const [weatherData, histData] = await Promise.all([
+      fetchCurrentWeather(city.lat, city.lon),
+      fetchHistoricalWeather(city.lat, city.lon, 14),
+    ]);
+
+    const current = weatherData.current;
+    const daily = weatherData.daily;
+
+    const forecast = (daily?.time || []).slice(0, 7).map((date: string, i: number) => {
+      const d = new Date(date + 'T00:00:00');
+      return {
+        date,
+        dayName: d.toLocaleDateString('en', { weekday: 'short' }),
+        formattedDate: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }),
+        tempMax: daily.temperature_2m_max[i],
+        tempMin: daily.temperature_2m_min[i],
+        condition: getConditionFromCode(daily.weather_code[i]),
+        precipitation: daily.precipitation_sum[i],
+      };
+    });
+
+    const historyDays = histData.daily.time.map((date: string, i: number) => {
+      const d = new Date(date + 'T00:00:00');
+      return {
+        date,
+        formattedDate: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }),
+        condition: getConditionFromCode(histData.daily.weather_code[i]),
+        tempMax: histData.daily.temperature_2m_max[i],
+        tempMin: histData.daily.temperature_2m_min[i],
+      };
+    });
+
+    const days = histData.daily.time.map((date: string, i: number) => ({
+      date,
+      condition: getConditionFromCode(histData.daily.weather_code[i]),
+    }));
+    const streak = calculateStreak(days);
+
+    res.json({
+      city: {
+        _id: city._id,
+        name: city.name,
+        country: city.country,
+        lat: city.lat,
+        lon: city.lon,
+        isFavorite: city.isFavorite,
+      },
+      currentWeather: {
+        temperature: current.temperature_2m,
+        feelsLike: current.apparent_temperature,
+        condition: getConditionFromCode(current.weather_code),
+        tempMax: daily?.temperature_2m_max?.[0] ?? current.temperature_2m,
+        tempMin: daily?.temperature_2m_min?.[0] ?? current.temperature_2m,
+        humidity: current.relative_humidity_2m,
+        windSpeed: current.wind_speed_10m,
+        precipitation: current.precipitation,
+      },
+      forecast,
+      history: historyDays,
+      streak: streak ? { label: streak.label } : null,
+    });
+  } catch (err) {
+    console.error('[City Details Error]', err);
+    res.status(500).json({ error: 'Failed to fetch city details' });
   }
 };
 

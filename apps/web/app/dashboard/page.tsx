@@ -2,20 +2,26 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import axios from 'axios';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { CitySearch } from '@/components/CitySearch';
 import { CityCard } from '@/components/CityCard';
 import { LocalWeatherSidebar } from '@/components/LocalWeatherSidebar';
 import api from '@/lib/api';
 
-interface City {
+interface CityData {
   _id: string;
   name: string;
   country: string;
   lat: number;
   lon: number;
   isFavorite: boolean;
+  currentWeather: {
+    temperature: number;
+    condition: string;
+    tempMax: number;
+    tempMin: number;
+  };
+  streak: { label: string } | null;
 }
 
 interface SearchResult {
@@ -29,13 +35,13 @@ interface SearchResult {
 
 export default function DashboardPage() {
   const { user } = useRequireAuth();
-  const [cities, setCities] = useState<City[]>([]);
+  const [dashboard, setDashboard] = useState<CityData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchCities = useCallback(async () => {
+  const fetchDashboard = useCallback(async () => {
     try {
-      const res = await api.get('/api/cities');
-      setCities(res.data.cities || []);
+      const res = await api.get('/api/dashboard');
+      setDashboard(res.data.cities || []);
     } catch {
       // ignore
     } finally {
@@ -44,9 +50,9 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (user) fetchCities();
+    if (user) fetchDashboard();
     else setLoading(false);
-  }, [user, fetchCities]);
+  }, [user, fetchDashboard]);
 
   const handleAdd = async (result: SearchResult) => {
     try {
@@ -57,20 +63,21 @@ export default function DashboardPage() {
         lat: result.lat,
         lon: result.lon,
       });
-      setCities((prev) => [res.data.city, ...prev]);
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err) && err.response?.status === 409) {
-        alert('City already added to your dashboard');
-      } else {
-        alert('Failed to add city');
-      }
+      // Optimistically add, then refetch to get weather data
+      setDashboard((prev) => [
+        ...prev,
+        { ...res.data.city, currentWeather: prev[0]?.currentWeather ?? null, streak: null },
+      ]);
+      fetchDashboard();
+    } catch {
+      alert('Failed to add city');
     }
   };
 
   const handleToggleFavorite = async (id: string) => {
     try {
       const res = await api.patch(`/api/cities/${id}`);
-      setCities((prev) =>
+      setDashboard((prev) =>
         prev.map((c) => (c._id === id ? { ...c, isFavorite: res.data.city.isFavorite } : c))
       );
     } catch {
@@ -82,7 +89,7 @@ export default function DashboardPage() {
     if (!confirm('Remove this city from your dashboard?')) return;
     try {
       await api.delete(`/api/cities/${id}`);
-      setCities((prev) => prev.filter((c) => c._id !== id));
+      setDashboard((prev) => prev.filter((c) => c._id !== id));
     } catch {
       alert('Failed to remove city');
     }
@@ -117,7 +124,7 @@ export default function DashboardPage() {
           <LocalWeatherSidebar />
         </div>
 
-        {cities.length === 0 ? (
+        {dashboard.length === 0 ? (
           <div className="relative text-center py-20">
             <h2 className="font-display text-xl mb-2 text-[var(--text-primary)]">No cities yet</h2>
             <p className="text-[var(--text-muted)] text-sm max-w-md mx-auto">
@@ -135,9 +142,9 @@ export default function DashboardPage() {
             }}
             className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
           >
-            {cities.map((city) => (
+            {dashboard.map((item) => (
               <motion.div
-                key={city._id}
+                key={item._id}
                 variants={{
                   hidden: { opacity: 0, y: 20 },
                   visible: {
@@ -148,7 +155,9 @@ export default function DashboardPage() {
                 }}
               >
                 <CityCard
-                  city={city}
+                  city={item}
+                  weatherData={item.currentWeather}
+                  streak={item.streak?.label || null}
                   onToggleFavorite={handleToggleFavorite}
                   onDelete={handleDelete}
                 />
