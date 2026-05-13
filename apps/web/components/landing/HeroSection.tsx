@@ -1,142 +1,84 @@
-import Rain from './Rain';
-import WeatherCard from './WeatherCard';
+'use client';
 
-interface WeatherData {
-  icon: string;
+import { useState, useEffect, useRef } from 'react';
+import { useSession } from '@/context/SessionContext';
+import api from '@/lib/api';
+import TimeSky from './TimeSky';
+import { getTheme, useTimeOfDay } from './timeSky';
+
+interface GeoData {
   temp: number;
-  city: string;
-  desc: string;
-  delay: number;
+  condition: string;
+  cityName: string;
 }
 
-interface HeroSectionProps {
-  weatherData: WeatherData[];
-  ctaPrimary: { text: string; href: string };
-  ctaSecondary: { text: string; href: string };
-}
+export default function HeroSection() {
+  const { user } = useSession();
+  const hour = useTimeOfDay();
+  const theme = getTheme(hour);
 
-export default function HeroSection({ weatherData, ctaPrimary, ctaSecondary }: HeroSectionProps) {
+  const [geoData, setGeoData] = useState<GeoData | null>(null);
+  const [geoLoading, setGeoLoading] = useState(false);
+  const geoFired = useRef(false);
+
+  useEffect(() => {
+    if (!user) {
+      setGeoData(null);
+      geoFired.current = false;
+      return;
+    }
+
+    if (geoFired.current) return;
+    geoFired.current = true;
+
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        try {
+          const res = await api.get('/api/weather/local', {
+            params: { lat: latitude, lon: longitude },
+          });
+          const cw = res.data.currentWeather;
+          const city = res.data.city;
+          if (cw?.temperature !== undefined && cw?.condition) {
+            setGeoData({
+              temp: Math.round(cw.temperature),
+              condition: cw.condition,
+              cityName: city?.name || null,
+            });
+          }
+        } catch {
+          // Fall back to theme-based display
+        } finally {
+          setGeoLoading(false);
+        }
+      },
+      () => {
+        setGeoLoading(false);
+      },
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+    );
+  }, [user]);
+
+  const displayTemp = geoData !== null ? `${geoData.temp}°` : theme.temperature;
+  const displayCondition =
+    geoData !== null ? geoData.condition.toUpperCase() : theme.condition.toUpperCase();
+  const displayLocation = geoData !== null ? geoData.cityName : null;
+
+  const ctaPrimary = user
+    ? { text: 'Go to Dashboard', href: '/dashboard' }
+    : { text: 'Sign In', href: '/login' };
+
+  const ctaSecondary = user
+    ? { text: 'View Favorites', href: '/favorites' }
+    : { text: 'Register', href: '/register' };
+
   return (
-    <section
-      className="relative w-full overflow-hidden flex flex-col items-center justify-start sm:justify-center min-h-[420px] sm:min-h-[540px] lg:min-h-[580px] px-4 sm:px-6 pt-[12vh] sm:pt-0"
-      style={{
-        background:
-          'linear-gradient(180deg, #0a1628 0%, #1a3a5c 35%, #2563eb 65%, #93c5fd 85%, #f8fafc 100%)',
-      }}
-    >
-      {/* Sun */}
-      <div
-        className="animate-sun-pulse absolute rounded-full w-12 h-12 sm:w-14 sm:h-14 lg:w-[72px] lg:h-[72px]"
-        style={{
-          bottom: '10%',
-          right: '4%',
-          background: 'radial-gradient(circle, #fef3c7 30%, #fcd34d 60%, #f59e0b 100%)',
-          boxShadow: '0 0 30px 10px rgba(251,191,36,0.4), 0 0 60px 20px rgba(251,191,36,0.15)',
-        }}
-        aria-hidden="true"
-      />
+    <section className="relative w-full flex flex-col items-center justify-center min-h-screen px-4 sm:px-6">
+      <TimeSky condition={geoData?.condition} />
 
-      {/* Clouds */}
-      {/* Cloud 1 - large, slow - hidden on mobile */}
-      <div
-        className="absolute scale-50 sm:scale-75 lg:scale-100 origin-bottom-left hidden sm:block"
-        style={{
-          bottom: '36%',
-          left: 0,
-          animation: 'cloudFloat 55s linear infinite',
-          animationDelay: '-6s',
-        }}
-        aria-hidden="true"
-      >
-        <CloudShape
-          baseW={210}
-          baseH={64}
-          color="rgba(255,255,255,0.88)"
-          bumps={[
-            { w: 100, h: 90, top: -48, left: 25 },
-            { w: 80, h: 74, top: -38, left: 100 },
-            { w: 62, h: 56, top: -28, left: 150 },
-          ]}
-        />
-      </div>
-
-      {/* Cloud 2 - medium - hidden on mobile */}
-      <div
-        className="absolute scale-50 sm:scale-75 lg:scale-100 origin-bottom-left hidden sm:block"
-        style={{
-          bottom: '44%',
-          left: 0,
-          animation: 'cloudFloat 75s linear infinite',
-          animationDelay: '-25s',
-          opacity: 0.82,
-        }}
-        aria-hidden="true"
-      >
-        <CloudShape
-          baseW={160}
-          baseH={50}
-          color="rgba(255,255,255,0.93)"
-          bumps={[
-            { w: 76, h: 68, top: -35, left: 16 },
-            { w: 60, h: 55, top: -28, left: 75 },
-          ]}
-        />
-      </div>
-
-      {/* Cloud 3 - wispy blue-tinted */}
-      <div
-        className="absolute scale-50 sm:scale-75 lg:scale-100 origin-bottom-left"
-        style={{
-          bottom: '52%',
-          left: 0,
-          animation: 'cloudFloat 90s linear infinite',
-          animationDelay: '-40s',
-          opacity: 0.6,
-        }}
-        aria-hidden="true"
-      >
-        <CloudShape
-          baseW={130}
-          baseH={42}
-          color="rgba(190,215,255,0.65)"
-          bumps={[
-            { w: 65, h: 56, top: -28, left: 12 },
-            { w: 50, h: 44, top: -22, left: 65 },
-          ]}
-        />
-      </div>
-
-      {/* Cloud 4 - tiny */}
-      <div
-        className="absolute scale-50 sm:scale-75 lg:scale-100 origin-bottom-left"
-        style={{
-          bottom: '30%',
-          left: 0,
-          animation: 'cloudFloat 48s linear infinite',
-          animationDelay: '-5s',
-          opacity: 0.75,
-        }}
-        aria-hidden="true"
-      >
-        <CloudShape
-          baseW={120}
-          baseH={38}
-          color="rgba(255,255,255,0.7)"
-          bumps={[
-            { w: 58, h: 52, top: -26, left: 14 },
-            { w: 46, h: 40, top: -20, left: 62 },
-          ]}
-        />
-      </div>
-
-      {/* Rain */}
-      <Rain />
-
-      {/* Hero text */}
-      <div
-        className="relative z-20 text-center px-4 sm:px-5 py-4 sm:py-0 mb-4 sm:mb-6 animate-fade-up"
-        style={{ animationDelay: '100ms', animationFillMode: 'both' }}
-      >
+      <div className="relative z-20 text-center px-4 sm:px-5 py-4 sm:py-0 mb-4 sm:mb-6">
         <p
           className="text-sky-300/85 text-sm mb-1.5"
           style={{
@@ -154,41 +96,64 @@ export default function HeroSection({ weatherData, ctaPrimary, ctaSecondary }: H
         >
           Mausam
         </h1>
-        <p className="text-white/55 font-light tracking-wide mt-2.5 text-sm leading-relaxed max-w-xs sm:max-w-sm mx-auto">
-          Beautiful weather, beautifully told. <br className="hidden sm:block" />
-          Know your sky before you step outside.
-        </p>
+
+        {/* Weather readout — only for logged-in users */}
+        {user && (
+          <>
+            <div
+              className="mt-5 flex flex-col items-center gap-1 transition-colors duration-1000"
+              style={{ color: theme.textColor }}
+            >
+              {geoLoading ? (
+                <div className="h-[72px] w-24 rounded animate-shimmer" />
+              ) : (
+                <>
+                  <span
+                    className="leading-none tracking-[-3px] font-[200]"
+                    style={{ fontSize: 'clamp(48px, 12vw, 72px)' }}
+                  >
+                    {displayTemp}
+                  </span>
+                  <span className="text-[13px] font-[400] tracking-[3px] uppercase opacity-75">
+                    {displayCondition}
+                  </span>
+                  {displayLocation && (
+                    <span className="text-[11px] tracking-[2px] uppercase opacity-50 mt-1">
+                      {displayLocation}
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+            <p className="text-white/55 font-light tracking-wide mt-5 text-sm leading-relaxed max-w-xs sm:max-w-sm mx-auto">
+              Beautiful weather, beautifully told. <br className="hidden sm:block" />
+              Know your sky before you step outside.
+            </p>
+          </>
+        )}
+
+        {/* CTA buttons */}
         <div className="flex gap-3 justify-center mt-6 sm:mt-8 flex-wrap">
           <a
             href={ctaPrimary.href}
-            className="px-5 sm:px-7 py-2 sm:py-2.5 rounded-full text-[var(--accent)] bg-white text-xs sm:text-[13px] font-medium tracking-wide
-            transition-all duration-300 hover:-translate-y-0.5
-          "
+            className="px-5 sm:px-7 py-2 sm:py-2.5 rounded-full text-[var(--accent)] bg-white text-xs sm:text-[13px] font-medium tracking-wide transition-all duration-300 hover:-translate-y-0.5"
           >
             {ctaPrimary.text}
           </a>
           <a
             href={ctaSecondary.href}
-            className="px-5 sm:px-7 py-2 sm:py-2.5 rounded-full text-[var(--accent)] bg-white text-xs sm:text-[13px] font-medium tracking-wide
-            transition-all duration-300 hover:-translate-y-0.5
-          "
+            className="px-5 sm:px-7 py-2 sm:py-2.5 rounded-full text-[var(--accent)] bg-white text-xs sm:text-[13px] font-medium tracking-wide transition-all duration-300 hover:-translate-y-0.5"
           >
             {ctaSecondary.text}
           </a>
         </div>
       </div>
 
-      {/* Weather mini-cards */}
-      <div className="relative z-20 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 px-4 mt-6 sm:mt-10 mb-8 sm:mb-0 justify-items-center">
-        {weatherData.map((w) => (
-          <WeatherCard key={w.city} {...w} />
-        ))}
-      </div>
       {/* Bottom wave */}
       <svg
-        className="absolute bottom-0 left-0 w-full z-[5]"
+        className="absolute left-0 w-full z-[5]"
+        style={{ bottom: -1 }}
         viewBox="0 0 1440 60"
-        fill="none"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
       >
@@ -198,44 +163,5 @@ export default function HeroSection({ weatherData, ctaPrimary, ctaSecondary }: H
         />
       </svg>
     </section>
-  );
-}
-
-/* Inline cloud shape helper */
-function CloudShape({
-  baseW,
-  baseH,
-  color,
-  bumps,
-}: {
-  baseW: number;
-  baseH: number;
-  color: string;
-  bumps: { w: number; h: number; top: number; left: number }[];
-}) {
-  return (
-    <div
-      className="relative"
-      style={{
-        width: baseW,
-        height: baseH,
-        background: color,
-        borderRadius: 50,
-      }}
-    >
-      {bumps.map((b, i) => (
-        <div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            width: b.w,
-            height: b.h,
-            top: b.top,
-            left: b.left,
-            background: color,
-          }}
-        />
-      ))}
-    </div>
   );
 }

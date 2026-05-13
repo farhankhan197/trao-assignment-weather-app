@@ -127,7 +127,7 @@ function MobileLink({
 
 export function Navbar() {
   const pathname = usePathname();
-  const { user, logout, unreadAlertCount } = useSession();
+  const { user, loading, logout, unreadAlertCount } = useSession();
   const { toggle: toggleChat } = useAIChat();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -175,7 +175,16 @@ export function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden lg:flex items-center gap-1 text-sm">
-          {user ? (
+          {loading ? (
+            <div className="flex items-center gap-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="h-8 w-[72px] rounded-lg animate-shimmer" />
+              ))}
+              <div className="w-px h-5 bg-white/20 mx-1" />
+              <div className="h-8 w-[88px] rounded-lg animate-shimmer" />
+              <div className="h-8 w-8 rounded-full animate-shimmer ml-1" />
+            </div>
+          ) : user ? (
             <>
               <NavLink href="/dashboard" label="Dashboard" pathname={pathname} />
               <NavLink href="/favorites" label="Favorites" pathname={pathname} />
@@ -273,7 +282,13 @@ export function Navbar() {
             className="lg:hidden relative overflow-hidden bg-[#0a1628] border-b border-[#1a3a5c]"
           >
             <div className="px-4 py-4 space-y-1">
-              {user ? (
+              {loading ? (
+                <div className="space-y-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="h-10 w-full rounded-lg animate-shimmer" />
+                  ))}
+                </div>
+              ) : user ? (
                 <>
                   <MobileLink href="/dashboard" label="Dashboard" pathname={pathname} />
                   <MobileLink href="/favorites" label="Favorites" pathname={pathname} />

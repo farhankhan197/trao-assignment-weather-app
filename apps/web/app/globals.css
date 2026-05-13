@@ -98,7 +98,7 @@ html {
     opacity: 1;
   }
   to {
-    transform: translateY(120%) translateX(40px);
+    transform: translateY(120vh) translateX(40px);
     opacity: 0.3;
   }
 }
@@ -175,14 +175,14 @@ html {
 /* Snow for cards and hero */
 @keyframes snowFall {
   from {
-    transform: translateY(-10px) translateX(0);
+    transform: translateY(-20px) translateX(0);
     opacity: 0;
   }
   10% {
     opacity: 1;
   }
   to {
-    transform: translateY(120%) translateX(20px);
+    transform: translateY(110vh) translateX(20px);
     opacity: 0.3;
   }
 }
@@ -291,6 +291,27 @@ html {
 .alert-message strong {
   color: var(--text-primary);
   font-weight: 600;
+}
+
+/* ── Skeleton shimmer for auth loading ── */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06) 25%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.06) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
 }
 
 .readme-content blockquote {

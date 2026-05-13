@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-white -mt-px py-16 px-6 text-center">
+    <footer className="bg-white py-16 px-6 text-center">
       {/* Thank You Message — Prominent */}
       <p className="text-base md:text-lg text-[#334155] font-light tracking-wide mb-6">
         thank you to <span className="font-medium text-[#0f172a]">TRAO</span> for your time
