@@ -34,6 +34,7 @@ interface HistoryDay {
   condition: string;
   tempMax: number;
   tempMin: number;
+  precipitation: number;
 }
 
 interface CurrentWeather {

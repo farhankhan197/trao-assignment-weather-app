@@ -183,6 +183,7 @@ export const getCityDetails = async (req: Request, res: Response): Promise<void>
         condition: getConditionFromCode(histData.daily.weather_code[i]),
         tempMax: histData.daily.temperature_2m_max[i],
         tempMin: histData.daily.temperature_2m_min[i],
+        precipitation: histData.daily.precipitation_sum[i],
       };
     });
 
