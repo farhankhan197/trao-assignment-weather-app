@@ -14,7 +14,9 @@ function isDuplicateKeyError(error: unknown): boolean {
 // GET /api/cities — all cities for the authenticated user
 export const getCities = async (req: Request, res: Response): Promise<void> => {
   try {
-    const cities = await City.find({ userId: req.user!.id }).sort({
+    const filter: Record<string, unknown> = { userId: req.user!.id };
+    if (req.query.favoritesOnly === 'true') filter.isFavorite = true;
+    const cities = await City.find(filter).sort({
       isFavorite: -1,
       addedAt: -1,
     });

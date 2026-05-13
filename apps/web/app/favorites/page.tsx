@@ -51,16 +51,41 @@ export default function FavoritesPage() {
   const [streak, setStreak] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [sidebarWeather, setSidebarWeather] = useState<
+    Record<string, { temperature: number; condition: string }>
+  >({});
 
   const fetchCities = useCallback(async () => {
     try {
-      const res = await api.get('/api/cities');
-      const all = res.data.cities || [];
-      const favs = all.filter((c: City) => c.isFavorite);
+      const res = await api.get('/api/cities', { params: { favoritesOnly: true } } as any);
+      const favs = res.data.cities || [];
       setFavorites(favs);
       if (favs.length > 0 && !selectedId) {
         setSelectedId(favs[0]._id);
       }
+
+      // Batch fetch weather for all sidebar items
+      const entries = await Promise.all(
+        favs.map(async (city: City) => {
+          try {
+            const wRes = await api.get('/api/weather/current', {
+              params: { lat: city.lat, lon: city.lon },
+            });
+            return {
+              id: city._id,
+              temperature: wRes.data.current.temperature_2m,
+              condition: getCondition(wRes.data.current.weather_code),
+            };
+          } catch {
+            return null;
+          }
+        })
+      );
+      const weatherMap: Record<string, { temperature: number; condition: string }> = {};
+      for (const entry of entries) {
+        if (entry) weatherMap[entry.id] = entry;
+      }
+      setSidebarWeather(weatherMap);
     } catch {
       // ignore
     } finally {
@@ -186,6 +211,7 @@ export default function FavoritesPage() {
                       city={city}
                       isSelected={city._id === selectedId}
                       onClick={() => setSelectedId(city._id)}
+                      weatherData={sidebarWeather[city._id]}
                     />
                   </motion.div>
                 ))}
@@ -324,36 +350,14 @@ function SidebarItem({
   city,
   isSelected,
   onClick,
+  weatherData,
 }: {
   city: City;
   isSelected: boolean;
   onClick: () => void;
+  weatherData?: { temperature: number; condition: string } | null;
 }) {
-  const [weather, setWeather] = useState<{
-    temperature: number;
-    condition: string;
-  } | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await api.get('/api/weather/current', {
-          params: { lat: city.lat, lon: city.lon },
-        });
-        if (cancelled) return;
-        setWeather({
-          temperature: res.data.current.temperature_2m,
-          condition: getCondition(res.data.current.weather_code),
-        });
-      } catch {
-        /* ignore */
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [city.lat, city.lon]);
+  const weather = weatherData || null;
 
   return (
     <button

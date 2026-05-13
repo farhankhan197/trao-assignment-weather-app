@@ -48,6 +48,16 @@ app.use(async (_req, _res, next) => {
   }
 });
 
+// ─── Cache headers ────────────────────────────────────────────────────────────
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/weather/') || req.path === '/api/dashboard') {
+    res.set('Cache-Control', 'public, max-age=300, s-maxage=600');
+  } else {
+    res.set('Cache-Control', 'private, no-cache');
+  }
+  next();
+});
+
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/auth', authRoutes);
 app.use('/api/cities', cityRoutes);
