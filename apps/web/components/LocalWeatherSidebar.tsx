@@ -364,13 +364,23 @@ export function LocalWeatherSidebar() {
         </div>
 
         {locationOff && (
-          <div className="mt-4 text-xs text-[var(--text-muted)] bg-[var(--bg-surface-hover)]/50 rounded-lg px-3 py-2">
-            Enable location in your browser settings for real-time updates.
+          <div className="mt-4">
+            <button
+              onClick={requestLocation}
+              className="w-full text-sm bg-[var(--accent)] text-white px-4 py-2 rounded-lg hover:bg-[var(--accent-hover)] transition-colors"
+            >
+              Enable Location
+            </button>
           </div>
         )}
         {gpsOff && !locationOff && (
-          <div className="mt-4 text-xs text-[var(--text-muted)] bg-[var(--bg-surface-hover)]/50 rounded-lg px-3 py-2">
-            Turn on device GPS for live weather.
+          <div className="mt-4">
+            <button
+              onClick={requestLocation}
+              className="w-full text-sm bg-[var(--bg-surface-hover)] text-[var(--text-primary)] px-4 py-2 rounded-lg hover:bg-[var(--bg-surface-hover)]/70 transition-colors"
+            >
+              Retry GPS
+            </button>
           </div>
         )}
       </div>
