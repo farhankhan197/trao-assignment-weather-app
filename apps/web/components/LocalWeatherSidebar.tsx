@@ -88,6 +88,7 @@ export function LocalWeatherSidebar() {
   const [loading, setLoading] = useState(true);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [locationOff, setLocationOff] = useState(false);
+  const [locationChecking, setLocationChecking] = useState(false);
   const [liveCoords, setLiveCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [contentHeight, setContentHeight] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -111,7 +112,8 @@ export function LocalWeatherSidebar() {
       setStreak(c.streak);
       setLiveCoords({ lat: c.lat, lon: c.lon });
       setLoading(false);
-      setLocationOff(true); // assume location might be stale
+      setLocationOff(false);
+      setLocationChecking(true); // pulsing green while we check
       setPermission('granted'); // treat as granted so we can try background geolocation
     }
 
@@ -130,6 +132,7 @@ export function LocalWeatherSidebar() {
         setLiveCoords({ lat, lon });
         setPermission('granted');
         setLocationOff(false);
+        setLocationChecking(false);
 
         // If we have cached data, check if location changed significantly
         if (cached.current) {
@@ -149,6 +152,7 @@ export function LocalWeatherSidebar() {
         if (cached.current) {
           // Have cache, no live location — keep showing cached
           setLocationOff(true);
+          setLocationChecking(false);
           setLoading(false);
           return;
         }
@@ -281,10 +285,16 @@ export function LocalWeatherSidebar() {
           <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
             Your Location
           </p>
-          {!locationOff && (
+          {locationChecking && (
+            <span
+              className="w-2 h-2 rounded-full bg-[var(--success)] animate-pulse"
+              title="Checking location..."
+            />
+          )}
+          {!locationChecking && !locationOff && (
             <span className="w-2 h-2 rounded-full bg-[var(--success)]" title="Live location" />
           )}
-          {locationOff && (
+          {!locationChecking && locationOff && (
             <span
               className="w-2 h-2 rounded-full bg-[var(--danger)]"
               title="Location unavailable"
