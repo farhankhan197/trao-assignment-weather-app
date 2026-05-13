@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
@@ -17,6 +18,7 @@ const PORT = process.env.PORT || 4000;
 const isServerless = process.env.VERCEL === '1';
 
 // ─── Middleware ────────────────────────────────────────────────────────────────
+app.use(compression());
 const ALLOWED_ORIGINS = [
   process.env.CLIENT_URL || 'http://localhost:3000',
   'https://mausam.farhankhan.site',

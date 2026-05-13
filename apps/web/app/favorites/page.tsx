@@ -8,15 +8,11 @@ import { WeatherIcon } from '@/components/WeatherIcon';
 import WeatherAtmosphere from '@/components/weather/WeatherAtmosphere';
 import api from '@/lib/api';
 import { getCondition } from '@/lib/weather';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
+import dynamic from 'next/dynamic';
+
+const HistoryChart = dynamic(() => import('@/components/weather/HistoryChart'), {
+  ssr: false,
+});
 
 interface City {
   _id: string;
@@ -280,64 +276,7 @@ export default function FavoritesPage() {
                     </h3>
                     {history.length > 0 ? (
                       <div className="h-64 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <AreaChart
-                            data={history}
-                            margin={{ top: 5, right: 24, left: -10, bottom: 5 }}
-                          >
-                            <defs>
-                              <linearGradient id="tempMaxGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
-                                <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
-                              </linearGradient>
-                              <linearGradient id="tempMinGrad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#64748b" stopOpacity={0.2} />
-                                <stop offset="95%" stopColor="#64748b" stopOpacity={0} />
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                            <XAxis
-                              dataKey="date"
-                              stroke="var(--text-muted)"
-                              fontSize={12}
-                              tickLine={false}
-                              axisLine={false}
-                              padding={{ left: 10, right: 10 }}
-                            />
-                            <YAxis
-                              stroke="var(--text-muted)"
-                              fontSize={12}
-                              tickLine={false}
-                              axisLine={false}
-                              unit="°"
-                            />
-                            <Tooltip
-                              contentStyle={{
-                                backgroundColor: 'var(--bg-surface)',
-                                border: '1px solid var(--border)',
-                                borderRadius: '12px',
-                                fontSize: '12px',
-                              }}
-                              labelStyle={{ color: 'var(--text-muted)' }}
-                            />
-                            <Area
-                              type="monotone"
-                              dataKey="tempMax"
-                              stroke="#0ea5e9"
-                              strokeWidth={2}
-                              fill="url(#tempMaxGrad)"
-                              name="High"
-                            />
-                            <Area
-                              type="monotone"
-                              dataKey="tempMin"
-                              stroke="#64748b"
-                              strokeWidth={2}
-                              fill="url(#tempMinGrad)"
-                              name="Low"
-                            />
-                          </AreaChart>
-                        </ResponsiveContainer>
+                        <HistoryChart data={history} />
                       </div>
                     ) : (
                       <div className="text-center py-12">
