@@ -7,10 +7,7 @@ import {
   exchangeCodeForTokens,
   refreshAccessToken,
 } from '../utils/calendar.service.js';
-import {
-  runCalendarAlertScanForUser,
-  runCalendarAlertScanForAllUsers,
-} from '../utils/calendarAlertJob.js';
+import { runCalendarAlertScanForUser } from '../utils/calendarAlertJob.js';
 
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 
@@ -227,22 +224,5 @@ export const manualCheck = async (req: Request, res: Response): Promise<void> =>
     res.json({ message: 'Calendar scan completed' });
   } catch {
     res.status(500).json({ error: 'Scan failed' });
-  }
-};
-
-// GET /api/cron/scan-alerts?secret=xxx
-// Triggered by Vercel Cron Jobs to scan all users
-export const runCronScan = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const secret = process.env.CRON_SECRET;
-    if (!secret || req.query.secret !== secret) {
-      res.status(401).json({ error: 'Unauthorized' });
-      return;
-    }
-
-    await runCalendarAlertScanForAllUsers();
-    res.json({ success: true });
-  } catch {
-    res.status(500).json({ error: 'Cron scan failed' });
   }
 };

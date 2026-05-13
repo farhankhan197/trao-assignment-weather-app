@@ -7,7 +7,6 @@ import {
   getCalendarAlerts,
   markAlertRead,
   manualCheck,
-  runCronScan,
 } from '../controllers/calendar.controller.js';
 import { authenticate } from '../middleware/authenticate.js';
 
@@ -23,8 +22,5 @@ router.post('/auth/calendar/disconnect', authenticate, disconnectCalendar);
 router.get('/api/calendar/alerts', authenticate, getCalendarAlerts);
 router.patch('/api/calendar/alerts/:id/read', authenticate, markAlertRead);
 router.post('/api/calendar/alerts/check', authenticate, manualCheck);
-
-// Cron job trigger (no auth — uses CRON_SECRET)
-router.get('/api/cron/scan-alerts', runCronScan);
 
 export default router;

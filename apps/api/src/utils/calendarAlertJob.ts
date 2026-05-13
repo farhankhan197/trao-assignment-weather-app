@@ -103,11 +103,3 @@ export async function runCalendarAlertScanForUser(userId: string) {
     console.error(`[CalendarAlertJob] Scan failed for user ${userId}:`, errorMessage);
   }
 }
-
-export async function runCalendarAlertScanForAllUsers() {
-  const users = await User.find({ calendarConnected: true });
-
-  for (const user of users) {
-    await runCalendarAlertScanForUser(user._id.toString());
-  }
-}
