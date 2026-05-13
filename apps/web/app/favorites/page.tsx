@@ -35,13 +35,6 @@ interface HistoryPoint {
   tempMin: number;
 }
 
-interface ApiHistoryPoint {
-  date: string;
-  condition: string;
-  tempMax: number;
-  tempMin: number;
-}
-
 interface CurrentWeather {
   temperature: number;
   condition: string;
@@ -89,43 +82,23 @@ export default function FavoritesPage() {
     setDetailLoading(true);
     (async () => {
       try {
-        const city = favorites.find((c) => c._id === selectedId);
-        if (!city) return;
-        const [wRes, hRes, sRes] = await Promise.all([
-          api.get('/api/weather/current', {
-            params: { lat: city.lat, lon: city.lon },
-          }),
-          api.get(`/api/cities/${selectedId}/history`).catch(() => null),
-          api.get(`/api/cities/${selectedId}/streak`).catch(() => null),
-        ]);
+        const res = await api.get(`/api/cities/${selectedId}/details`);
         if (cancelled) return;
-        const data = wRes.data;
-        setCurrent({
-          temperature: data.current.temperature_2m,
-          condition: getCondition(data.current.weather_code),
-          tempMax: data.daily?.temperature_2m_max?.[0] ?? data.current.temperature_2m,
-          tempMin: data.daily?.temperature_2m_min?.[0] ?? data.current.temperature_2m,
-          humidity: data.current.relative_humidity_2m,
-          windSpeed: data.current.wind_speed_10m,
-          precipitation: data.current.precipitation,
-        });
-        if (hRes?.data?.history) {
-          setHistory(
-            hRes.data.history.map((h: ApiHistoryPoint) => {
-              const d = new Date(h.date + 'T00:00:00');
-              return {
-                date: formatDateShort(h.date),
-                formattedDate: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }),
-                condition: h.condition,
-                tempMax: h.tempMax,
-                tempMin: h.tempMin,
-              };
-            })
-          );
-        } else {
-          setHistory([]);
-        }
-        setStreak(sRes?.data?.streak?.label || null);
+        const data = res.data;
+        setCurrent(data.currentWeather);
+        setHistory(
+          (data.history || []).map((h: any) => {
+            const d = new Date(h.date + 'T00:00:00');
+            return {
+              date: d.toLocaleDateString('en', { weekday: 'narrow' }),
+              formattedDate: h.formattedDate,
+              condition: h.condition,
+              tempMax: h.tempMax,
+              tempMin: h.tempMin,
+            };
+          })
+        );
+        setStreak(data.streak?.label || null);
       } catch {
         // ignore
       } finally {
@@ -135,7 +108,7 @@ export default function FavoritesPage() {
     return () => {
       cancelled = true;
     };
-  }, [selectedId, favorites]);
+  }, [selectedId]);
 
   if (authLoading || loading) {
     return (
@@ -467,9 +440,4 @@ function SidebarItem({
       </div>
     </button>
   );
-}
-
-function formatDateShort(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('en', { weekday: 'narrow' });
 }

@@ -146,7 +146,7 @@ export default function HeroSection({ weatherData, ctaPrimary, ctaSecondary }: H
           मौसम
         </p>
         <h1
-          className="font-display font-black text-white leading-none tracking-tight"
+          className="font-display font-bold text-white leading-none tracking-tight"
           style={{
             fontSize: 'clamp(28px, 7vw, 72px)',
             textShadow: '0 2px 16px rgba(0,0,0,0.3)',
