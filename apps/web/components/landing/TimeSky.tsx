@@ -11,7 +11,7 @@ interface TimeSkyProps {
 
 function StormFlash() {
   const [flash, setFlash] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     const schedule = () => {
