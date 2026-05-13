@@ -5,6 +5,7 @@ import {
   getWeatherHistory,
   getWeatherStreak,
   getCurrentWeather,
+  getLocalWeather,
 } from '../controllers/weather.controller.js';
 import { authenticate } from '../middleware/authenticate.js';
 
@@ -14,6 +15,7 @@ router.get('/search', authenticate, searchCity);
 router.get('/reverse', authenticate, getCurrentCity);
 router.get('/history', authenticate, getWeatherHistory);
 router.get('/streak', authenticate, getWeatherStreak);
+router.get('/local', authenticate, getLocalWeather);
 router.get('/current', authenticate, getCurrentWeather);
 
 export default router;

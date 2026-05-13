@@ -1,20 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import api from '@/lib/api';
-import { getCondition } from '@/lib/weather';
 import { WeatherIcon } from './WeatherIcon';
 import WeatherAtmosphere from './weather/WeatherAtmosphere';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts';
 
 interface LocationCity {
   name: string;
@@ -39,33 +29,71 @@ interface HistoryPoint {
   tempMin: number;
 }
 
-interface ApiHistoryPoint {
-  date: string;
-  condition: string;
-  tempMax: number;
-  tempMin: number;
+interface LocalCache {
+  city: LocationCity;
+  lat: number;
+  lon: number;
+  weather: CurrentWeather;
+  history: HistoryPoint[];
+  streak: string | null;
+  timestamp: number;
 }
 
 type PermissionState = 'prompt' | 'denied' | 'unavailable' | 'granted';
 
-const STORAGE_KEY = 'mausam_local_city';
+const CACHE_KEY = 'mausam_local_cache';
+const CACHE_TTL = 30 * 60 * 1000;
+const DISTANCE_THRESHOLD_KM = 10;
 
-function formatDateShort(dateStr: string): string {
-  const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('en', { weekday: 'narrow' });
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function loadCache(): LocalCache | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw) as LocalCache;
+    if (Date.now() - data.timestamp > CACHE_TTL) {
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+    return data;
+  } catch {
+    localStorage.removeItem(CACHE_KEY);
+    return null;
+  }
+}
+
+function saveCache(data: LocalCache) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+  } catch {
+    // storage full — ignore
+  }
 }
 
 export function LocalWeatherSidebar() {
   const [permission, setPermission] = useState<PermissionState>('prompt');
-  const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [city, setCity] = useState<LocationCity | null>(null);
   const [weather, setWeather] = useState<CurrentWeather | null>(null);
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   const [streak, setStreak] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [locationOff, setLocationOff] = useState(false);
+  const [liveCoords, setLiveCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [contentHeight, setContentHeight] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
-  const [loading, setLoading] = useState(false);
+
+  // Try loading cached data immediately
+  const cached = useRef(loadCache());
 
   useEffect(() => {
     if (contentRef.current) {
@@ -73,127 +101,109 @@ export function LocalWeatherSidebar() {
     }
   }, [history]);
 
+  // On mount: show cache instantly, then check location
   useEffect(() => {
-    const cached = sessionStorage.getItem(STORAGE_KEY);
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached) as { city: LocationCity; lat: number; lon: number };
-        setCity(parsed.city);
-        setLocation({ lat: parsed.lat, lon: parsed.lon });
-        setPermission('granted');
-      } catch {
-        sessionStorage.removeItem(STORAGE_KEY);
-      }
+    if (cached.current) {
+      const c = cached.current;
+      setCity(c.city);
+      setWeather(c.weather);
+      setHistory(c.history);
+      setStreak(c.streak);
+      setLiveCoords({ lat: c.lat, lon: c.lon });
+      setLoading(false);
+      setLocationOff(true); // assume location might be stale
+      setPermission('granted'); // treat as granted so we can try background geolocation
     }
-  }, []);
 
-  useEffect(() => {
-    if (permission !== 'prompt') return;
+    // Try geolocation in background
     if (!navigator.geolocation) {
-      setPermission('unavailable');
+      if (!cached.current) {
+        setPermission('unavailable');
+        setLoading(false);
+      }
       return;
     }
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude: lat, longitude: lon } = pos.coords;
-        setLocation({ lat, lon });
+        setLiveCoords({ lat, lon });
         setPermission('granted');
+        setLocationOff(false);
+
+        // If we have cached data, check if location changed significantly
+        if (cached.current) {
+          const dist = haversineKm(cached.current.lat, cached.current.lon, lat, lon);
+          if (dist < DISTANCE_THRESHOLD_KM) {
+            // Same area — keep cached data, just update timestamp
+            saveCache({ ...cached.current, timestamp: Date.now() });
+            return;
+          }
+        }
+        // Location changed or no cache — fetch fresh data
+        setCity(null);
+        setWeather(null);
+        setLoading(true);
       },
       (err) => {
-        if (err.code === err.PERMISSION_DENIED) {
-          setPermission('denied');
-        } else {
-          setPermission('unavailable');
+        if (cached.current) {
+          // Have cache, no live location — keep showing cached
+          setLocationOff(true);
+          setLoading(false);
+          return;
         }
+        if (err.code === err.PERMISSION_DENIED) setPermission('denied');
+        else setPermission('unavailable');
+        setLoading(false);
       },
-      { timeout: 4000 }
+      { timeout: 3000, maximumAge: 300000 }
     );
-  }, [permission]);
+  }, []);
 
+  // When liveCoords updates to a new location, fetch fresh data
   useEffect(() => {
-    if (!location) return;
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      try {
-        let currentCity = city;
-        if (!currentCity) {
-          const cRes = await api
-            .get('/api/weather/reverse', {
-              params: { lat: location.lat, lon: location.lon },
-            })
-            .catch(() => ({
-              data: {
-                city: {
-                  name: 'Current Location',
-                  country: `${location.lat.toFixed(2)}, ${location.lon.toFixed(2)}`,
-                },
-              },
-            }));
-          if (cancelled) return;
-          currentCity = cRes.data.city;
-          setCity(currentCity);
-          sessionStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify({ city: currentCity, lat: location.lat, lon: location.lon })
-          );
-        }
+    if (!liveCoords) return;
+    if (cached.current) {
+      const dist = haversineKm(
+        cached.current.lat,
+        cached.current.lon,
+        liveCoords.lat,
+        liveCoords.lon
+      );
+      if (dist < DISTANCE_THRESHOLD_KM) return; // same area
+    }
 
-        const [wRes, hRes, sRes] = await Promise.all([
-          api.get('/api/weather/current', {
-            params: { lat: location.lat, lon: location.lon },
-          }),
-          api
-            .get('/api/weather/history', {
-              params: { lat: location.lat, lon: location.lon },
-            })
-            .catch(() => null),
-          api
-            .get('/api/weather/streak', {
-              params: { lat: location.lat, lon: location.lon },
-            })
-            .catch(() => null),
-        ]);
-        if (cancelled) return;
-        const data = wRes.data;
-        setWeather({
-          temperature: data.current.temperature_2m,
-          condition: getCondition(data.current.weather_code),
-          tempMax: data.daily?.temperature_2m_max?.[0] ?? data.current.temperature_2m,
-          tempMin: data.daily?.temperature_2m_min?.[0] ?? data.current.temperature_2m,
-          humidity: data.current.relative_humidity_2m,
-          windSpeed: data.current.wind_speed_10m,
-          precipitation: data.current.precipitation,
-        });
+    fetchLocal(liveCoords.lat, liveCoords.lon);
+  }, [liveCoords]);
 
-        if (hRes?.data?.history) {
-          setHistory(
-            hRes.data.history.map((h: ApiHistoryPoint) => {
-              const d = new Date(h.date + 'T00:00:00');
-              return {
-                date: formatDateShort(h.date),
-                formattedDate: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }),
-                condition: h.condition,
-                tempMax: h.tempMax,
-                tempMin: h.tempMin,
-              };
-            })
-          );
-        }
+  const fetchLocal = useCallback(async (lat: number, lon: number) => {
+    setLoading(true);
+    try {
+      const res = await api.get('/api/weather/local', { params: { lat, lon } });
+      const data = res.data;
+      setCity(data.city);
+      setWeather(data.currentWeather);
+      setHistory(data.history || []);
+      setStreak(data.streak?.label || null);
 
-        setStreak(sRes?.data?.streak?.label || null);
-      } catch {
-        // ignore
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [location, city]);
+      saveCache({
+        city: data.city,
+        lat,
+        lon,
+        weather: data.currentWeather,
+        history: data.history || [],
+        streak: data.streak?.label || null,
+        timestamp: Date.now(),
+      });
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  if (permission === 'prompt') {
+  // Permission prompt state — no cache yet
+  if (permission === 'prompt' && !cached.current) {
     return (
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 shadow-[var(--shadow-sm)]">
         <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">
@@ -213,7 +223,8 @@ export function LocalWeatherSidebar() {
     );
   }
 
-  if (permission === 'denied') {
+  // Denied/no cache
+  if (permission === 'denied' && !cached.current) {
     return (
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 shadow-[var(--shadow-sm)]">
         <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-2">
@@ -226,17 +237,19 @@ export function LocalWeatherSidebar() {
     );
   }
 
-  if (permission === 'unavailable') {
+  // Unavailable/no cache
+  if (permission === 'unavailable' && !cached.current) {
     return (
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 shadow-[var(--shadow-sm)]">
         <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-2">
           Your Location
         </p>
-        <p className="text-sm text-[var(--text-muted)]">Could not determine your location.</p>
+        <p className="text-sm text-[var(--text-muted])">Could not determine your location.</p>
       </div>
     );
   }
 
+  // Still loading fresh data
   if (loading || !weather) {
     return (
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 shadow-[var(--shadow-sm)]">
@@ -264,9 +277,18 @@ export function LocalWeatherSidebar() {
     >
       <WeatherAtmosphere condition={weather.condition} intensity="card" />
       <div className="relative z-10 p-5 lg:p-6">
-        <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-4">
-          Your Location
-        </p>
+        <div className="flex items-center gap-2 mb-4">
+          <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider">
+            Your Location
+          </p>
+          {!locationOff && (
+            <span className="w-2 h-2 rounded-full bg-[var(--success)]" title="Live location" />
+          )}
+          {locationOff && (
+            <span className="text-[10px] text-[var(--text-muted)] italic">(cached)</span>
+          )}
+        </div>
+
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h2 className="font-display text-2xl text-[var(--text-primary)] truncate">
@@ -297,6 +319,12 @@ export function LocalWeatherSidebar() {
           <span className="shrink-0">Wind {Math.round(weather.windSpeed)} km/h</span>
           <span className="shrink-0">Precip {weather.precipitation} mm</span>
         </div>
+
+        {locationOff && (
+          <div className="mt-4 text-xs text-[var(--text-muted)] bg-[var(--bg-surface-hover)]/50 rounded-lg px-3 py-2">
+            Enable location in your browser settings for real-time weather updates.
+          </div>
+        )}
       </div>
 
       {history.length > 0 && (
@@ -335,65 +363,7 @@ export function LocalWeatherSidebar() {
             className="overflow-hidden mt-4"
           >
             <div ref={contentRef}>
-              <div className="h-48 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={history} margin={{ top: 5, right: 16, left: -10, bottom: 5 }}>
-                    <defs>
-                      <linearGradient id="histTempMaxGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
-                      </linearGradient>
-                      <linearGradient id="histTempMinGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#64748b" stopOpacity={0.2} />
-                        <stop offset="95%" stopColor="#64748b" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                    <XAxis
-                      dataKey="date"
-                      stroke="var(--text-muted)"
-                      fontSize={12}
-                      tickLine={false}
-                      axisLine={false}
-                      padding={{ left: 10, right: 10 }}
-                    />
-                    <YAxis
-                      stroke="var(--text-muted)"
-                      fontSize={12}
-                      tickLine={false}
-                      axisLine={false}
-                      unit="°"
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'var(--bg-surface)',
-                        border: '1px solid var(--border)',
-                        borderRadius: '12px',
-                        fontSize: '12px',
-                      }}
-                      labelStyle={{ color: 'var(--text-muted)' }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="tempMax"
-                      stroke="#0ea5e9"
-                      strokeWidth={2}
-                      fill="url(#histTempMaxGrad)"
-                      name="High"
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="tempMin"
-                      stroke="#64748b"
-                      strokeWidth={2}
-                      fill="url(#histTempMinGrad)"
-                      name="Low"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="flex gap-3 mt-4 overflow-x-auto pb-2 scrollbar-hide">
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                 {history.map((h, i) => (
                   <div
                     key={i}

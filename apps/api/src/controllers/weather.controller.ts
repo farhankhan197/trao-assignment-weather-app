@@ -90,6 +90,66 @@ export const getWeatherStreak = async (req: Request, res: Response): Promise<voi
   }
 };
 
+// GET /api/weather/local?lat=X&lon=Y — aggregated local weather
+export const getLocalWeather = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { lat, lon } = req.query;
+    if (!lat || !lon || isNaN(Number(lat)) || isNaN(Number(lon))) {
+      res.status(400).json({ error: 'Valid lat and lon are required' });
+      return;
+    }
+    const latitude = Number(lat);
+    const longitude = Number(lon);
+
+    const [city, weatherData, histData] = await Promise.all([
+      reverseGeocode(latitude, longitude),
+      fetchCurrentWeather(latitude, longitude),
+      fetchHistoricalWeather(latitude, longitude, 14),
+    ]);
+
+    const current = weatherData.current;
+    const daily = weatherData.daily;
+
+    const history = histData.daily.time.map((date: string, i: number) => {
+      const d = new Date(date + 'T00:00:00');
+      return {
+        date,
+        formattedDate: d.toLocaleDateString('en', { month: 'short', day: 'numeric' }),
+        condition: getConditionFromCode(histData.daily.weather_code[i]),
+        tempMax: histData.daily.temperature_2m_max[i],
+        tempMin: histData.daily.temperature_2m_min[i],
+      };
+    });
+
+    const days = histData.daily.time.map((date: string, i: number) => ({
+      date,
+      condition: getConditionFromCode(histData.daily.weather_code[i]),
+    }));
+    const streak = calculateStreak(days);
+
+    res.json({
+      city: city ?? {
+        name: 'Current Location',
+        country: `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`,
+      },
+      currentWeather: {
+        temperature: current.temperature_2m,
+        condition: getConditionFromCode(current.weather_code),
+        tempMax: daily?.temperature_2m_max?.[0] ?? current.temperature_2m,
+        tempMin: daily?.temperature_2m_min?.[0] ?? current.temperature_2m,
+        humidity: current.relative_humidity_2m,
+        windSpeed: current.wind_speed_10m,
+        precipitation: current.precipitation,
+      },
+      history,
+      streak: streak ? { label: streak.label } : null,
+    });
+  } catch (err) {
+    console.error('[Local Weather Error]', err);
+    res.status(500).json({ error: 'Failed to fetch local weather' });
+  }
+};
+
 // GET /api/weather/current?lat=X&lon=Y
 export const getCurrentWeather = async (req: Request, res: Response): Promise<void> => {
   try {
