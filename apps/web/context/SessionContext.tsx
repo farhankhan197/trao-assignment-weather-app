@@ -50,10 +50,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     api
       .get('/auth/me', { skipAuthRedirect: true })
       .then((res) => {
-        if (!cancelled) {
-          setUser(res.data.user);
-          refreshAlertCount();
-        }
+        if (!cancelled) setUser(res.data.user);
       })
       .catch(() => {
         if (!cancelled) setUser(null);
@@ -64,7 +61,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       cancelled = true;
     };
-  }, [refreshAlertCount]);
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await api.post('/auth/login', { email, password });

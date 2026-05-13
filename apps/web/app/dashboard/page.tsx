@@ -28,7 +28,7 @@ interface SearchResult {
 }
 
 export default function DashboardPage() {
-  const { loading: authLoading } = useRequireAuth();
+  const { user } = useRequireAuth();
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,8 +44,9 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    fetchCities();
-  }, [fetchCities]);
+    if (user) fetchCities();
+    else setLoading(false);
+  }, [user, fetchCities]);
 
   const handleAdd = async (result: SearchResult) => {
     try {
@@ -87,7 +88,7 @@ export default function DashboardPage() {
     }
   };
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <p className="text-[var(--text-muted)]">Loading cities...</p>
