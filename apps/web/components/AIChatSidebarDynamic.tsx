@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 
-const AIChatSidebar = dynamic(() => import('./AIChatSidebar'), {
+const AIChatSidebar = dynamic(() => import('./AIChatSidebar').then((mod) => mod.AIChatSidebar), {
   ssr: false,
 });
 
