@@ -17,7 +17,7 @@ export default function SettingsPage() {
 
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await api.get('/auth/calendar/status');
+      const res = await api.get('/auth/calendar/status', { skipCache: true } as any);
       setCalendarConnected(res.data.connected);
       setGoogleEmail(res.data.googleEmail || null);
     } catch {
@@ -33,7 +33,7 @@ export default function SettingsPage() {
 
   const handleConnectCalendar = async () => {
     try {
-      const res = await api.get('/auth/calendar/connect');
+      const res = await api.get('/auth/calendar/connect', { skipCache: true } as any);
       if (res.data.url) {
         window.location.href = res.data.url;
       }

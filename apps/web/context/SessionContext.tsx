@@ -38,7 +38,8 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await api.get('/api/calendar/alerts', {
         skipAuthRedirect: true,
-      });
+        skipCache: true,
+      } as any);
       setUnreadAlertCount(res.data.unreadCount || 0);
     } catch {
       setUnreadAlertCount(0);
