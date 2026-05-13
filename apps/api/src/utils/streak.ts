@@ -3,7 +3,7 @@ export interface WeatherDay {
   condition: string;
 }
 
-export interface StreakResult {
+interface StreakResult {
   condition: string;
   days: number;
   label: string;

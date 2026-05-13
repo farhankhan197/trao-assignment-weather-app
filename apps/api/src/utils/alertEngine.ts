@@ -1,6 +1,6 @@
 import { getConditionFromCode } from './weather.service.js';
 
-export interface AlertCheckResult {
+interface AlertCheckResult {
   shouldAlert: boolean;
   condition: string;
   tempMax: number;

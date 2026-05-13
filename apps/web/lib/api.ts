@@ -238,10 +238,3 @@ export function clearApiCache(pattern?: string) {
   saveToStorage();
   if (DEBUG) console.log(`[API Cache] Cleared pattern: ${pattern}`);
 }
-
-/** Enable/disable debug logging for the API cache. */
-export function setApiCacheDebug(enabled: boolean) {
-  if (typeof window !== 'undefined') {
-    (window as any).__API_CACHE_DEBUG = enabled;
-  }
-}

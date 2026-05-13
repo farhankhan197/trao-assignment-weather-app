@@ -7,7 +7,7 @@ if (!SECRET) {
   throw new Error('JWT_SECRET environment variable is required');
 }
 
-export interface JWTPayload {
+interface JWTPayload {
   userId: string;
   email: string;
 }

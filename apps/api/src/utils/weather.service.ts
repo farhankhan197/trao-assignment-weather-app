@@ -11,7 +11,7 @@ interface GeocodeResult {
   state?: string;
 }
 
-export interface CitySearchResult {
+interface CitySearchResult {
   name: string;
   country: string;
   countryCode: string;

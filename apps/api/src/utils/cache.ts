@@ -28,7 +28,7 @@ export const setCachedData = async (key: string, data: unknown, ttlSeconds = 60 
   }
 };
 
-export const delCachedData = async (key: string) => {
+const delCachedData = async (key: string) => {
   try {
     await redis.del(key);
     console.log(`[Cache DEL] ${key}`);
