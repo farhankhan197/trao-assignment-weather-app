@@ -8,12 +8,19 @@ function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : '';
 }
 
-export async function runCalendarAlertScanForUser(userId: string) {
+const SCAN_COOLDOWN_MS = 15 * 60 * 1000;
+
+export async function runCalendarAlertScanForUser(userId: string): Promise<{ scanned: boolean }> {
   const user = await User.findById(userId);
-  if (!user || !user.calendarConnected) return;
+  if (!user || !user.calendarConnected) return { scanned: false };
+
+  // Cooldown: skip if scanned recently
+  if (user.lastAlertScanAt && Date.now() - user.lastAlertScanAt.getTime() < SCAN_COOLDOWN_MS) {
+    return { scanned: false };
+  }
 
   const accessToken = await getValidAccessToken(user);
-  if (!accessToken) return;
+  if (!accessToken) return { scanned: false };
 
   try {
     const events = await fetchUpcomingEvents(accessToken);
@@ -83,6 +90,12 @@ export async function runCalendarAlertScanForUser(userId: string) {
       userId: user._id,
       eventStart: { $lt: new Date() },
     });
+
+    // Update scan timestamp
+    user.lastAlertScanAt = new Date();
+    await user.save();
+
+    return { scanned: true };
   } catch (err: unknown) {
     const errorMessage = getErrorMessage(err);
     const isScopeError =
@@ -101,5 +114,6 @@ export async function runCalendarAlertScanForUser(userId: string) {
     }
 
     console.error(`[CalendarAlertJob] Scan failed for user ${userId}:`, errorMessage);
+    return { scanned: false };
   }
 }

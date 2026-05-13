@@ -13,6 +13,7 @@ export interface IUser extends Document {
   googleTokenExpiry?: Date;
   googleEmail?: string;
   calendarConnected: boolean;
+  lastAlertScanAt?: Date;
   comparePassword(password: string): Promise<boolean>;
 }
 
@@ -40,6 +41,7 @@ const UserSchema = new Schema<IUser>(
     googleTokenExpiry: { type: Date, default: null },
     googleEmail: { type: String, default: null },
     calendarConnected: { type: Boolean, default: false },
+    lastAlertScanAt: { type: Date, default: null },
   },
   { timestamps: true }
 );
