@@ -71,8 +71,11 @@ export default function AlertsPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[var(--text-muted)]">Loading alerts...</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="w-8 h-8 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin" />
+        <p className="text-sm text-[var(--text-muted)]">
+          Checking your calendar for weather alerts...
+        </p>
       </div>
     );
   }
