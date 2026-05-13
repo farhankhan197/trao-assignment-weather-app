@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 interface StormProps {
-  intensity?: 'subtle' | 'dramatic';
+  intensity?: 'subtle' | 'dramatic' | 'card';
 }
 
 export default function Storm({ intensity = 'subtle' }: StormProps) {
