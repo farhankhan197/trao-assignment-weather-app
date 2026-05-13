@@ -364,13 +364,8 @@ export function LocalWeatherSidebar() {
         </div>
 
         {locationOff && (
-          <div className="mt-4">
-            <button
-              onClick={requestLocation}
-              className="w-full text-sm bg-[var(--accent)] text-white px-4 py-2 rounded-lg hover:bg-[var(--accent-hover)] transition-colors"
-            >
-              Enable Location
-            </button>
+          <div className="mt-4 text-xs text-[var(--text-muted)] bg-[var(--bg-surface-hover)]/50 rounded-lg px-3 py-2">
+            Location blocked. Allow in your browser settings.
           </div>
         )}
         {gpsOff && !locationOff && (
