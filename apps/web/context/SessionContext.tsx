@@ -78,6 +78,7 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
   const logout = useCallback(async () => {
     await api.post('/auth/logout');
     clearApiCache();
+    localStorage.removeItem('mausam_local_cache');
     setUser(null);
     setUnreadAlertCount(0);
   }, []);
