@@ -90,6 +90,8 @@ export function LocalWeatherSidebar() {
   const [locationOff, setLocationOff] = useState(false);
   const [locationChecking, setLocationChecking] = useState(false);
   const [liveCoords, setLiveCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [gpsOff, setGpsOff] = useState(false);
+  const [requested, setRequested] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
 
@@ -133,6 +135,7 @@ export function LocalWeatherSidebar() {
         setPermission('granted');
         setLocationOff(false);
         setLocationChecking(false);
+        setGpsOff(false);
 
         // If we have cached data, check if location changed significantly
         if (cached.current) {
@@ -150,17 +153,20 @@ export function LocalWeatherSidebar() {
       },
       (err) => {
         if (cached.current) {
-          // Only red dot if permission actually denied (vs timeout / unavailable)
           if (err.code === err.PERMISSION_DENIED) setLocationOff(true);
+          else setGpsOff(true);
           setLocationChecking(false);
           setLoading(false);
           return;
         }
         if (err.code === err.PERMISSION_DENIED) setPermission('denied');
-        else setPermission('unavailable');
+        else {
+          setPermission('unavailable');
+          setGpsOff(true);
+        }
         setLoading(false);
       },
-      { timeout: 3000, maximumAge: 300000 }
+      { timeout: 8000, maximumAge: 300000 }
     );
   }, []);
 
@@ -206,23 +212,44 @@ export function LocalWeatherSidebar() {
     }
   }, []);
 
-  // Permission prompt state — no cache yet
+  const requestLocation = useCallback(() => {
+    setRequested(true);
+    if (!navigator.geolocation) {
+      setPermission('unavailable');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lon } = pos.coords;
+        setLiveCoords({ lat, lon });
+        setPermission('granted');
+        setLoading(true);
+      },
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) setPermission('denied');
+        else setPermission('unavailable');
+      },
+      { timeout: 8000 }
+    );
+  }, []);
+
+  // Permission prompt — no cache yet
   if (permission === 'prompt' && !cached.current) {
     return (
       <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-5 shadow-[var(--shadow-sm)]">
-        <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">
+        <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-2">
           Your Location
         </p>
-        <div className="animate-pulse flex items-center gap-4">
-          <div className="space-y-3">
-            <div className="h-4 bg-[var(--bg-surface-hover)] rounded w-28" />
-            <div className="h-8 bg-[var(--bg-surface-hover)] rounded w-16" />
-          </div>
-          <div className="h-12 w-12 bg-[var(--bg-surface-hover)] rounded-full" />
-        </div>
-        <p className="text-xs text-[var(--text-muted)] mt-3">
-          Allow location access to see local weather
+        <p className="text-sm text-[var(--text-muted)] mb-3">
+          See live weather for your current location
         </p>
+        <button
+          onClick={requestLocation}
+          disabled={requested}
+          className="text-sm bg-[var(--accent)] text-white px-4 py-2 rounded-lg hover:bg-[var(--accent-hover)] transition-colors disabled:opacity-50"
+        >
+          {requested ? 'Requesting...' : 'Grant Access'}
+        </button>
       </div>
     );
   }
@@ -235,7 +262,7 @@ export function LocalWeatherSidebar() {
           Your Location
         </p>
         <p className="text-sm text-[var(--text-muted)]">
-          Location access denied. Enable it in your browser settings to see local weather.
+          Location access blocked. Enable in your browser settings.
         </p>
       </div>
     );
@@ -291,14 +318,17 @@ export function LocalWeatherSidebar() {
               title="Checking location..."
             />
           )}
-          {!locationChecking && !locationOff && (
+          {!locationChecking && !locationOff && !gpsOff && (
             <span className="w-2 h-2 rounded-full bg-[var(--success)]" title="Live location" />
           )}
           {!locationChecking && locationOff && (
             <span
               className="w-2 h-2 rounded-full bg-[var(--danger)]"
-              title="Location unavailable"
+              title="Location permission denied"
             />
+          )}
+          {!locationChecking && gpsOff && !locationOff && (
+            <span className="w-2 h-2 rounded-full bg-[var(--warning)]" title="GPS unavailable" />
           )}
         </div>
 
@@ -335,7 +365,12 @@ export function LocalWeatherSidebar() {
 
         {locationOff && (
           <div className="mt-4 text-xs text-[var(--text-muted)] bg-[var(--bg-surface-hover)]/50 rounded-lg px-3 py-2">
-            Enable location in your browser settings for real-time weather updates.
+            Enable location in your browser settings for real-time updates.
+          </div>
+        )}
+        {gpsOff && !locationOff && (
+          <div className="mt-4 text-xs text-[var(--text-muted)] bg-[var(--bg-surface-hover)]/50 rounded-lg px-3 py-2">
+            Turn on device GPS for live weather.
           </div>
         )}
       </div>
