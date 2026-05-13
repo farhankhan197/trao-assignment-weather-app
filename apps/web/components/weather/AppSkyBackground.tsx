@@ -1,6 +1,13 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
+
+const PUBLIC_ROUTES = ['/login', '/register', '/privacy-policy', '/terms-of-service'];
+
 export default function AppSkyBackground() {
+  const pathname = usePathname();
+  if (PUBLIC_ROUTES.includes(pathname)) return null;
+
   return (
     <div
       className="fixed inset-0 z-0 pointer-events-none overflow-hidden"

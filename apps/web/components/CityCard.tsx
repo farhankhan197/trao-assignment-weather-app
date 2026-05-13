@@ -206,5 +206,20 @@ function CityCardComponent({ city, weatherData, streak, onToggleFavorite, onDele
   );
 }
 
-export const CityCard = React.memo(CityCardComponent);
+function areEqual(prevProps: Props, nextProps: Props) {
+  return (
+    prevProps.city._id === nextProps.city._id &&
+    prevProps.city.isFavorite === nextProps.city.isFavorite &&
+    prevProps.city.name === nextProps.city.name &&
+    prevProps.weatherData?.temperature === nextProps.weatherData?.temperature &&
+    prevProps.weatherData?.condition === nextProps.weatherData?.condition &&
+    prevProps.weatherData?.tempMax === nextProps.weatherData?.tempMax &&
+    prevProps.weatherData?.tempMin === nextProps.weatherData?.tempMin &&
+    prevProps.streak === nextProps.streak &&
+    prevProps.onToggleFavorite === nextProps.onToggleFavorite &&
+    prevProps.onDelete === nextProps.onDelete
+  );
+}
+
+export const CityCard = React.memo(CityCardComponent, areEqual);
 CityCard.displayName = 'CityCard';

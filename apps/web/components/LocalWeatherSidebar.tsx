@@ -106,7 +106,7 @@ export function LocalWeatherSidebar() {
           setPermission('unavailable');
         }
       },
-      { timeout: 8000 }
+      { timeout: 4000 }
     );
   }, [permission]);
 

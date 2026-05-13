@@ -7,6 +7,7 @@ import { CitySearch } from '@/components/CitySearch';
 import { CityCard } from '@/components/CityCard';
 import { LocalWeatherSidebar } from '@/components/LocalWeatherSidebar';
 import api from '@/lib/api';
+import { getCondition } from '@/lib/weather';
 
 interface CityData {
   _id: string;
@@ -54,7 +55,7 @@ export default function DashboardPage() {
     else setLoading(false);
   }, [user, fetchDashboard]);
 
-  const handleAdd = async (result: SearchResult) => {
+  const handleAdd = useCallback(async (result: SearchResult) => {
     try {
       const res = await api.post('/api/cities', {
         name: result.name,
@@ -63,18 +64,28 @@ export default function DashboardPage() {
         lat: result.lat,
         lon: result.lon,
       });
-      // Optimistically add, then refetch to get weather data
+      // Fetch weather for the new city only, then append
+      const wRes = await api
+        .get('/api/weather/current', { params: { lat: result.lat, lon: result.lon } })
+        .catch(() => null);
+      const weather = wRes
+        ? {
+            temperature: wRes.data.current.temperature_2m,
+            condition: getCondition(wRes.data.current.weather_code),
+            tempMax: wRes.data.daily?.temperature_2m_max?.[0] ?? wRes.data.current.temperature_2m,
+            tempMin: wRes.data.daily?.temperature_2m_min?.[0] ?? wRes.data.current.temperature_2m,
+          }
+        : { temperature: 0, condition: 'sunny', tempMax: 0, tempMin: 0 };
       setDashboard((prev) => [
+        { ...res.data.city, currentWeather: weather, streak: null },
         ...prev,
-        { ...res.data.city, currentWeather: prev[0]?.currentWeather ?? null, streak: null },
       ]);
-      fetchDashboard();
     } catch {
       alert('Failed to add city');
     }
-  };
+  }, []);
 
-  const handleToggleFavorite = async (id: string) => {
+  const handleToggleFavorite = useCallback(async (id: string) => {
     try {
       const res = await api.patch(`/api/cities/${id}`);
       setDashboard((prev) =>
@@ -83,9 +94,9 @@ export default function DashboardPage() {
     } catch {
       alert('Failed to update favorite');
     }
-  };
+  }, []);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (!confirm('Remove this city from your dashboard?')) return;
     try {
       await api.delete(`/api/cities/${id}`);
@@ -93,7 +104,7 @@ export default function DashboardPage() {
     } catch {
       alert('Failed to remove city');
     }
-  };
+  }, []);
 
   if (loading) {
     return (
