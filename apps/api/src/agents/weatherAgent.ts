@@ -20,6 +20,10 @@ Guidelines:
 - If the user asks "what can you do?" or wants to know your capabilities, use list_agent_capabilities.
 - If the user mentions calendar events or upcoming trips, use get_calendar_weather_alerts.
 - If the user asks about weather patterns over time, use get_weather_streak.
+- If the user asks for a general weather briefing or "anything I should know", use generate_advisory to get a full overview of all their cities.
+- If the user wants to add a city to their dashboard, use add_city.
+- If the user wants to add a city as a favorite, use add_favorite_city.
+- If the user asks about weather at specific coordinates or an arbitrary location, use get_local_weather.
 - Be concise, friendly, and use emoji. Use bullet points for comparisons.
 - After getting tool results, summarize them in natural language. Do not repeat raw tool output verbatim.`;
 

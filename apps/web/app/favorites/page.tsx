@@ -10,6 +10,8 @@ import api from '@/lib/api';
 import { getCondition } from '@/lib/weather';
 import dynamic from 'next/dynamic';
 
+const STORAGE_KEY = 'mausam_selected_favorite_id';
+
 const HistoryChart = dynamic(() => import('@/components/weather/HistoryChart'), {
   ssr: false,
 });
@@ -45,7 +47,9 @@ export default function FavoritesPage() {
   const { loading: authLoading } = useRequireAuth();
   const router = useRouter();
   const [favorites, setFavorites] = useState<City[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(() =>
+    typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
+  );
   const [current, setCurrent] = useState<CurrentWeather | null>(null);
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   const [streak, setStreak] = useState<string | null>(null);
@@ -63,7 +67,9 @@ export default function FavoritesPage() {
       setFavorites(favs);
       if (favs.length > 0 && !autoSelected.current) {
         autoSelected.current = true;
-        setSelectedId(favs[0]._id);
+        const saved = localStorage.getItem(STORAGE_KEY);
+        const match = saved ? favs.find((c: City) => c._id === saved) : undefined;
+        setSelectedId(match?._id ?? favs[0]._id);
       }
 
       // Batch fetch weather for all sidebar items
@@ -98,6 +104,10 @@ export default function FavoritesPage() {
   useEffect(() => {
     fetchCities();
   }, [fetchCities]);
+
+  useEffect(() => {
+    if (selectedId) localStorage.setItem(STORAGE_KEY, selectedId);
+  }, [selectedId]);
 
   useEffect(() => {
     if (!selectedId) return;
@@ -135,8 +145,9 @@ export default function FavoritesPage() {
 
   if (authLoading || initialLoad) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-[var(--text-muted)]">Loading favorites...</p>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+        <div className="w-8 h-8 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin" />
+        <p className="text-sm text-[var(--text-muted)]">Loading favorites...</p>
       </div>
     );
   }

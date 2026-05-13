@@ -40,7 +40,10 @@ export const SessionProvider = ({ children }: { children: ReactNode }) => {
         skipAuthRedirect: true,
         cacheTTL: 900000,
       } as any);
-      setUnreadAlertCount(res.data.unreadCount || 0);
+      const readIds: string[] = JSON.parse(localStorage.getItem('mausam_read_alerts') || '[]');
+      const readSet = new Set(readIds);
+      const unread = (res.data.alerts || []).filter((a: any) => !readSet.has(a._id));
+      setUnreadAlertCount(unread.length);
     } catch {
       setUnreadAlertCount(0);
     }

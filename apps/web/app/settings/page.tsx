@@ -45,7 +45,7 @@ export default function SettingsPage() {
   const handleManualCheck = async () => {
     setChecking(true);
     try {
-      await api.post('/api/calendar/alerts/check');
+      await api.get('/api/calendar/alerts', { skipCache: true } as any);
       await refreshAlertCount();
       alert('Calendar scan completed');
     } catch {

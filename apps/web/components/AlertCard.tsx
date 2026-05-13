@@ -14,6 +14,7 @@ interface Alert {
   severity: 'low' | 'medium' | 'high';
   message: string;
   read: boolean;
+  aiGenerated?: boolean;
 }
 
 interface Props {
@@ -22,9 +23,9 @@ interface Props {
 }
 
 const SEVERITY_STYLES = {
-  high: 'border-[var(--danger)]/40 bg-[#0f172a]',
-  medium: 'border-[var(--warning)]/40 bg-[#0f172a]',
-  low: 'border-[var(--border)] bg-[var(--bg-surface)]',
+  high: 'bg-[#0f172a]',
+  medium: 'bg-[#0f172a]',
+  low: 'bg-[var(--bg-surface)]',
 };
 
 const SEVERITY_BADGE = {
@@ -57,7 +58,7 @@ export function AlertCard({ alert, onMarkRead }: Props) {
     <motion.div
       whileHover={{ scale: 1.005, y: -1 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-      className={`border rounded-xl overflow-hidden shadow-[var(--shadow-sm)] ${SEVERITY_STYLES[alert.severity]} ${!alert.read ? 'ring-1 ring-[var(--accent)]/20' : 'opacity-90'}`}
+      className={`rounded-xl overflow-hidden shadow-[var(--shadow-sm)] ${SEVERITY_STYLES[alert.severity]} ${!alert.read ? 'ring-1 ring-[var(--accent)]/20' : 'opacity-90'}`}
     >
       {/* Top Section: Event info (left) + Weather (right) */}
       <div className="flex items-start gap-4 p-5">
@@ -116,6 +117,13 @@ export function AlertCard({ alert, onMarkRead }: Props) {
 
       {/* Bottom: Message with Markdown */}
       <div className="px-5 py-4">
+        {alert.aiGenerated && (
+          <div className="flex items-center gap-1.5 mb-2">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--accent)] bg-[var(--accent-light)]/50 px-2 py-0.5 rounded-full border border-[var(--accent-muted)]/30">
+              AI Recommendation
+            </span>
+          </div>
+        )}
         <div className="text-sm text-[var(--text-secondary)] leading-relaxed prose prose-sm max-w-none alert-message">
           <ReactMarkdown>{alert.message}</ReactMarkdown>
         </div>

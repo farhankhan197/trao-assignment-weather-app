@@ -8,6 +8,8 @@ import { AlertCard } from '@/components/AlertCard';
 import Link from 'next/link';
 import api from '@/lib/api';
 
+const READ_KEY = 'mausam_read_alerts';
+
 interface Alert {
   _id: string;
   eventTitle: string;
@@ -19,9 +21,29 @@ interface Alert {
   severity: 'low' | 'medium' | 'high';
   message: string;
   read: boolean;
+  aiGenerated?: boolean;
 }
 
 type FilterType = 'all' | 'unread' | 'high';
+
+function getReadIds(): Set<string> {
+  if (typeof window === 'undefined') return new Set();
+  try {
+    const raw = localStorage.getItem(READ_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveReadIds(ids: Set<string>) {
+  localStorage.setItem(READ_KEY, JSON.stringify([...ids]));
+}
+
+function mergeReadStatus(alerts: Alert[]): Alert[] {
+  const readIds = getReadIds();
+  return alerts.map((a) => ({ ...a, read: readIds.has(a._id) || a.read }));
+}
 
 export default function AlertsPage() {
   const { loading: authLoading } = useRequireAuth();
@@ -39,7 +61,7 @@ export default function AlertsPage() {
         api.get('/api/calendar/alerts', { cacheTTL: 900000 } as any),
         api.get('/auth/calendar/status', { cacheTTL: 900000 } as any),
       ]);
-      setAlerts(alertsRes.data.alerts);
+      setAlerts(mergeReadStatus(alertsRes.data.alerts));
       setCalendarConnected(statusRes.data.connected);
     } catch {
       // Handled by interceptor
@@ -59,14 +81,12 @@ export default function AlertsPage() {
     setFilteredAlerts(filtered);
   }, [alerts, filter]);
 
-  const handleMarkRead = async (id: string) => {
-    try {
-      await api.patch(`/api/calendar/alerts/${id}/read`);
-      setAlerts((prev) => prev.map((a) => (a._id === id ? { ...a, read: true } : a)));
-      refreshAlertCount();
-    } catch {
-      // ignore
-    }
+  const handleMarkRead = (id: string) => {
+    const readIds = getReadIds();
+    readIds.add(id);
+    saveReadIds(readIds);
+    setAlerts((prev) => prev.map((a) => (a._id === id ? { ...a, read: true } : a)));
+    refreshAlertCount();
   };
 
   if (authLoading || loading) {
@@ -143,7 +163,7 @@ export default function AlertsPage() {
                       : 'No high-severity alerts.'}
                 </p>
                 <p className="text-[var(--text-muted)] text-sm mt-2">
-                  Alerts are generated daily at 6 AM UTC for events in the next 7 days.
+                  Alerts are computed live from your calendar events and weather forecasts.
                 </p>
               </div>
             ) : (

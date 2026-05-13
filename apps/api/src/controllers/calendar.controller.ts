@@ -1,13 +1,12 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
-import { CalendarAlert } from '../models/CalendarAlert.js';
 import {
   generateAuthUrl,
   exchangeCodeForTokens,
   refreshAccessToken,
 } from '../utils/calendar.service.js';
-import { runCalendarAlertScanForUser } from '../utils/calendarAlertJob.js';
+import { computeCalendarAlerts } from '../utils/computeCalendarAlerts.js';
 
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 
@@ -86,11 +85,6 @@ export const calendarCallback = async (req: Request, res: Response): Promise<voi
     user.calendarConnected = true;
     await user.save();
 
-    // Run initial scan immediately
-    runCalendarAlertScanForUser(user._id.toString()).catch(() => {
-      /* ignore */
-    });
-
     res.redirect(`${CLIENT_URL}/dashboard?calendar=connected`);
   } catch {
     res.redirect(`${CLIENT_URL}/dashboard?calendar=error&message=OAuth failed`);
@@ -148,9 +142,6 @@ export const disconnectCalendar = async (req: Request, res: Response): Promise<v
     user.calendarConnected = false;
     await user.save();
 
-    // Delete all calendar alerts for this user
-    await CalendarAlert.deleteMany({ userId: user._id });
-
     res.json({ message: 'Calendar disconnected successfully' });
   } catch {
     res.status(500).json({ error: 'Failed to disconnect calendar' });
@@ -158,7 +149,7 @@ export const disconnectCalendar = async (req: Request, res: Response): Promise<v
 };
 
 // GET /api/calendar/alerts
-// Runs a live scan of upcoming calendar events and returns current alerts
+// Computes up-to-date alerts from Google Calendar events + weather data
 export const getCalendarAlerts = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user) {
@@ -166,63 +157,25 @@ export const getCalendarAlerts = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    // Run live scan: fetches events, checks weather, upserts alerts, cleans up passed
-    await runCalendarAlertScanForUser(req.user.id);
+    const alerts = await computeCalendarAlerts(req.user.id);
 
-    const alerts = await CalendarAlert.find({ userId: req.user.id }).sort({
-      read: 1,
-      createdAt: -1,
-    });
+    // Map computed alerts to response format (id → _id for client compatibility)
+    const mapped = alerts.map((a) => ({
+      _id: a.id,
+      eventId: a.eventId,
+      eventTitle: a.eventTitle,
+      eventStart: a.eventStart,
+      eventLocation: a.eventLocation,
+      condition: a.condition,
+      tempMax: a.tempMax,
+      tempMin: a.tempMin,
+      severity: a.severity,
+      message: a.message,
+      aiGenerated: a.aiGenerated,
+    }));
 
-    const unreadCount = await CalendarAlert.countDocuments({
-      userId: req.user.id,
-      read: false,
-    });
-
-    res.json({ alerts, unreadCount });
+    res.json({ alerts: mapped });
   } catch {
     res.status(500).json({ error: 'Failed to fetch alerts' });
-  }
-};
-
-// PATCH /api/calendar/alerts/:id/read
-// Mark a specific alert as read
-export const markAlertRead = async (req: Request, res: Response): Promise<void> => {
-  try {
-    if (!req.user) {
-      res.status(401).json({ error: 'Authentication required' });
-      return;
-    }
-
-    const alert = await CalendarAlert.findOneAndUpdate(
-      { _id: req.params.id, userId: req.user.id },
-      { read: true },
-      { new: true }
-    );
-
-    if (!alert) {
-      res.status(404).json({ error: 'Alert not found' });
-      return;
-    }
-
-    res.json({ alert });
-  } catch {
-    res.status(500).json({ error: 'Failed to mark alert as read' });
-  }
-};
-
-// POST /api/calendar/alerts/check
-// Manually trigger a calendar scan (for testing)
-export const manualCheck = async (req: Request, res: Response): Promise<void> => {
-  try {
-    if (!req.user) {
-      res.status(401).json({ error: 'Authentication required' });
-      return;
-    }
-
-    await runCalendarAlertScanForUser(req.user.id);
-    res.json({ message: 'Calendar scan completed' });
-  } catch {
-    res.status(500).json({ error: 'Scan failed' });
   }
 };

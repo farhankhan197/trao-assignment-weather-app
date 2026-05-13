@@ -106,25 +106,42 @@ export default function LoginPage() {
           </Link>
         </p>
 
-        <div className="mt-6 bg-[var(--bg-input)]/50 border border-[var(--border)] rounded-xl p-4 shadow-[var(--shadow-sm)]">
-          <p className="text-[var(--accent)] text-sm font-medium mb-2">Try the Demo</p>
-          <p className="text-[var(--text-muted)] text-xs mb-1">
-            Email: <span className="text-[var(--text-secondary)]">test@mausam.me</span>
-          </p>
-          <p className="text-[var(--text-muted)] text-xs mb-2">
-            Password: <span className="text-[var(--text-secondary)]">password123</span>
-          </p>
-          <button
-            type="button"
-            onClick={() => {
-              setEmail('test@mausam.me');
-              setPassword('password123');
-            }}
-            className="text-xs text-[var(--accent)] hover:text-[var(--accent-hover)] underline cursor-pointer"
-          >
-            Auto-fill credentials
-          </button>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.15 }}
+          className="mt-6 bg-[var(--bg-surface)] border border-[var(--accent)]/20 rounded-2xl p-5 shadow-[var(--shadow-md)] relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent)]/5 to-transparent pointer-events-none" />
+          <div className="relative">
+            <p className="font-display text-base text-[var(--accent)] mb-1">Log in as test user</p>
+            <p className="text-[var(--text-muted)] text-xs mb-3">
+              Use the demo account to explore all features instantly
+            </p>
+            <div className="bg-[var(--bg-surface-hover)]/50 rounded-xl px-4 py-3 mb-4 space-y-1.5">
+              <p className="text-[var(--text-muted)] text-xs">
+                Email:{' '}
+                <span className="text-[var(--text-secondary)] font-mono text-sm">
+                  test@mausam.me
+                </span>
+              </p>
+              <p className="text-[var(--text-muted)] text-xs">
+                Password:{' '}
+                <span className="text-[var(--text-secondary)] font-mono text-sm">password123</span>
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('test@mausam.me');
+                setPassword('password123');
+              }}
+              className="w-full bg-gradient-to-r from-[var(--accent)] to-sky-400 hover:from-[var(--accent-hover)] hover:to-sky-300 text-white text-sm font-medium py-2.5 rounded-lg transition-all shadow-sm hover:shadow-md"
+            >
+              Auto-fill &amp; Sign In
+            </button>
+          </div>
+        </motion.div>
       </div>
     </motion.div>
   );
