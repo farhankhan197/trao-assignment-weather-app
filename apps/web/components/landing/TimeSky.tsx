@@ -1,12 +1,13 @@
 'use client';
 
 import { useMemo, useEffect, useRef, useState } from 'react';
-import { useTimeOfDay, getTheme } from './skyTheme';
+import { getTheme } from './skyTheme';
 import Rain from '@/components/weather/Rain';
 import Snow from '@/components/weather/Snow';
 
 interface TimeSkyProps {
   condition?: string;
+  hour: number | null;
 }
 
 function StormFlash() {
@@ -46,9 +47,9 @@ const CLOUDS = [
   { width: 120, height: 34, top: 65, speed: 65, delay: -28 },
 ];
 
-export default function TimeSky({ condition }: TimeSkyProps) {
-  const hour = useTimeOfDay();
-  const theme = getTheme(hour);
+export default function TimeSky({ condition, hour }: TimeSkyProps) {
+  const resolvedHour = hour ?? 12;
+  const theme = getTheme(resolvedHour);
 
   const stars = useMemo(() => {
     let seed = 42;
@@ -70,10 +71,13 @@ export default function TimeSky({ condition }: TimeSkyProps) {
     return result;
   }, []);
 
-  const orbLeft = 10 + (hour / 23) * 75;
+  const orbLeft = 10 + (resolvedHour / 23) * 75;
 
   return (
-    <div className="absolute inset-0 overflow-hidden" style={{ background: theme.gradient }}>
+    <div
+      className="absolute inset-0 overflow-hidden transition-opacity duration-300"
+      style={{ background: theme.gradient, opacity: hour === null ? 0 : 1 }}
+    >
       <style>{`
 @keyframes tDrift{from{transform:translateX(-200px)}to{transform:translateX(calc(100vw + 200px))}}
 @keyframes tTwinkle{0%,100%{opacity:.2}50%{opacity:1}}

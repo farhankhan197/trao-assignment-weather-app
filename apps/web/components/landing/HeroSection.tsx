@@ -13,9 +13,9 @@ interface GeoData {
 }
 
 export default function HeroSection() {
-  const { user } = useSession();
+  const { user, loading: authLoading } = useSession();
   const hour = useTimeOfDay();
-  const theme = getTheme(hour);
+  const theme = getTheme(hour ?? 12);
 
   const [geoData, setGeoData] = useState<GeoData | null>(null);
   const [geoLoading, setGeoLoading] = useState(false);
@@ -76,7 +76,7 @@ export default function HeroSection() {
 
   return (
     <section className="relative w-full flex flex-col items-center justify-center min-h-screen px-4 sm:px-6">
-      <TimeSky condition={geoData?.condition} />
+      <TimeSky condition={geoData?.condition} hour={hour} />
 
       <div className="relative z-20 text-center px-4 sm:px-5 py-4 sm:py-0 mb-4 sm:mb-6">
         <p
@@ -134,18 +134,27 @@ export default function HeroSection() {
 
         {/* CTA buttons */}
         <div className="flex gap-3 justify-center mt-6 sm:mt-8 flex-wrap">
-          <a
-            href={ctaPrimary.href}
-            className="px-5 sm:px-7 py-2 sm:py-2.5 rounded-full text-[var(--accent)] bg-white text-xs sm:text-[13px] font-medium tracking-wide transition-all duration-300 hover:-translate-y-0.5"
-          >
-            {ctaPrimary.text}
-          </a>
-          <a
-            href={ctaSecondary.href}
-            className="px-5 sm:px-7 py-2 sm:py-2.5 rounded-full text-[var(--accent)] bg-white text-xs sm:text-[13px] font-medium tracking-wide transition-all duration-300 hover:-translate-y-0.5"
-          >
-            {ctaSecondary.text}
-          </a>
+          {authLoading ? (
+            <>
+              <div className="h-9 w-[118px] rounded-full animate-shimmer bg-white/10" />
+              <div className="h-9 w-[118px] rounded-full animate-shimmer bg-white/10" />
+            </>
+          ) : (
+            <>
+              <a
+                href={ctaPrimary.href}
+                className="px-5 sm:px-7 py-2 sm:py-2.5 rounded-full text-[var(--accent)] bg-white text-xs sm:text-[13px] font-medium tracking-wide transition-all duration-300 hover:-translate-y-0.5"
+              >
+                {ctaPrimary.text}
+              </a>
+              <a
+                href={ctaSecondary.href}
+                className="px-5 sm:px-7 py-2 sm:py-2.5 rounded-full text-[var(--accent)] bg-white text-xs sm:text-[13px] font-medium tracking-wide transition-all duration-300 hover:-translate-y-0.5"
+              >
+                {ctaSecondary.text}
+              </a>
+            </>
+          )}
         </div>
       </div>
 

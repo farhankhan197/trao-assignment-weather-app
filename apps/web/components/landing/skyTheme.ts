@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 
 export interface SkyTheme {
   gradient: string;
@@ -127,10 +127,12 @@ export function getTheme(hour: number): SkyTheme {
   };
 }
 
-export function useTimeOfDay(): number {
-  const [hour, setHour] = useState(() => new Date().getHours());
+const useClientLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
-  useEffect(() => {
+export function useTimeOfDay(): number | null {
+  const [hour, setHour] = useState<number | null>(null);
+
+  useClientLayoutEffect(() => {
     const sync = () => setHour(new Date().getHours());
     sync();
     const id = setInterval(sync, 60000);
