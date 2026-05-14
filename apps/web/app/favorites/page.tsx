@@ -9,7 +9,7 @@ import { formatTempShort, formatSpeed, formatPrecip } from '@/lib/units';
 import { WeatherIcon } from '@/components/WeatherIcon';
 import WeatherAtmosphere from '@/components/weather/WeatherAtmosphere';
 import SunEventIcon from '@/components/weather/SunEventIcon';
-import api from '@/lib/api';
+import api, { clearApiCache } from '@/lib/api';
 import { getCondition } from '@/lib/weather';
 import dynamic from 'next/dynamic';
 
@@ -160,7 +160,45 @@ export default function FavoritesPage() {
 
   useEffect(() => {
     if (selectedId) localStorage.setItem(STORAGE_KEY, selectedId);
+    else localStorage.removeItem(STORAGE_KEY);
   }, [selectedId]);
+
+  const handleToggleFavorite = useCallback(
+    async (id: string) => {
+      try {
+        await api.patch(`/api/cities/${id}`);
+        clearApiCache('/api/cities');
+        clearApiCache('/api/dashboard');
+        clearApiCache(`/api/cities/${id}`);
+
+        const nextFavorites = favorites.filter((city) => city._id !== id);
+        setFavorites(nextFavorites);
+        setSidebarWeather((prev) => {
+          const next = { ...prev };
+          delete next[id];
+          return next;
+        });
+
+        if (selectedId === id) {
+          const nextSelected = nextFavorites[0]?._id ?? null;
+          setSelectedId(nextSelected);
+          if (!nextSelected) {
+            setCurrent(null);
+            setHistory([]);
+            setStreak(null);
+            setHourly([]);
+            setAirQuality(null);
+            setForecastToday(null);
+          }
+        }
+
+        window.dispatchEvent(new Event('mausam:cities-updated'));
+      } catch {
+        alert('Failed to update favorite');
+      }
+    },
+    [favorites, selectedId]
+  );
 
   useEffect(() => {
     if (!selectedId) return;
@@ -280,6 +318,7 @@ export default function FavoritesPage() {
                       city={city}
                       isSelected={city._id === selectedId}
                       onClick={() => setSelectedId(city._id)}
+                      onToggleFavorite={handleToggleFavorite}
                       weatherData={sidebarWeather[city._id]}
                     />
                   </motion.div>
@@ -517,18 +556,25 @@ function SidebarItem({
   city,
   isSelected,
   onClick,
+  onToggleFavorite,
   weatherData,
 }: {
   city: City;
   isSelected: boolean;
   onClick: () => void;
+  onToggleFavorite: (id: string) => void;
   weatherData?: { temperature: number; condition: string } | null;
 }) {
   const weather = weatherData || null;
 
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') onClick();
+      }}
       className={`w-full shrink-0 lg:shrink text-left flex items-center gap-3 p-3 rounded-xl transition-colors ${
         isSelected
           ? 'bg-[var(--accent-light)] border border-[var(--accent-muted)]'
@@ -538,7 +584,7 @@ function SidebarItem({
       <div className="shrink-0">
         <WeatherIcon condition={weather?.condition || 'sunny'} className="text-xl" />
       </div>
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <p
           className={`text-sm font-medium truncate ${isSelected ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}
         >
@@ -548,6 +594,29 @@ function SidebarItem({
           {weather ? `${Math.round(weather.temperature)}°` : '—'}
         </p>
       </div>
-    </button>
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onToggleFavorite(city._id);
+        }}
+        className="shrink-0 p-1.5 rounded-lg text-[var(--warning)] hover:bg-[var(--warning-light)]/60 transition-colors"
+        aria-label={`Remove ${city.name} from favorites`}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1-1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+        </svg>
+      </button>
+    </div>
   );
 }

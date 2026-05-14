@@ -128,7 +128,9 @@ function CityCardComponent({ city, weatherData, streak, onToggleFavorite, onDele
                 e.stopPropagation();
                 onToggleFavorite(city._id);
               }}
-              className="p-1.5 rounded-lg hover:bg-[var(--bg-surface-hover)] transition-colors text-[var(--text-muted)] hover:text-[var(--warning)]"
+              className={`p-1.5 rounded-lg hover:bg-[var(--bg-surface-hover)] transition-colors hover:text-[var(--warning)] ${
+                city.isFavorite ? 'text-[var(--warning)]' : 'text-[var(--text-muted)]'
+              }`}
               aria-label={city.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
             >
               <svg

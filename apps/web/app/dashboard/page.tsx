@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { CitySearch } from '@/components/CitySearch';
@@ -34,10 +34,19 @@ interface SearchResult {
   state: string | null;
 }
 
+type CityFilter = 'all' | 'added' | 'favorites';
+
+const CITY_FILTERS: { id: CityFilter; label: string }[] = [
+  { id: 'all', label: 'All Cities' },
+  { id: 'added', label: 'Added Cities' },
+  { id: 'favorites', label: 'Favorite Cities' },
+];
+
 export default function DashboardPage() {
   const { user, loading: authLoading } = useRequireAuth();
   const [dashboard, setDashboard] = useState<CityData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cityFilter, setCityFilter] = useState<CityFilter>('all');
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
@@ -119,6 +128,31 @@ export default function DashboardPage() {
   }, []);
 
   const citiesLoading = authLoading || loading || !user;
+  const filteredDashboard = useMemo(() => {
+    if (cityFilter === 'favorites') return dashboard.filter((city) => city.isFavorite);
+    if (cityFilter === 'added') return dashboard.filter((city) => !city.isFavorite);
+    return dashboard;
+  }, [dashboard, cityFilter]);
+
+  const filterCounts = useMemo(
+    () => ({
+      all: dashboard.length,
+      added: dashboard.filter((city) => !city.isFavorite).length,
+      favorites: dashboard.filter((city) => city.isFavorite).length,
+    }),
+    [dashboard]
+  );
+
+  const emptyFilterCopy =
+    cityFilter === 'favorites'
+      ? {
+          title: 'No favorite cities yet',
+          body: 'Use the star on any city card to mark it as a favorite.',
+        }
+      : {
+          title: 'No added cities in this filter',
+          body: 'All of your saved cities are currently marked as favorites.',
+        };
 
   return (
     <div className="relative min-h-screen">
@@ -140,6 +174,37 @@ export default function DashboardPage() {
         <div className="mb-8">
           <LocalWeatherSidebar />
         </div>
+
+        {!citiesLoading && dashboard.length > 0 && (
+          <div className="mb-5 flex justify-center">
+            <div
+              className="inline-flex flex-wrap items-center justify-center gap-1 rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-1 shadow-[var(--shadow-sm)]"
+              role="tablist"
+              aria-label="Filter dashboard cities"
+            >
+              {CITY_FILTERS.map((filter) => {
+                const active = cityFilter === filter.id;
+                return (
+                  <button
+                    key={filter.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setCityFilter(filter.id)}
+                    className={`rounded-lg px-3 py-1.5 text-xs sm:text-sm font-medium transition-colors ${
+                      active
+                        ? 'bg-[var(--accent)] text-white shadow-sm'
+                        : 'text-[var(--text-muted)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    {filter.label}
+                    <span className="ml-1.5 opacity-70">{filterCounts[filter.id]}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {citiesLoading ? (
           <motion.div
@@ -187,6 +252,15 @@ export default function DashboardPage() {
               streaks for each city.
             </p>
           </div>
+        ) : filteredDashboard.length === 0 ? (
+          <div className="relative text-center py-16">
+            <h2 className="font-display text-xl mb-2 text-[var(--text-primary)]">
+              {emptyFilterCopy.title}
+            </h2>
+            <p className="text-[var(--text-muted)] text-sm max-w-md mx-auto">
+              {emptyFilterCopy.body}
+            </p>
+          </div>
         ) : (
           <motion.div
             initial="hidden"
@@ -197,7 +271,7 @@ export default function DashboardPage() {
             }}
             className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
           >
-            {dashboard.map((item) => (
+            {filteredDashboard.map((item) => (
               <motion.div
                 key={item._id}
                 variants={{
