@@ -35,11 +35,12 @@ interface SearchResult {
 }
 
 export default function DashboardPage() {
-  const { user } = useRequireAuth();
+  const { user, loading: authLoading } = useRequireAuth();
   const [dashboard, setDashboard] = useState<CityData[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchDashboard = useCallback(async () => {
+    setLoading(true);
     try {
       const res = await api.get('/api/dashboard');
       setDashboard(res.data.cities || []);
@@ -51,9 +52,13 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (user) fetchDashboard();
-    else setLoading(false);
-  }, [user, fetchDashboard]);
+    if (authLoading) return;
+    if (user) {
+      fetchDashboard();
+      return;
+    }
+    setLoading(false);
+  }, [user, authLoading, fetchDashboard]);
 
   const handleAdd = useCallback(async (result: SearchResult) => {
     try {
@@ -106,14 +111,7 @@ export default function DashboardPage() {
     }
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <div className="w-8 h-8 border-2 border-[var(--border)] border-t-[var(--accent)] rounded-full animate-spin" />
-        <p className="text-sm text-[var(--text-muted)]">Loading your cities...</p>
-      </div>
-    );
-  }
+  const citiesLoading = authLoading || loading || !user;
 
   return (
     <div className="relative min-h-screen">
@@ -136,7 +134,45 @@ export default function DashboardPage() {
           <LocalWeatherSidebar />
         </div>
 
-        {dashboard.length === 0 ? (
+        {citiesLoading ? (
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: 0.05 } },
+            }}
+            className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+            aria-label="Loading cities"
+          >
+            {Array.from({ length: 4 }).map((_, i) => (
+              <motion.div
+                key={i}
+                variants={{
+                  hidden: { opacity: 0, y: 12 },
+                  visible: { opacity: 1, y: 0 },
+                }}
+                className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-2xl p-4 h-40 shadow-[var(--shadow-sm)] animate-pulse"
+              >
+                <div className="flex items-start justify-between mb-5">
+                  <div className="space-y-2">
+                    <div className="h-4 bg-[var(--bg-surface-hover)] rounded w-24" />
+                    <div className="h-3 bg-[var(--bg-surface-hover)] rounded w-16" />
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="h-7 w-7 bg-[var(--bg-surface-hover)] rounded-lg" />
+                    <div className="h-7 w-7 bg-[var(--bg-surface-hover)] rounded-lg" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-9 w-9 bg-[var(--bg-surface-hover)] rounded-full" />
+                  <div className="h-8 bg-[var(--bg-surface-hover)] rounded w-24" />
+                </div>
+                <div className="h-3 bg-[var(--bg-surface-hover)] rounded w-28" />
+              </motion.div>
+            ))}
+          </motion.div>
+        ) : dashboard.length === 0 ? (
           <div className="relative text-center py-20">
             <h2 className="font-display text-xl mb-2 text-[var(--text-primary)]">No cities yet</h2>
             <p className="text-[var(--text-muted)] text-sm max-w-md mx-auto">
