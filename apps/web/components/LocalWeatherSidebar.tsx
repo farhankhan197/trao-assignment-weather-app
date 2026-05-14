@@ -83,6 +83,8 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
 }
 
 function loadCache(): LocalCache | null {
+  if (typeof window === 'undefined') return null;
+
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
@@ -99,6 +101,8 @@ function loadCache(): LocalCache | null {
 }
 
 function saveCache(data: LocalCache) {
+  if (typeof window === 'undefined') return;
+
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(data));
   } catch {
