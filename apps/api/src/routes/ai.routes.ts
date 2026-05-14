@@ -19,8 +19,8 @@ router.post('/chat', authenticate, async (req: Request, res: Response) => {
       return;
     }
 
-    const response = await runWeatherAgent(req.user!.id, message);
-    res.json({ response });
+    const result = await runWeatherAgent(req.user!.id, message);
+    res.json(result);
   } catch (err: unknown) {
     const message = getErrorMessage(err);
     console.error('[AI Agent Error]', message);
@@ -51,8 +51,8 @@ router.get('/insights', authenticate, async (req: Request, res: Response) => {
     what to wear, whether to carry an umbrella, best time to go outside.
     Keep the total response under 300 words. Be warm and conversational.`;
 
-    const insights = await runWeatherAgent(req.user!.id, prompt);
-    res.json({ insights });
+    const result = await runWeatherAgent(req.user!.id, prompt);
+    res.json({ insights: result.response });
   } catch (err: unknown) {
     console.error('[AI Agent Error]', getErrorMessage(err));
     res.status(500).json({ error: 'Failed to generate insights' });

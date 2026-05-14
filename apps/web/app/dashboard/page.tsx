@@ -60,6 +60,13 @@ export default function DashboardPage() {
     setLoading(false);
   }, [user, authLoading, fetchDashboard]);
 
+  useEffect(() => {
+    if (!user) return;
+    const refreshDashboard = () => fetchDashboard();
+    window.addEventListener('mausam:cities-updated', refreshDashboard);
+    return () => window.removeEventListener('mausam:cities-updated', refreshDashboard);
+  }, [user, fetchDashboard]);
+
   const handleAdd = useCallback(async (result: SearchResult) => {
     try {
       const res = await api.post('/api/cities', {

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from 'react';
 import axios from 'axios';
-import api from '@/lib/api';
+import api, { clearApiCache } from '@/lib/api';
 
 export interface ChatMessage {
   role: 'user' | 'assistant';
@@ -41,6 +41,12 @@ export function AIChatProvider({ children }: { children: ReactNode }) {
 
     try {
       const res = await api.post('/api/ai/chat', { message: text.trim() });
+      if (res.data.mutated) {
+        clearApiCache('/api/dashboard');
+        clearApiCache('/api/cities');
+        clearApiCache('/api/ai/insights');
+        window.dispatchEvent(new Event('mausam:cities-updated'));
+      }
       const assistantMessage: ChatMessage = {
         role: 'assistant',
         content: res.data.response || "I'm not sure how to respond to that.",

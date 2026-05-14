@@ -3,6 +3,7 @@ import { HumanMessage, ToolMessage, SystemMessage, BaseMessage } from '@langchai
 import { createWeatherTools } from './tools.js';
 
 const MAX_ITERATIONS = 10;
+const MUTATING_TOOLS = new Set(['add_city', 'add_favorite_city']);
 
 function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Unknown error';
@@ -27,7 +28,16 @@ Guidelines:
 - Be concise, friendly, and use emoji. Use bullet points for comparisons.
 - After getting tool results, summarize them in natural language. Do not repeat raw tool output verbatim.`;
 
-export const runWeatherAgent = async (userId: string, userMessage: string): Promise<string> => {
+export interface WeatherAgentResult {
+  response: string;
+  toolCalls: string[];
+  mutated: boolean;
+}
+
+export const runWeatherAgent = async (
+  userId: string,
+  userMessage: string
+): Promise<WeatherAgentResult> => {
   const llm = new ChatGroq({
     model: 'openai/gpt-oss-120b',
     apiKey: process.env.GROQ_API_KEY,
@@ -37,6 +47,7 @@ export const runWeatherAgent = async (userId: string, userMessage: string): Prom
   const tools = createWeatherTools(userId);
   const toolMap = new Map(tools.map((t) => [t.name, t]));
   const modelWithTools = llm.bindTools(tools);
+  const toolCalls: string[] = [];
 
   const messages: BaseMessage[] = [new SystemMessage(SYSTEM_PROMPT), new HumanMessage(userMessage)];
 
@@ -53,6 +64,7 @@ export const runWeatherAgent = async (userId: string, userMessage: string): Prom
       messages.push(response);
 
       for (const toolCall of response.tool_calls) {
+        toolCalls.push(toolCall.name);
         const tool = toolMap.get(toolCall.name);
         let toolResult: string;
 
@@ -76,15 +88,28 @@ export const runWeatherAgent = async (userId: string, userMessage: string): Prom
       }
     } else {
       // No tool calls — return the final response
-      return String(response.content);
+      return {
+        response: String(response.content),
+        toolCalls,
+        mutated: toolCalls.some((name) => MUTATING_TOOLS.has(name)),
+      };
     }
   }
 
   // Max iterations reached — return last message
   const lastMessage = messages[messages.length - 1];
   if (lastMessage) {
-    return String(lastMessage.content);
+    return {
+      response: String(lastMessage.content),
+      toolCalls,
+      mutated: toolCalls.some((name) => MUTATING_TOOLS.has(name)),
+    };
   }
 
-  return 'I was unable to complete your request after multiple attempts. Please try rephrasing your question.';
+  return {
+    response:
+      'I was unable to complete your request after multiple attempts. Please try rephrasing your question.',
+    toolCalls,
+    mutated: toolCalls.some((name) => MUTATING_TOOLS.has(name)),
+  };
 };

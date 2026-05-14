@@ -86,7 +86,7 @@ function formatTime(time: string): string {
 }
 
 export default function FavoritesPage() {
-  const { loading: authLoading } = useRequireAuth();
+  const { user, loading: authLoading } = useRequireAuth();
   const { units } = useUnits();
   const router = useRouter();
   const [favorites, setFavorites] = useState<City[]>([]);
@@ -150,6 +150,13 @@ export default function FavoritesPage() {
   useEffect(() => {
     fetchCities();
   }, [fetchCities]);
+
+  useEffect(() => {
+    if (!user) return;
+    const refreshFavorites = () => fetchCities();
+    window.addEventListener('mausam:cities-updated', refreshFavorites);
+    return () => window.removeEventListener('mausam:cities-updated', refreshFavorites);
+  }, [user, fetchCities]);
 
   useEffect(() => {
     if (selectedId) localStorage.setItem(STORAGE_KEY, selectedId);
