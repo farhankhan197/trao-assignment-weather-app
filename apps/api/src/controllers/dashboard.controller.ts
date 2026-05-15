@@ -56,16 +56,9 @@ export const getDashboard = async (req: Request, res: Response): Promise<void> =
             lat: city.lat,
             lon: city.lon,
             isFavorite: city.isFavorite,
-            currentWeather: {
-              temperature: 0,
-              condition: 'sunny',
-              tempMax: 0,
-              tempMin: 0,
-              humidity: 0,
-              windSpeed: 0,
-              precipitation: 0,
-            },
+            currentWeather: null,
             streak: null,
+            weatherError: true,
           };
         }
       })

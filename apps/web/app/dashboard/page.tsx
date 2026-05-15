@@ -21,8 +21,9 @@ interface CityData {
     condition: string;
     tempMax: number;
     tempMin: number;
-  };
+  } | null;
   streak: { label: string } | null;
+  weatherError?: boolean;
 }
 
 interface SearchResult {
@@ -126,6 +127,32 @@ export default function DashboardPage() {
       alert('Failed to remove city');
     }
   }, []);
+
+  const handleRetryWeather = useCallback(
+    async (id: string) => {
+      const city = dashboard.find((c) => c._id === id);
+      if (!city) return;
+      try {
+        const wRes = await api.get('/api/weather/current', {
+          params: { lat: city.lat, lon: city.lon },
+        });
+        const weather = {
+          temperature: wRes.data.current.temperature_2m,
+          condition: getCondition(wRes.data.current.weather_code),
+          tempMax: wRes.data.daily?.temperature_2m_max?.[0] ?? wRes.data.current.temperature_2m,
+          tempMin: wRes.data.daily?.temperature_2m_min?.[0] ?? wRes.data.current.temperature_2m,
+        };
+        setDashboard((prev) =>
+          prev.map((c) =>
+            c._id === id ? { ...c, currentWeather: weather, weatherError: false } : c
+          )
+        );
+      } catch {
+        // keep the error state
+      }
+    },
+    [dashboard]
+  );
 
   const citiesLoading = authLoading || loading || !user;
   const filteredDashboard = useMemo(() => {
@@ -287,8 +314,10 @@ export default function DashboardPage() {
                   city={item}
                   weatherData={item.currentWeather}
                   streak={item.streak?.label || null}
+                  weatherError={item.weatherError || false}
                   onToggleFavorite={handleToggleFavorite}
                   onDelete={handleDelete}
+                  onRetryWeather={handleRetryWeather}
                 />
               </motion.div>
             ))}

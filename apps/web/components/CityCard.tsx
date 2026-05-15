@@ -28,11 +28,21 @@ interface Props {
   city: City;
   weatherData?: WeatherData | null;
   streak?: string | null;
+  weatherError?: boolean;
   onToggleFavorite: (id: string) => void;
   onDelete: (id: string) => void;
+  onRetryWeather?: (id: string) => void;
 }
 
-function CityCardComponent({ city, weatherData, streak, onToggleFavorite, onDelete }: Props) {
+function CityCardComponent({
+  city,
+  weatherData,
+  streak,
+  weatherError = false,
+  onToggleFavorite,
+  onDelete,
+  onRetryWeather,
+}: Props) {
   const router = useRouter();
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [streakState, setStreakState] = useState<string | null>(null);
@@ -187,6 +197,57 @@ function CityCardComponent({ city, weatherData, streak, onToggleFavorite, onDele
           </div>
         )}
 
+        {weatherError && !activeWeather && (
+          <div className="mb-2">
+            <div className="flex items-center gap-2 mb-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-[var(--text-muted)]"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" x2="12" y1="8" y2="12" />
+                <line x1="12" x2="12.01" y1="16" y2="16" />
+              </svg>
+              <span className="text-xs text-[var(--text-muted)]">Weather unavailable</span>
+            </div>
+            {onRetryWeather && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRetryWeather(city._id);
+                }}
+                className="text-xs text-[var(--accent)] hover:text-[var(--accent-hover)] flex items-center gap-1 transition-colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                  <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+                  <path d="M16 16h5v5" />
+                </svg>
+                Retry
+              </button>
+            )}
+          </div>
+        )}
+
         {activeWeather && (
           <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
             <span>H {Math.round(activeWeather.tempMax)}°</span>
@@ -217,9 +278,11 @@ function areEqual(prevProps: Props, nextProps: Props) {
     prevProps.weatherData?.condition === nextProps.weatherData?.condition &&
     prevProps.weatherData?.tempMax === nextProps.weatherData?.tempMax &&
     prevProps.weatherData?.tempMin === nextProps.weatherData?.tempMin &&
+    prevProps.weatherError === nextProps.weatherError &&
     prevProps.streak === nextProps.streak &&
     prevProps.onToggleFavorite === nextProps.onToggleFavorite &&
-    prevProps.onDelete === nextProps.onDelete
+    prevProps.onDelete === nextProps.onDelete &&
+    prevProps.onRetryWeather === nextProps.onRetryWeather
   );
 }
 
